@@ -22,7 +22,7 @@ function vozmob_callback_dial($number, $script_name='vozmob_callback_record_scri
   $call->setScript($script);
 
   // Dial the call.
-  voip_dial($voipcall);
+  voip_dial($call);
 
 $options = array('@name' => $user->name, '@call' => print_r($call, true));
 $message = t("New callback dialed for @name with call: @call");
@@ -133,7 +133,7 @@ watchdog('vozmob_callback', "in _vozmob_callback_record_callback($call_id, $reco
   $node = new stdClass();
 
   $node->title = "Callback message from $number";
-  $body = t("New callback message recorded with call_id: $call_id, recording_url: $recording_url, recording_duration: $recording_duration, uid: $uid, name: $name, number: $number");
+  $body = t("New callback message recorded with call_id: $call_id, recording_url: $recording_url, uid: $uid, name: $name, number: $number");
   $node->body = $body;
   $node->type = 'story';
   $node->created = time();
