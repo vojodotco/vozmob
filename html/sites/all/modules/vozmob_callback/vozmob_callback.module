@@ -10,22 +10,23 @@ function vozmob_callback_dial($number, $script_name='vozmob_callback_record_scri
 
   global $user;
 
-  // Create new voipcall node for the callback 
-  $details['dest_number'] = $number;
-  $details['dest_name'] = $user->name;
-  $details['caller_name'] = 'callblast message recorder';
+  // Create new voipcall instance for the callback 
+  $call = new VoipCall();
+  $call->setDestNumber($number);
+  $call->setDestName($user->name);
+  $call->setCallerName('callback message recorder');
 
   // load voip script
   $vars = array('uid' => $user->uid, 'name' => $name, 'number' => $number);
   $script = VoipScript::loadScript($script_name, $vars);
-  $details['script'] = $script;
-  $voipcall_node = voipcall_save($details);
+  $call->setScript($script);
 
   // Dial the call.
-  voip_dial($voipcall_node);
+  voip_dial($voipcall);
 
-$message = t("New callback dialed for $user->name. See voipcall nid $voipcall_node->nid");
-watchdog('vozmob_callback', $message);
+$options = array('@name' => $user->name, '@call' => print_r($call, true));
+$message = t("New callback dialed for @name with call: @call");
+watchdog('vozmob_callback', $message, $options);
 
 }
 
@@ -46,12 +47,34 @@ function vozmob_callback_voipscript_load_script($script_name, $vars=NULL) {
 function _vozmob_callback_get_record_script($vars) {
   $script = new VoipScript('vozmob_callback_record_script');
 
-  $script->addLabel('start');
-  $script->addSay("Please record your message after the beep.  When done, press the pound key.");
+  $script->addLabel('language_selection');
+  $script->addSetLanguage('es');
+  $text = "Para espanol, oprima el numero uno";
+  $url = '';
+  $timeout = 3;
+  $end_key = '';
+  $num_digits = 1;
+  $script->addGetInput($text, $url, $timeout, $end_key, $num_digits);
+
+  $script->addGotoIf('switch_to_spanish', "^%input_digits == '1'");
+  $script->addSetLanguage('en');
+  $script->addSet('msg', 'Please record your message after the beep.  When done, press the pound key.');
+  $script->addGoto('start_recording');
+
+  $script->addLabel('switch_to_spanish');
+  $script->addSetLanguage('es');
+  $script->addSet('msg', 'Graba tu mensaje despues del tono. Quando estiver listo, oprime el #.');
+//TODO: translate the remaining sentences to Spanish using Drupal's locale functionality. the commands "say" and "get input" automatically call t() with the appropriate language;
+  $script->addGoto('start_recording');
+  
+  $script->addLabel('start_recording');
+  $script->addSay('%msg');
   $timeout = 5;
   $end_key = '#';
   $max_length = 20;
   $script->addRecord($timeout, $end_key, $max_length);
+
+  $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
   $script->addSay('You said ');
   $script->addPlay('%recording_url');
@@ -66,7 +89,7 @@ function _vozmob_callback_get_record_script($vars) {
 
   $script->addGotoIf('accept recording', "^%input_digits == '1'");
 
-  $script->addGotoIf('start', "^%input_digits == '2'");
+  $script->addGotoIf('start_recording', "^%input_digits == '2'");
 
   $script->addGotoIf('end call', "^%input_digits == '#'");
 
@@ -86,7 +109,11 @@ function _vozmob_callback_get_record_script($vars) {
 
   $script->addLabel('no input received');
   $script->addSay("No input received. Please try again.");
-  $script->addGoto('start');
+  $script->addGoto('start_recording');
+
+  $script->addLabel('no recording detected');
+  $script->addSay("No recording detected. Please try again.");
+  $script->addGoto('start_recording');
 
   $script->addLabel('end call');
   $script->addSay('Bye bye.');
