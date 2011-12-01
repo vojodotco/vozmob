@@ -85,7 +85,8 @@ function vozmob_util_truncate_form_submit($form, &$form_state) {
         variable_del('sms_email_gateway_mail_domain');
         variable_del('sms_registration_address');
         variable_del('vozmob_support_messaging_mms_from_node');
-        db_query("DELETE FROM {system} WHERE type = '%s' AND name = '%s'", 'module', 'vozmob_util');
+        db_query("DELETE FROM {variable} WHERE name LIKE '%s'", 'securelogin%');
+        db_query("UPDATE {system} SET status = 0 WHERE name IN ('securelogin', 'vozmob_util')");
         db_query("DELETE FROM {files} WHERE filepath NOT LIKE '%s'", '%/banlist/%');
         db_query('TRUNCATE {media_mover_files}');
         db_query('TRUNCATE {cache}');
