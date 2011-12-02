@@ -1,4 +1,3 @@
-// $Id: openlayers_behavior_drawfeatures.js,v 1.1.2.18 2010/11/13 13:43:42 zzolo Exp $
 
 /**
  * @file

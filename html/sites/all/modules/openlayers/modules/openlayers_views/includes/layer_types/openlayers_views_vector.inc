@@ -1,5 +1,4 @@
 <?php
-// $Id: openlayers_views_vector.inc,v 1.1.2.9 2010/11/05 14:18:18 tmcw Exp $
 
 /**
  * @file

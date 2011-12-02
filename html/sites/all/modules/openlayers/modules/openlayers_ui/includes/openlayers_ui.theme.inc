@@ -1,5 +1,4 @@
 <?php
-// $Id: openlayers_ui.theme.inc,v 1.1.2.10 2010/09/14 07:13:40 strk Exp $
 
 /**
  * @file

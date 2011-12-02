@@ -1,5 +1,4 @@
 <?php
-// $Id: openlayers_ui.module,v 1.1.2.42 2010/10/13 09:03:58 strk Exp $
 
 /**
  * Implementation of hook_help

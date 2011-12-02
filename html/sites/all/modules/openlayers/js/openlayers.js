@@ -1,4 +1,3 @@
-// $Id: openlayers.js,v 1.47.2.49 2010/10/28 07:24:14 strk Exp $
 /*jslint white: false */
 /*jslint forin: true */
 /*global OpenLayers Drupal $ document jQuery window */
