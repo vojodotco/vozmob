@@ -11,6 +11,46 @@ function vozmob_geo_map($node) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function vozmob_geo_theme($existing, $type, $theme, $path) {
+  $themes = array(
+    'vozmob_geo_formatter_vozmob_geo_default' => array(
+      'arguments' => array('element' => NULL),
+      'gis input' => 'wkt',
+    ),
+  );
+  return $themes;
+}
+
+/**
+ * If a location is defined, render the Open Layers map.
+ */
+function theme_vozmob_geo_formatter_vozmob_geo_default($element) {
+  foreach (element_children($element) as $delta) {
+    if (!empty($element[$delta]['#item']['openlayers_wkt'])) {
+      return theme('openlayers_cck_formatter_map', $element);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function vozmob_geo_field_formatter_info() {
+  $formatters = array();
+
+  // Default formatter
+  $formatters['vozmob_geo_default'] = array(
+    'label' => t('Default Map - hide if no location'),
+    'field types' => array('openlayers_wkt'),
+    'multiple values' => CONTENT_HANDLE_MODULE,
+  );
+
+  return $formatters;
+}
+
+/**
  * Implements hook_nodeapi().
  */
 function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
