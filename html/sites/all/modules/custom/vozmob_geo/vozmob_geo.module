@@ -2,6 +2,15 @@
 // $Id$
 
 /**
+ * Copy EXIF coordinates to OpenLayers coordinates.
+ */
+function vozmob_geo_map($node) {
+  if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
+    $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
+  }
+}
+
+/**
  * Implements hook_nodeapi().
  */
 function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
@@ -15,19 +24,22 @@ function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
           $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $locations[0]['location']['lng'] . ' ' . $locations[0]['location']['lat'] . '))';
         }
       }
-      // check to see if this is being posted to a geograpic group.
-      // @todo check that group has always been attached by this point - inc incoming sms
-      $flag = flag_load('located');
-      if (is_array($node->og_groups)) {
-        // we go through each of the groups and see if any of them is flagged
-        // to include automatic location.
-        foreach ($node->og_groups as $nid) {
-          if ($flag->is_flagged($nid, $account->uid)) {
-            if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
-              $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
+      if (variable_get('vozmob_geo_always_map', FALSE)) {
+        vozmob_geo_map($node);
+      }
+      else {
+        // check to see if this is being posted to a geograpic group.
+        // @todo check that group has always been attached by this point - inc incoming sms
+        $flag = flag_load('located');
+        if (is_array($node->og_groups)) {
+          // we go through each of the groups and see if any of them is flagged
+          // to include automatic location.
+          foreach ($node->og_groups as $nid) {
+            if ($flag->is_flagged($nid, $account->uid)) {
+              vozmob_geo_map($node);
+              // no need to keep checking for other groups that may be flagged.
+              break;
             }
-            // no need to keep checking for other groups that may be flagged.
-            break;
           }
         }
       }
