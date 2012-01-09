@@ -25,3 +25,21 @@
 [submodule "html/sites/all/libraries/blueprint"]
 	path = html/sites/all/libraries/blueprint
 	url = git://github.com/joshuaclayton/blueprint-css.git
+[submodule "html/sites/all/modules/custom/vojo"]
+	path = html/sites/all/modules/custom/vojo
+	url = git://gitorious.org/vozmob/vojo.git
+[submodule "html/sites/all/modules/custom/vojo_cdh_juarez"]
+	path = html/sites/all/modules/custom/vojo_cdh_juarez
+	url = git://gitorious.org/vozmob/vojo_cdh_juarez.git
+[submodule "html/sites/all/modules/custom/vojo_cdh_monterrey"]
+	path = html/sites/all/modules/custom/vojo_cdh_monterrey
+	url = git://gitorious.org/vozmob/vojo_cdh_monterrey.git
+[submodule "html/sites/all/themes/vojo_generic"]
+	path = html/sites/all/themes/vojo_generic
+	url = git://gitorious.org/vozmob/vojo_generic_theme.git
+[submodule "html/sites/all/themes/cdh_juarez"]
+	path = html/sites/all/themes/cdh_juarez
+	url = git://gitorious.org/vozmob/cdh_juarez_theme.git
+[submodule "html/sites/all/themes/cdh_monterrey"]
+	path = html/sites/all/themes/cdh_monterrey
+	url = git://gitorious.org/vozmob/cdh_monterrey_theme.git
