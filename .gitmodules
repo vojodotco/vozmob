@@ -43,3 +43,6 @@
 [submodule "html/sites/all/themes/cdh_monterrey"]
 	path = html/sites/all/themes/cdh_monterrey
 	url = git://gitorious.org/vozmob/cdh_monterrey_theme.git
+[submodule "html/sites/all/modules/contrib/voipextension"]
+	path = html/sites/all/modules/contrib/voipextension
+	url = git://git.drupal.org/project/voipextension
