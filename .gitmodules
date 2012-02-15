@@ -46,3 +46,6 @@
 [submodule "html/sites/all/modules/contrib/voipextension"]
 	path = html/sites/all/modules/contrib/voipextension
 	url = git://git.drupal.org/project/voipextension
+[submodule "html/sites/all/modules/contrib/voipnode"]
+	path = html/sites/all/modules/contrib/voipnode
+	url = git://git.drupal.org/project/voipnode
