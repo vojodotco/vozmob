@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Implementation of hook_get_voip_numbers().
+ * 
+ * Returns numbers provided by SMS Framework module (http://drupal.org/project/smsframework)
+ */
+function voipnumber_sms_get_voip_numbers($id, $type){
+  $numbers=array();
+  switch ($type) {
+    case 'user':
+     $account = user_load($id);
+     if(isset($account->sms_user)){
+       $number = $account->sms_user[0]['number'];
+       $name = 'SMS Framework ('.$number.')';
+       $type = 'SMS Number';
+       $numbers[] = new VoipNumber($number, $name, $type);
+     }
+     return $numbers;
+    break;
+    
+    case 'uids':
+      $sql = "SELECT uid FROM {sms_user} WHERE number = '" . $id."'";
+      $result = db_query($sql);
+      while ($temp = db_fetch_array($result)) {
+        if ($temp['uid'] != "" ) {
+          $uids[$temp['uid']] = $temp['uid'];
+        }
+      }
+      return $uids;
+    break;
+  }
+  
+  
+}

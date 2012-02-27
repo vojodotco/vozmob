@@ -1,0 +1,1058 @@
+<?php
+
+module_load_include('inc', 'voipnumber', 'voipnumber');
+
+/**
+ * Implementation of hook_perm().
+ */
+ 
+ //TODO: Revise permissions
+ function voipnumber_perm() {
+  return array('use default voip number');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function voipnumber_menu() {
+  $items['admin/settings/voipnumber'] = array(
+    'title' => 'VoIP Number',
+    'description' => 'VoIP Number settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('voipnumber_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+function voipnumber_admin_settings_form(&$form_state) {
+  $form=_voipnumber_settings_fields($form_state);
+  return system_settings_form($form);
+}
+
+function _voipnumber_settings_fields(&$form_state, $field=FALSE) {
+  drupal_add_js(drupal_get_path('module', 'voipnumber') . '/voipnumber.js');
+
+  /*Set stored values, they can come from admin form or from field form*/
+  if ($field) {
+    $voipnumber_choice = !empty($field['voipnumber_choice']) ? $field['voipnumber_choice'] : variable_get('voipnumber_choice', 1);
+    $voipnumber_default = !empty($field['voipnumber_default']) ? $field['voipnumber_default'] : variable_get('voipnumber_default', '');
+    $voipnumber_max_length = !empty($field['voipnumber_max_length']) ? $field['voipnumber_max_length'] : variable_get('voipnumber_max_length', 15);
+    $voipnumber_allowed_countries = isset($field['voipnumber_allowed_countries']) ? $field['voipnumber_allowed_countries'] : variable_get('voipnumber_allowed_countries', '');
+    $voipnumber_show_code = !empty($field['voipnumber_show_code']) ? $field['voipnumber_show_code'] : variable_get('voipnumber_show_code', 1);
+    $prefix='';
+  }
+  else {
+    $voipnumber_choice=variable_get('voipnumber_choice', 1);
+    $voipnumber_default = variable_get('voipnumber_default', '');
+    $voipnumber_max_length = variable_get('voipnumber_max_length', 15);
+    $voipnumber_allowed_countries = variable_get('voipnumber_allowed_countries', '');
+    $voipnumber_show_code=variable_get('voipnumber_show_code', 1);
+    $prefix='<div>' . t('This are global settings, each field can be further adjusted with per field settings.') . '</div>';
+  }
+  /*Max Length*/
+  $form['voipnumber_max_length'] = array(
+    '#prefix' => $prefix,
+    '#type' => 'textfield',
+    '#title' => t('Number length'),
+    '#default_value' => $voipnumber_max_length,
+    '#description' => t('Maximum length of international numbers, according to the ITU this is 15.'),
+  );
+
+  /*VoIP Allowed Countries*/
+  $form['voipnumber_choice'] = array(
+    '#type' => 'item',
+    '#title' => t('Country code settings'),
+  );
+  
+  /*() Allow all*/
+  $form['voipnumber_choice']['country_all'] = array(
+    '#type' => 'radio',
+    '#title' => t('Allow all'),
+    '#return_value' => 1,
+    '#default_value' => $voipnumber_choice,
+    '#parents' => array('voipnumber_choice')
+  );
+  
+  /*() Let user select from list*/
+  $form['voipnumber_choice'] ['country_list']= array(
+    '#prefix' => '<div class="container-inline form-item">',
+    '#suffix' => '</div>'
+  );
+
+  $form['voipnumber_choice']['country_list']['country_list_choice'] = array(
+    '#type' => 'radio',
+    '#title' => t('Let user select from predefined list') . '<br/>',
+    '#return_value' => 2,
+    '#default_value' => $voipnumber_choice,
+    '#parents' => array('voipnumber_choice')
+  );
+  
+  $countries=voipnumber_dialing_codes(); 
+  $form['voipnumber_choice']['country_list']['voipnumber_allowed_countries'] = array(
+    '#type' => 'select',
+    '#multiple' => TRUE,
+    '#default_value' => $voipnumber_allowed_countries,
+    '#options' => $countries,
+    '#description' => t('Select which countries will be available. Use CTRL key to select multiple values.'),
+    '#suffix' => '</div>'  // End of the "form-radios" style.
+  );
+  
+  /*() Use default*/
+  $form['voipnumber_choice']['default_country'] = array(
+    '#prefix' => '<div class="container-inline form-item">',
+    '#suffix' => '</div>'
+  );
+
+  $form['voipnumber_choice']['default_country']['default_country_choice'] = array(
+    '#type' => 'radio',
+    '#title' => t('Use default country code:'),
+    '#return_value' => 3,
+    '#default_value' => $voipnumber_choice,
+    '#parents' => array('voipnumber_choice')
+  );
+
+  $form['voipnumber_choice']['default_country']['voipnumber_default'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $voipnumber_default,
+    '#size' => 20,         
+    '#attributes' => array('onClick' => '$("input[name=voipnumber_choice][value=3]").attr("checked", true);'),  
+  );
+  
+  $form['voipnumber_choice']['default_country']['voipnumber_show_code'] = array(  
+    '#type' => 'checkbox',
+    '#title' => t('Show default country code.'),
+    '#default_value' => $voipnumber_show_code,
+    '#suffix' => '</div>'  // End of the "form-radios" style.
+   );
+
+  return $form;
+}
+
+/*CCK Functions*/
+/**
+ * Implementation of hook_field_info().
+ */
+function voipnumber_field_info() {
+  return array(
+    'voipnumber' => array(
+      'label' => t('VoIP Number'),
+      'description' => t('VoIP Number CCK.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function voipnumber_field_settings($op, $field) {
+  switch ($op) {
+    case 'form':
+      if ($field['widget']['type']=='voipphonenumber_widget' || $field['widget']['type'] =='voipmobilenumber_widget') {
+        //Config form only for phone number widget type
+        $form=_voipnumber_settings_fields($form_state, $field);
+      }
+      return $form;
+    
+    case 'save':
+      $settings = array('voipnumber_choice','voipnumber_types', 'voipnumber_allowed_countries', 'voipnumber_default', 'voipnumber_max_length', 'voipnumber_show_code');
+	  return $settings;	
+    
+    case 'database columns':
+      $columns = array(
+      'number_prefix' => array('type' => 'varchar', 'length' => 64, 'not null' => FALSE),
+      'phone' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+      );
+    return $columns;
+  }
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function voipnumber_field($op, &$node, $field, &$node_field, $teaser, $page) {
+  switch ($op) {
+   case 'validate': 
+      foreach ($node_field as $delta => $item) {
+        if ($item['phone'] != '') {
+            switch ($field['widget']['type']){
+              case 'voipphonenumber_widget':
+              case 'voipmobilenumber_widget':
+                $code = voipnumber_get_code($item['number_prefix']);
+                $phonenumber = $code . $item['phone'];
+                if (!_voipnumber_valid_int_phone_number($phonenumber, $error, $field['voipnumber_max_length'])) {
+                  form_set_error($field['field_name'], t('"%value" is %error', array('%value' => $item['phone'], '%error' => $error)));
+                }
+              break;
+              case 'voipsipnumber_widget':
+                //Couldn't find regex for SIP validation, therefore using email validation + added ':' as valid character (eg sip:john@test.com)
+                if(!eregi("^[_a-z0-9:-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $item['phone'])){
+                  form_set_error($field['field_name'], t('"%value" is invalid SIP number.', array('%value' => $item['phone'])));
+                } 
+              break;
+              case 'voipimusername_widget':
+                if(!eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $item['phone'])){
+                  form_set_error($field['field_name'], t('"%value" is invalid IM username.', array('%value' => $item['phone'])));
+                } 
+              break;
+              case 'voipunknownnumber_widget':
+                //No validation for unknown numbers
+              break;
+            }
+        }
+      }	
+    break;
+  }
+}
+
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function voipnumber_content_is_empty($item, $field) {
+  if (empty($item['phone'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function voipnumber_theme() {
+  return array(
+    'voipnumber_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipphonenumber_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipmobilenumber_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipsipnumber_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipimusername_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipunknownnumber_widget' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipnumber_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipnumber_formatter_numberonly' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'voipnumber_formatter_number_nocountry' => array(
+      'arguments' => array('element' => NULL),
+    ),
+   /* 'voipnumber_formatter_number_noarea' => array(
+      'arguments' => array('element' => NULL),
+    ),*/
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function voipnumber_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => t('Full number (default) (+XXX-YY-NNNNNNNN)'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'numberonly' => array(
+      'label' => t('Full number with country name'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'number_nocountry' => array(
+      'label' => t('Number without country code (YY-NNNNNN)'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+   /* 'number_noarea' => array(
+      'label' => t('Number without country/area codes (NNNNNN)'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),*/
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter().
+ *
+ * Prepare an individual item for viewing in a browser.
+ *
+ * @param $field
+ *   The field the action is being performed on.
+ * @param $item
+ *   An array, keyed by column, of the data stored for this item in this field.
+ * @param $formatter
+ *   The name of the formatter being used to display the field.
+ * @param $node
+ *   The node object, for context. Will be NULL in some cases.
+ *   Warning: when displaying field retrieved by Views, $node will not
+ *   be a "full-fledged" node object, but an object containg the data returned
+ *   by the Views query (at least nid, vid, changed)
+ * @return
+ *   An HTML string containing the formatted item.
+ *
+ * In a multiple-value field scenario, this function will be called once per
+ * value currently stored in the field. This function is also used as the handler
+ * for viewing a field in a views.module tabular listing.
+ *
+ * It is important that this function at the minimum perform security
+ * transformations such as running check_plain() or check_markup().
+ */
+function voipnumber_field_formatter($field, $item, $formatter, $node) {
+  if (!isset($item['phone'])) {
+    return '';
+  }
+  if ($field['text_processing']) {
+    $text = check_markup($item['phone'], $item['format'], is_null($node) || isset($node->in_preview));
+  }
+  else {
+    $text = check_plain($item['phone']);
+  }
+  // iPhone Support
+  if (strpos($_SERVER['HTTP_USER_AGENT'], 'iPhone') !== FALSE) {
+     $text = '<a href="tel:' . $text . '">' . $text . '</a>';
+  }
+  return $text;
+}
+
+/**
+ * FAPI theme for an individual text elements.
+ *
+ * The textfield or textarea is already rendered by the
+ * textfield or textarea themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_voipphonenumber_widget($element) {
+  return theme('voipnumber_widget',$element);
+}
+
+function theme_voipmobilenumber_widget($element) {
+  return theme('voipnumber_widget',$element);
+}
+
+function theme_voipsipnumber_widget($element) {
+  return theme('voipnumber_widget',$element);
+}
+function theme_voipimusername_widget($element) {
+  return theme('voipnumber_widget',$element);
+}
+function theme_voipunknownnumber_widget($element) {
+  return theme('voipnumber_widget',$element);
+}
+
+function theme_voipnumber_widget($element) {
+   drupal_add_css(drupal_get_path('module', 'voipnumber') .'/voipnumber.css');
+  $output = '';
+  $output .= '<div class="voipnumber-field-subrow clear-block">';
+  $output .= '<div class="voipnumber-field-prefix voipnumber-field-column">'. theme($element['number_prefix']['#type'], $element['number_prefix']) .'</div>';
+  $output .= '<div class="voipnumber-field-phone">'. theme('textfield', $element['phone']) .'</div>'; 
+  $output .= '</div>';
+ 
+  return $output;
+}
+
+/**
+ * Theme function for 'default' field formatter.
+ */
+function theme_voipnumber_formatter_default($element) {
+  switch($element['#item']['number_prefix']){
+    case 'SIP':
+    case 'IM':
+    case 'Unknown':
+      //In case of SIP, IM, Unknown return the phone suffix only.
+      return $element['#item']['phone'];
+    break;
+    default:
+      $code=voipnumber_get_code($element['#item']['number_prefix']);
+      return $code . $element['#item']['phone'];
+    break;
+  }
+}
+
+/**
+ * Theme function for 'number with country name' field formatter.
+ */
+function theme_voipnumber_formatter_numberonly($element) {
+  switch($element['#item']['number_prefix']){
+    case 'SIP':
+    case 'IM':
+    case 'Unknown':
+      //In case of SIP, IM, Unknown return the phone suffix only.
+      return $element['#item']['phone'];
+    break;
+    default:
+      $code=voipnumber_get_code($element['#item']['number_prefix']);
+      return $element['#item']['number_prefix'] . " " . $code . $element['#item']['phone'];
+    break;
+  }
+}
+
+/**
+ * Theme function for 'number_nocountry' field formatter.
+ */
+function theme_voipnumber_formatter_number_nocountry($element) {
+ return $element['#item']['phone'];
+}
+
+/**
+ * Implementation of hook_widget_info().
+ * Define Phone number, SIP Number widgets.
+**/
+function voipnumber_widget_info() {
+  return array(
+    'voipphonenumber_widget' => array(
+      'label' => t('Land Line Number'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'voipmobilenumber_widget' => array(
+      'label' => t('Mobile Number'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'voipsipnumber_widget' => array(
+      'label' => t('SIP Number'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'voipimusername_widget' => array(
+      'label' => t('IM Username'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'voipunknownnumber_widget' => array(
+      'label' => t('Unknown'),
+      'field types' => array('voipnumber'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function voipnumber_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#title' => $field['widget']['label'],
+    '#weight' => $field['widget']['weight'],
+    '#description' => $field['widget']['description'],
+    '#required' => $field['required'],
+    '#field' => $field,
+  );
+  return $element;
+}
+
+
+/**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+ function voipnumber_elements() {
+  return array(
+     'voipphonenumber_widget' => array(
+      '#input' => TRUE,
+      '#process' => array('voipphonenumber_widget_process'),
+     ),
+     'voipmobilenumber_widget' => array(
+      '#input' => TRUE,
+      '#process' => array('voipphonenumber_widget_process'),  //same as landline
+     ),
+     'voipsipnumber_widget' => array(
+        '#input' => TRUE,
+        '#process' => array('voipsipnumber_widget_process'),
+      ), 
+      'voipimusername_widget' => array(
+        '#input' => TRUE,
+        '#process' => array('voipimusername_widget_process'),
+      ),
+      'voipunknownnumber_widget' => array(
+        '#input' => TRUE,
+        '#process' => array('voipunknownnumber_widget_process'),
+      ),      
+  );
+}
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function voipphonenumber_widget_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+ 
+  $country_field_key=$element['#columns'][0];
+  $field_settings=content_fields($element['#field_name'], $element['#type_name']);
+  
+  
+  $voipnumber_choice = !empty($field_settings['voipnumber_choice']) ? $field_settings['voipnumber_choice'] : variable_get('voipnumber_choice', 1);
+  $voipnumber_show_code=TRUE;
+  switch ($voipnumber_choice) {
+    case 1:
+      //Allow all country codes
+      $list_of_countries = voipnumber_dialing_codes();
+    break;
+    case 2:
+      //Allow only selected country codes
+      $countries=$field_settings['voipnumber_allowed_countries']; 
+      $country_codes=voipnumber_dialing_codes(2);
+      $list_of_countries=array();
+      if (is_array($countries)) {
+        foreach ($countries as $country) {
+          $code=$country_codes[$country];
+          $list_of_countries[$country]=$country . " ($code)";
+        }
+    }
+    break;
+    case 3:
+      //Allow only default country
+      $default_code = $field_settings['voipnumber_default'];
+      $voipnumber_show_code = $field['voipnumber_show_code'];
+      $list_of_countries[$default_code]=$default_code;
+    break;	
+  }
+  
+  //Check if we display the country code to the user
+  if ($voipnumber_show_code) {
+    $element[$country_field_key] = array(
+      '#type' => 'select',
+      '#title' => 'Country code',
+      '#default_value' => isset($element['#value'][$country_field_key]) ? $element['#value'][$country_field_key] : NULL,
+      '#options' => $list_of_countries,
+      '#required' => $element['#required'],
+      '#attributes' => array('class' => 'phone-field-select'),
+    );
+  }
+  else {
+    $element[$country_field_key] = array(
+      '#type' => 'hidden',
+      '#value' => $default_code,
+    );
+  }
+  
+  
+  
+  $phone_field_key=$element['#columns'][1];
+  if (empty($element['#title'])) {
+    $title='Phone number';
+  }
+  else{
+    $title=$element['#title'];
+  }
+  $element[$phone_field_key] = array(
+    '#type' => 'textfield',
+    '#title' => $title,
+    '#default_value' => isset($element['#value'][$phone_field_key]) ? $element['#value'][$phone_field_key] : NULL,
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 9,   
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#attributes' => array('class' => 'phone-field-textfield'),
+  );
+
+  return $element;
+}
+
+function voipsipnumber_widget_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+ 
+  $prefix_field_key=$element['#columns'][0];
+  $field_settings=content_fields($element['#field_name'], $element['#type_name']);
+ 
+  $element[$prefix_field_key] = array(
+      '#type' => 'hidden',
+      '#value' => 'SIP',
+    );
+
+  $phone_field_key=$element['#columns'][1];
+  if (empty($element['#title'])) {
+    $title='Phone number';
+  }
+  else{
+    $title=$element['#title'];
+  }
+  $element[$phone_field_key] = array(
+    '#type' => 'textfield',
+    '#title' => $title,
+    '#default_value' => isset($element['#value'][$phone_field_key]) ? $element['#value'][$phone_field_key] : NULL,
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 9,   
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#attributes' => array('class' => 'phone-field-textfield'),
+  );
+
+  return $element;
+}
+
+function voipimusername_widget_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+ 
+  $prefix_field_key=$element['#columns'][0];
+  $field_settings=content_fields($element['#field_name'], $element['#type_name']);
+ 
+  $element[$prefix_field_key] = array(
+      '#type' => 'hidden',
+      '#value' => 'IM',
+    );
+
+  $phone_field_key=$element['#columns'][1];
+  if (empty($element['#title'])) {
+    $title='IM Username';
+  }
+  else{
+    $title=$element['#title'];
+  }
+  $element[$phone_field_key] = array(
+    '#type' => 'textfield',
+    '#title' => $title,
+    '#default_value' => isset($element['#value'][$phone_field_key]) ? $element['#value'][$phone_field_key] : NULL,
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 9,   
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#attributes' => array('class' => 'phone-field-textfield'),
+  );
+
+  return $element;
+}
+
+function voipunknownnumber_widget_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+ 
+  $prefix_field_key=$element['#columns'][0];
+  $field_settings=content_fields($element['#field_name'], $element['#type_name']);
+ 
+  $element[$prefix_field_key] = array(
+      '#type' => 'hidden',
+      '#value' => 'Unknown',
+    );
+
+  $phone_field_key=$element['#columns'][1];
+  if (empty($element['#title'])) {
+    $title='Phone number';
+  }
+  else{
+    $title=$element['#title'];
+  }
+  $element[$phone_field_key] = array(
+    '#type' => 'textfield',
+    '#title' => $title,
+    '#default_value' => isset($element['#value'][$phone_field_key]) ? $element['#value'][$phone_field_key] : NULL,
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 9,   
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#attributes' => array('class' => 'phone-field-textfield'),
+  );
+
+  return $element;
+}
+
+function _voipnumber_valid_int_phone_number($phonenumber, &$error, $length='') {
+  if (empty($length)) {
+    $length=variable_get('voipnumber_max_length', 15);
+  }
+  $phonenumber = trim($phonenumber);
+  if ($phonenumber === '') {
+    return FALSE;
+  }
+ 
+  $base_phonenumber = str_replace(array('.', '(', ')', '[', ']', '-', '+', ' '), '', $phonenumber);
+ 
+  if (strlen($base_phonenumber) > $length) {
+    $error = t('invalid phone number. Phone number is too long; phone numbers are limited to %length digits.', array('%length' => $length));
+    return FALSE;
+  }
+  // Check if digits are used in the base_phonenumber
+  if (!ctype_digit($base_phonenumber)) {  
+    $error = t('invalid phone number. Phone number contains invalid characters; only allowed characters are numbers and punctuation.');
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Implementation of hook_user().
+ * 
+ * Add phone field to core user profile
+ */
+function voipnumber_user($op, &$edit, &$account, $category = NULL) {
+  if ($op == 'form' && $category == 'account' && user_access('use default voip number')) {     
+    drupal_add_css(drupal_get_path('module', 'voipnumber') .'/voipnumber.css');
+    $form['voipnumber'] = array(
+        '#title' => t('Default Phone Number'),
+        '#type' => 'fieldset',
+    );
+    $country=voipnumber_dialing_codes(4);
+    $form['voipnumber']['voipnumber_country'] = array(
+      '#type' => 'select',
+      '#title' => 'Country code',
+      '#default_value' => $edit['voipnumber_country'],
+      '#options' => $country,
+    );
+    
+    $form['voipnumber']['voipnumber_phone'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Phone Number'),
+      '#default_value' => $edit['voipnumber_phone'],
+      '#size' => 9,   
+    );
+    return $form;
+  }
+  elseif ($op == 'validate' && !empty($edit['voipnumber_phone'])) {
+    $phonenumber=$edit['voipnumber_country'] . $edit['voipnumber_phone'];
+    if (!empty($edit['voipnumber_phone']) && !_voipnumber_valid_int_phone_number($phonenumber, $error)) {
+      form_set_error('voipnumber_phone', t('"%value" is %error', array('%value' => $edit['voipnumber_phone'], '%error' => $error)));
+    }
+  }
+}
+
+/*API Functions*/
+//API Functions that returns array of phone numbers from cck voipnumber field based on author uid.
+function _voipnumber_api_get_numbers($uid) {
+  $voipnumber_list = array();
+  $list_fields = content_fields();
+
+  foreach ($list_fields as $field) {
+    if ($field['type']=='voipnumber') {
+      //Store content type names and their fields
+      $voipnumber_content[$field['type_name']][]=$field;
+    }
+  }
+  
+  if (empty($voipnumber_content)) {
+    return;
+  }
+  
+  //Now loop through matching content types and retrieve phone numbers
+  $num_index=0;
+  foreach ($voipnumber_content as $content_type => $content_fields) {
+    //Get all matching nodes of that content type
+    $result = db_query('SELECT nid FROM {node} WHERE type = "%s" AND uid=%d AND status = 1', $content_type, $uid);
+    while ($noderow = db_fetch_object($result)) {
+      $node=node_load($noderow->nid);
+      //Loop through all fields of that content type
+      foreach ($content_fields as $field) {
+        
+        //Loop through multiple values of individual field
+        $i=1;
+        //If field doesn't exists, skip this step
+        if (!is_array($node->{$field['field_name']})) {
+          continue;
+        }
+        $type = voipnumber_field_type($field);
+        foreach ($node->{$field['field_name']} as $delta) {
+          //Don't display empty fields
+          if (empty($delta['phone'])) {
+            continue;
+          }
+          $code = voipnumber_get_code($delta['number_prefix']);
+          $phone = $code .  $delta['phone'];
+          
+          $name=$node->title . " - " . $list_fields[$field['field_name']]['widget']['label'] . "#$i (" . $phone . ")";
+          $number = $phone;
+          $type = $type;
+          //Merge duplicated numbers by using number as index
+          $voipnumber_list[$num_index] = new VoipNumber($number, $name, $type);
+          $i++;
+          $num_index++;
+        }
+      }
+    }
+  }
+  
+  return $voipnumber_list;
+}
+
+function voipnumber_dialing_codes($op=1, $code=NULL) {
+  if ($code!=NULL) {
+    //Country specific query
+    $res=db_query("SELECT * FROM {voipnumber_dialing_codes} WHERE code ='%s' ORDER BY country", $code);
+  }
+  else {
+    $res=db_query("SELECT * FROM {voipnumber_dialing_codes} ORDER BY country");
+  }
+  switch ($op) {
+    case 1:
+      //Return countries with country as key and "country (code)" as value
+      while ($country=db_fetch_array($res)) {
+        $countries[$country['country']]=$country['country'] . " (" . $country['code'] . ")";
+      }
+    break;	
+    case 2:
+      //Return countries with country as key and code as value
+      while ($country=db_fetch_array($res)) {
+      $countries[$country['country']]=$country['code'];
+      }
+    break;		
+    case 3:
+      //Return countries with integer as key and country as value
+      while ($country=db_fetch_array($res)) {
+        $countries[]=$country['country'];
+      }
+    case 4:
+    //Return countries with code as key and "country (code)" as value
+      while ($country=db_fetch_array($res)) {
+        $countries[$country['code']]=$country['country'] . " (" . $country['code'] . ")";
+      }
+    break;
+  }
+  
+  return $countries;
+}
+
+function voipnumber_get_code($number_prefix) {
+switch($number_prefix){
+    case 'SIP':
+    case 'IM':
+    case 'Unknown':
+      //In case of SIP, IM, Unknown return the NULL.
+      return NULL;
+    break;
+    default:
+      $country = $number_prefix;
+    break;
+  }
+
+  $code=db_result(db_query("SELECT code FROM {voipnumber_dialing_codes} WHERE country='%s'", $country));
+  if (!$code) {
+    return $country;
+  }
+  #Else
+  return $code;
+}
+
+function voipnumber_field_type($field) {
+//var_dump($field);die();
+switch ($field['widget']['type']) {
+              case 'voipphonenumber_widget':
+                $type = 'VoIP Land Line Number';
+              break;
+              case 'voipmobilenumber_widget':
+                $type = 'VoIP Mobile Number';
+              break;
+              case 'voipsipnumber_widget':
+                $type = 'SIP Number';
+              break;
+              case 'voipimusername_widget':
+                $type = 'IM Username';
+              break;
+              case 'voipunknownnumber_widget':
+                $type = 'VoIP Unknown Number';
+              break;
+          }
+  return $type;          
+}
+/*Custom hooks*/
+/**
+ * Implementation of hook_get_voip_numbers().
+ * 
+ * Returns numbers provided by voipnumber module (voipnumber CCK and voipnumber user profile)
+ */
+function voipnumber_get_voip_numbers($id, $type){
+  $numbers=array();
+  switch($type){
+    case 'user':
+      $voip_user=user_load($id);
+      //First return number from user profile
+      if(!empty($voip_user->voipnumber_phone)){
+        $user_profile_number = $voip_user->voipnumber_country . $voip_user->voipnumber_phone;
+        $name='Profile number (' . $user_profile_number . ')';
+        $number=$user_profile_number;
+        $type='VoIP User Profile number';
+        $numbers[] = new VoipNumber($number, $name, $type);
+      }
+      $voip_cck_numbers = _voipnumber_api_get_numbers($id);
+      if(is_array($voip_cck_numbers)){
+        $numbers = array_merge($numbers, $voip_cck_numbers);
+      }
+      return $numbers;      
+    break;
+    case 'node':
+      $num_index=0;
+      $node = node_load($id);
+      $info = _content_type_info();
+      $phone_fields =$info['content types'][$node->type]['fields'];
+    
+      foreach ($phone_fields as $field) {
+       if ($field['module']=='voipnumber') {
+        $i=0;
+        $type = voipnumber_field_type($field);
+        foreach ($node->{$field['field_name']} as $voip_field) {
+          $name=$node->title . " - " . $field['widget']['label'] . "#$i (" . $voip_field['phone'] . ")";
+          $number = $voip_field['phone'];
+          //$type = $type;
+          $numbers[$num_index] = new VoipNumber($number, $name, $type);
+        }
+          
+        $num_index++;
+        $i++;
+       }
+     }
+     return $numbers;
+    break;
+    case 'nids':
+      $voipnumber_content=array();    
+      //Take into consideration country prefix
+      $country_prefix = substr($id, 0, 5);
+      $country_prefix  = str_replace('00','+', $country_prefix);
+      $country_code = voipnumber_dialing_codes(3,$country_prefix);
+      $number = substr($id, 5);
+      if(!empty($country_code)){
+        $country_code = $country_code[0];
+      }
+      else{
+        $country_code=NULL;
+      }
+      //TODO: This logic will fail for countries with 2 digits prefix (ex +93)
+      foreach (content_fields() as $field) {
+          //If Field is an Image then
+          if ($field['widget']['module'] == 'voipnumber') {
+          
+            //Store content type names and their fields
+            $db_info = content_database_info($field);
+            //Get Content Type DB name - FROM statement
+            $table = $db_info['table'];
+            //Get File ID DB Column Name - WHERE statement
+            $prefix_column = $db_info['columns']['number_prefix']['column']; 
+            $number_column = $db_info['columns']['phone']['column'];
+            switch($field['widget']['type']){
+              case 'voipphonenumber_widget':
+              case 'voipmobilenumber_widget':
+                if(!empty($country_code)){
+                  $country_prefix = $prefix_column."='".$country_code."' AND ";
+                }
+                else{
+                  $country_prefix ="";
+                }
+                $where_clause = $country_prefix.$number_column."='".$number."'";
+               
+              break;
+              default:
+                 $where_clause = $number_column."='".$id."'";
+              break;
+            }
+            
+             $voipnumber_content[$table]->table = $table;
+             $voipnumber_content[$table]->where[] = $where_clause;
+          }
+      }
+      
+      foreach($voipnumber_content as $field){ 
+           //Optimized by having one query by content type
+           $where=implode(" OR ", $field->where);
+            $sqlB = "SELECT nid FROM {". $field->table ."} WHERE ". $where;
+            $result = db_query($sqlB);
+           
+            //Get nid
+            while ($temp = db_fetch_array($result)) {
+              if ($temp['nid'] != "" ) {
+                $nids[$temp['nid']] = $temp['nid'];
+              }
+            }
+      }
+    return $nids;
+    break;
+    case 'uids':
+      $voipnumber_content=array();        
+      //Take into consideration country prefix
+      $country_prefix = substr($id, 0, 5);
+      $country_prefix  = str_replace('00','+', $country_prefix);
+      $country_code = voipnumber_dialing_codes(3,$country_prefix);
+      $number = substr($id, 5);
+      if(!empty($country_code)){
+        $country_code = $country_code[0];
+      }
+      else{
+        $country_code=NULL;
+      }
+      
+      //Search amnong default user numbers
+      $result = db_query("SELECT * FROM {users} WHERE data LIKE '%%s%'",$number);     
+      while ($users = db_fetch_array($result)) {
+        $user_data=unserialize($users['data']);
+        if($user_data['voipnumber_country'] == $country_prefix && $user_data['voipnumber_phone'] == $number){
+          $uids[]=$users['uid'];
+        }
+      }
+      //TODO: This logic will fail for countries with 2 digits prefix (ex +93)
+      foreach (content_fields() as $field) {
+          //If Field is an Image then
+          if ($field['widget']['module'] == 'voipnumber') {
+          
+            //Store content type names and their fields
+            $db_info = content_database_info($field);
+            //Get Content Type DB name - FROM statement
+            $table = $db_info['table'];
+            //Get File ID DB Column Name - WHERE statement
+            $prefix_column = $db_info['columns']['number_prefix']['column']; 
+            $number_column = $db_info['columns']['phone']['column'];
+            switch($field['widget']['type']){
+              case 'voipphonenumber_widget':
+              case 'voipmobilenumber_widget':
+                if(!empty($country_code)){
+                  $country_prefix = $prefix_column."='".$country_code."' AND ";
+                }
+                else{
+                  $country_prefix ="";
+                }
+                $where_clause = $country_prefix.$number_column."='".$number."'";
+               
+              break;
+              default:
+                 $where_clause = $number_column."='".$id."'";
+              break;
+            }
+            
+             //Filter by table
+             $voipnumber_content[$table]->table = $table;
+             $voipnumber_content[$table]->where[] = $where_clause;
+          }
+      }
+      
+      foreach($voipnumber_content as $field){ 
+           //Optimized by having one query by content type
+           $where=implode(" OR ", $field->where);
+           $sqlB = "SELECT uid FROM {". $field->table ."} ct, node n WHERE ct.nid=n.nid AND ". $where;
+           $result = db_query($sqlB);
+           
+            //Get nid
+            while ($temp = db_fetch_array($result)) {
+              if ($temp['uid'] != "" ) {
+                $uids[$temp['uid']] = $temp['uid'];
+              }
+            }
+      }
+    return $uids;
+    break;
+  }
+}
