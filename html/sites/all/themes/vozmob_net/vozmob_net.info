@@ -1,0 +1,15 @@
+; $Id: page.tpl.php,v 1.15.4.1 2008/08/27 04:47:37 m3avrck Exp $
+name = Vozbmob Net
+description = A theme that implements the design for VozMob.net. 
+base theme = vozmob_white_label
+core = 6.x
+engine = phptemplate
+scripts[] = scripts/general.js
+
+stylesheets[screen,projection][] = css/style.css
+stylesheets[screen,projection][] = css/daniel.css
+stylesheets[screen,projection][] = css/poonam.css
+stylesheets[screen,projection][] = css/sarah.css
+
+; Unset these css files
+stylesheets[all][] = css/forms.css
