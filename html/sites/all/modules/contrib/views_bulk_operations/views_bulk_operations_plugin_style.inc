@@ -127,12 +127,26 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       if (function_exists($form_function)) {
         $form_settings = call_user_func($form_function, @$this->options['operations'][$key]['settings']);
         foreach (element_children($form_settings) as $child) {
-          $form_settings[$child] += array(
-            '#process' => array('views_process_dependency'),
-            '#dependency' => array(
-              $dom_id => array(1),
-            ),
-          );
+          // The views dependency code requires special handling for checkboxes.
+          if (isset($form_settings[$child]['#type']) && $form_settings[$child]['#type'] == 'checkboxes') {
+            $child_wrapper_id = 'edit-style-options-operations-' . str_replace('_', '-', $key) . '-settings-' . str_replace('_', '-', $child) . '-wrapper';
+            $form_settings[$child] += array(
+              '#prefix' => '<div id="' . $child_wrapper_id . '"><div>',
+              '#suffix' => '</div></div>',
+              '#process' => array('expand_checkboxes', 'views_process_dependency'),
+              '#dependency' => array(
+                $dom_id => array(1),
+              ),
+            );
+          }
+          else {
+            $form_settings[$child] += array(
+              '#process' => array('views_process_dependency'),
+              '#dependency' => array(
+                $dom_id => array(1),
+              ),
+            );
+          }
         }
         $form['operations'][$key]['settings'] = $form_settings;
       }
@@ -167,6 +181,19 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       if (function_exists($form_function)) {
         call_user_func($form_function, $form, array('values' => $options['settings']));
       }
+    }
+
+    // Reset runtime settings for this view.
+    unset($_SESSION['vbo_values'][$this->view->name]);
+  }
+
+  /**
+   * Implementation of views_plugin::query().
+   */
+  function query() {
+    // Add base field if not present in the query.
+    if (!isset($this->view->query->fields[$this->view->base_field])) {
+      $this->view->query->add_field($this->view->base_table, $this->view->base_field);
     }
   }
 
