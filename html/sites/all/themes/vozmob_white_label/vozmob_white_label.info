@@ -1,5 +1,5 @@
 name = VozMob White Label
-description = A theme while label theme for VozMob.net. 
+description = A white label theme for VozMob.
 base theme = blueprint
 core = 6.x
 engine = phptemplate

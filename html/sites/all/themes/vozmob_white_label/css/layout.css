@@ -114,6 +114,9 @@ body.page-blog div.picture { float: right; }
 
 div.view-overlay div.picture { display: none; }
 
+.view-features div {
+   
+}
 div.view-features ul li {
   list-style-image: none;
   list-style-type: none;
@@ -124,7 +127,7 @@ div.view-features ul.pager {
 
 div.view-id-feature div.view-content { width: 690px; height: 320px; }
 div.view-id-feature div.views-row-2, div.view-id-feature div.views-row-3, div.view-id-feature div.views-row-4, div.view-id-feature div.views-row-5 { display: none; }
-#feature-cycle-nav { position: relative; top: -44px; left: 300px; }
+#feature-cycle-nav { position: relative; top: -51px; left: 300px; }
 a#feature-cycle-prev, a#feature-cycle-next { z-index: 10; display: inline-block; width: 17px; height: 16px; }
 a#feature-cycle-prev { background-image: url(../images/arrow-l-sm.png); }
 a#feature-cycle-next { background-image: url(../images/arrow-r-sm.png); }
@@ -147,12 +150,16 @@ div.meta div.terms {
 }
 
 /* mime icon views row (taxonomy image all terms) */
-div.views-field-tid-list {
+div.views-field-tid-list,
+div.views-field-tid-list div {
   display: inline;
-  float: left;
-  margin-right: 0.5em;
 }
-
+.views-field-name,
+.views-field-name div {
+   color: #666666;
+   font-weight: bold;
+   margin-right: 0;
+}
 div.media-types div.item-list ul,
 div.media-types div.item-list ul li {
   margin: 0;

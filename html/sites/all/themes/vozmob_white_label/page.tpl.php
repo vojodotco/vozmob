@@ -99,6 +99,7 @@
 		<a href="http://creativecommons.org/licenses/by-nc-sa/2.0"><?php print theme('image', path_to_theme() . '/images/copy_left.png', t('Copyleft')); ?></a>
 		<a href="http://idepsca.org"><?php print theme('image', path_to_theme() . '/images/idepsca.png', t('IDEPSCA'), t('IDEPSCA')); ?></a>
 		<a href="http://asc.usc.edu"><?php print theme('image', path_to_theme() . '/images/annenberg.png', t('Annenberg'), t('Annenberg')); ?></a>
+		<a href="http://drupal.org"><?php print theme('image', path_to_theme() . '/images/powered-by-vozmob.gif', t('Powered by VozMob'), t('Powered by VozMob')); ?></a>
 		<a href="http://drupal.org"><?php print theme('image', path_to_theme() . '/images/drupal.png', t('Drupal'), t('Powered by Drupal')); ?></a>
 	  </div>
 
