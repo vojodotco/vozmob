@@ -114,9 +114,7 @@ body.page-blog div.picture { float: right; }
 
 div.view-overlay div.picture { display: none; }
 
-.view-features div {
-   
-}
+
 div.view-features ul li {
   list-style-image: none;
   list-style-type: none;
@@ -159,6 +157,8 @@ div.views-field-tid-list div {
    color: #666666;
    font-weight: bold;
    margin-right: 0;
+   float: none;
+   display: inline;
 }
 div.media-types div.item-list ul,
 div.media-types div.item-list ul li {
