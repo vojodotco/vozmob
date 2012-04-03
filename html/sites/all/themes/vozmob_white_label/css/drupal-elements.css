@@ -1,0 +1,97 @@
+/* Tabs */
+.tabs {
+  margin: 10px 0;
+}
+ul.primary li a,
+ul.primary li a:hover,
+ul.primary li.active a{
+  border: none;
+}
+.tabs .primary,
+.tabs .secondary {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0;
+  border-bottom: #DADADA solid 1px;
+}
+
+.tabs .primary li {
+  margin: 0;
+}
+.tabs .primary li a {
+    background-color: #EEEEEE;
+    display: inline-block;
+    padding-bottom: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+	padding-top:3px;
+	padding-bottom:3px;
+	border:1px solid transparent;
+	-webkit-border-radius:4px 4px 0 0;
+	-moz-border-radius:4px 4px 0 0;
+	border-radius:4px 4px 0 0;
+	margin: 0;
+	border: none;
+}
+.tabs .primary li.active a {
+  background-color: transparent;
+  font-weight: bold;
+}
+.tabs .primary li a:hover {
+}
+.tabs .secondary {
+  margin-left: 0;
+  margin: 0;
+  padding: 0.5em 0 0.5em;
+}
+.tabs .secondary li {
+  padding: 0 0.5em;
+}
+.tabs .secondary li a {
+  font-weight: bold;
+}
+
+/* Help */
+.help {
+  padding: 5px 10px;
+  border: #CAF4F6 solid 2px;
+  margin: 10px 0;
+  color:  #666;
+  min-height: 80px;
+  clear: both;
+}
+
+/* Messages */
+#messages {
+  clear: both;
+}
+#messages div.messages {
+  clear: both;
+  padding: 5px 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  box-shadow: 1px 2px 4px #999;
+}
+#messages div.messages ul {
+  margin-bottom: 0;
+}
+#messages div.status {
+  background-color: #E7FFFF;
+  border: #CAF4F6 solid 2px;
+}
+#messages div.error {
+  color: #CD4727;
+  border: 2px solid #CD4727;
+  background-color: #FFB19F;
+}
+#messages div.warning {
+  color: #222200;
+  border: 2px solid #F0C020;
+  background-color: #FFFFDD;
+}
+#messages div.success {
+  border-width: 2px;
+}

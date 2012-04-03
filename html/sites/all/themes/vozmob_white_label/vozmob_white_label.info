@@ -1,0 +1,13 @@
+name = VozMob White Label
+description = A white label theme for VozMob.
+base theme = blueprint
+core = 6.x
+engine = phptemplate
+scripts[] = scripts/general.js
+stylesheets[all][] = css/tables.css
+stylesheets[all][] = css/forms.css
+stylesheets[all][] = css/typography.css
+; stylesheets[all][] = css/blueprint.css
+stylesheets[all][] = css/drupal-elements.css
+stylesheets[all][] = css/views.css
+stylesheets[all][] = css/layout.css
