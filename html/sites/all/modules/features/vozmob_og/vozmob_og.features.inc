@@ -108,6 +108,21 @@ function vozmob_og_imagecache_default_presets() {
         ),
       ),
     ),
+    'group_logo_med' => array(
+      'presetname' => 'group_logo_med',
+      'actions' => array(
+        '0' => array(
+          'weight' => '0',
+          'module' => 'imagecache',
+          'action' => 'imagecache_scale',
+          'data' => array(
+            'width' => '150',
+            'height' => '90',
+            'upscale' => 0,
+          ),
+        ),
+      ),
+    ),
     'group_logo_small' => array(
       'presetname' => 'group_logo_small',
       'actions' => array(
