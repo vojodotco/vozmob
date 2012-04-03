@@ -1,0 +1,36 @@
+/* put your custom CSS in here */
+body {
+    background: #fff url("../images/body_header_tile.png") repeat-x;
+	margin: 0px;
+	background-repeat:repeat-x;
+	font-family:arial, helvetica, sans-serif;
+	background-color:#fff;
+	font-size: 13px;
+}
+#header a.home-link {
+	display: block;
+    float: left;
+    height: 96px;
+    width: 640px;
+}
+#headerinner a {
+	
+}
+#main-content {
+   padding-left: 20px !important;
+   padding-right: 20px;
+}
+#headerinner {
+	font-family:arial, helvetica, sans-serif;
+	float:right;
+	text-align:right;
+	height: 90px;
+	margin-top: 9px;
+	width: 280px;
+}
+#headerinner .block {
+	margin: 0;
+}
+.breadcrumb {
+	padding-left: 20px !important;
+}
