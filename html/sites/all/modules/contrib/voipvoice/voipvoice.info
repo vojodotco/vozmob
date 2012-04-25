@@ -1,0 +1,16 @@
+; $Id$
+name = "VoIP Voice"
+description = "Adds v() for voice translating"
+package = VoIP Drupal
+dependencies[] = voip
+dependencies[] = voipcall
+dependencies[] = locale
+dependencies[] = audiorecorderfield
+core = 6.x
+
+; Information added by drupal.org packaging script on 2012-03-23
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "voipvoice"
+datestamp = "1332517850"
+
