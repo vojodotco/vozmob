@@ -1,4 +1,5 @@
 <?php
+// $Id: cloudmade.inc,v 1.1.2.18 2010/08/30 07:47:43 zzolo Exp $
 
 /**
  * @file

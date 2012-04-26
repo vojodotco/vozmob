@@ -72,7 +72,7 @@ function vozmob_og_content_default_fields() {
       'rotate' => 0,
       'label' => 'Group logo',
       'weight' => '-4',
-      'description' => 'Please upload a logo or image for your group! Your image will be resized if over 700px by 200px, so that it fits within the website header. ',
+      'description' => '',
       'type' => 'imagefield_widget',
       'module' => 'imagefield',
     ),

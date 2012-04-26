@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_fullscreen.js,v 1.1.2.6 2010/07/18 22:10:44 zzolo Exp $
 
 /**
  * @file

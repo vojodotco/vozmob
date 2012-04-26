@@ -1,3 +1,4 @@
+// $Id: openlayers_cck_vector_layer.js,v 1.1.2.4 2010/06/06 19:54:28 zzolo Exp $
 
 /**
  * @file

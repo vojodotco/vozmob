@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers.behaviors.inc,v 1.1.2.14 2010/06/07 20:21:25 zzolo Exp $
 
 /**
  * @file

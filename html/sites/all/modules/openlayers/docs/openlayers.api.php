@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers.api.php,v 1.2.2.6 2010/10/13 09:03:58 strk Exp $
 
 /**
  * @file

@@ -1,4 +1,5 @@
 <?php
+// $Id: flag.views_default.inc,v 1.1.2.5.2.3 2010/10/24 00:39:21 mooffie Exp $
 
 /**
  * @file
@@ -37,7 +38,6 @@ function flag_views_default_views() {
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
-      'relationship' => 'uid_1',
     ),
   );
 
@@ -98,13 +98,6 @@ function flag_views_default_views() {
       'override' => array(
         'button' => 'Override',
       ),
-    ),
-    'uid_1' => array(
-      'label' => 'author',
-      'required' => 0,
-      'id' => 'uid_1',
-      'table' => 'node',
-      'field' => 'uid',
     ),
   );
 

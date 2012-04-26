@@ -1,4 +1,5 @@
 <?php
+// $Id: flag.features.inc,v 1.1.2.8 2011/01/10 12:25:27 mooffie Exp $
 
 /**
  * @file

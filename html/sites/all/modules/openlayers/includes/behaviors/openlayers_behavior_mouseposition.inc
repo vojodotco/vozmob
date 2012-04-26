@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_behavior_mouseposition.inc,v 1.1.2.4 2010/05/18 19:25:57 tmcw Exp $
 
 /**
  * @file

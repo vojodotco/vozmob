@@ -1,3 +1,4 @@
+// $Id: openlayers_test_rnd_int.js,v 1.1.2.2 2010/10/13 13:35:35 tmcw Exp $
 
 /**
  * @file

@@ -1,4 +1,5 @@
 <?php
+// $Id: flag.token.inc,v 1.1.2.4.2.2 2010/08/16 20:32:29 mooffie Exp $
 
 /**
  * @file
@@ -27,7 +28,6 @@ function flag_token_list($type = 'all') {
       $flags = flag_get_flags($flag_type);
       foreach ($flags as $flag) {
         $tokens[$flag_type]['flag-'. str_replace('_', '-', $flag->name) .'-count'] = t('Total flag count for flag @flag', array('@flag' => $flag->get_title()));
-        $tokens[$flag_type]['flag-'. str_replace('_', '-', $flag->name) .'-link'] = t('Flag/unflag link for @flag', array('@flag' => $flag->get_title()));
       }
     }
   }
@@ -55,7 +55,6 @@ function flag_token_values($type, $object = NULL) {
     $flags = flag_get_flags($type);
     foreach ($flags as $flag) {
       $values['flag-'. str_replace('_', '-', $flag->name) .'-count'] = $flag->get_count($flag->get_content_id($object));
-      $values['flag-'. str_replace('_', '-', $flag->name) .'-link'] = flag_create_link($flag->name, $flag->get_content_id($object));
     }
   }
   return $values;

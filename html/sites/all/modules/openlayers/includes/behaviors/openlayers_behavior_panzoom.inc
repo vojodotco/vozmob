@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_behavior_panzoom.inc,v 1.1.2.4 2010/09/09 16:00:12 strk Exp $
 
 /**
  * @file

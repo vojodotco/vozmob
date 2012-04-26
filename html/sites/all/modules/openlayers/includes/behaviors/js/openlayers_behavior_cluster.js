@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_cluster.js,v 1.1.2.3 2010/07/21 09:38:30 strk Exp $
 
 /**
  * @file

@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_popup.js,v 1.1.2.5 2011/01/31 14:28:53 tmcw Exp $
 
 /**
  * Global variables to help with scope

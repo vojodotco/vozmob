@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_layerswitcher.js,v 1.1.2.7 2010/10/06 14:31:11 strk Exp $
 
 /**
  * @file

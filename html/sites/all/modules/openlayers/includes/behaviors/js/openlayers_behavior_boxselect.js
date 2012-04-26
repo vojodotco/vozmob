@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_boxselect.js,v 1.1.2.4 2010/08/06 17:00:56 tmcw Exp $
 
 /**
  * @file

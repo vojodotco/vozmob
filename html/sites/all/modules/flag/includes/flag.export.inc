@@ -1,4 +1,5 @@
 <?php
+// $Id: flag.export.inc,v 1.1.2.8 2011/01/10 12:25:27 mooffie Exp $
 
 /**
  * @file
@@ -96,13 +97,8 @@ function flag_import_form_validate($form, &$form_state) {
   }
 
   // Create the flag object.
-  foreach ($flags as $flag_name => $flag_info) {
-    // Backward compatibility: old exported flags have their names in $flag_info
-    // instead, so we use the += operator to not overwrite it.
-    $flag_info += array(
-      'name' => $flag_name,
-    );
-    $new_flag = flag_flag::factory_by_array($flag_info);
+  foreach ($flags as $config) {
+    $new_flag = flag_flag::factory_by_array($config);
 
     // Give new flags with the same name a matching FID, which tells Flag to
     // update the existing flag, rather than creating a new one.

@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_ui.presets.inc,v 1.1.2.32 2010/11/11 08:23:48 strk Exp $
 
 /**
  * @file
@@ -28,7 +29,6 @@ function openlayers_ui_presets_form(&$form_state, $preset = NULL, $edit = FALSE)
   drupal_add_css(drupal_get_path('module', 'openlayers_ui') . '/openlayers_ui.css');
 
   // If cloning or editing, attempt to get preset
-  $defaults = array();
   if (empty($preset)) {
     $default_preset = openlayers_preset_load(variable_get('openlayers_default_preset', 'default'));
     if ($default_preset) {
@@ -323,7 +323,7 @@ function openlayers_ui_presets_form(&$form_state, $preset = NULL, $edit = FALSE)
           // UPGRADE NOTE:
           // Presets up to 6.x-2.x-alpha10 always had a single style
           // per layer specified. Newer ones have them splitted by role
-          '#default_value' => (!empty($defaults['layer_styles']) && is_array($defaults['layer_styles'][$id])) ?
+          '#default_value' => is_array($defaults['layer_styles'][$id]) ?
             ( !empty($defaults['layer_styles'][$id][$role]) ?
               $defaults['layer_styles'][$id][$role] : '' )
             : 

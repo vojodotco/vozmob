@@ -1,3 +1,4 @@
+$Id: CUSTOMIZATION.txt,v 1.1.2.4 2010/05/18 19:25:57 tmcw Exp $
 
 Current for 6.x-2.0-alpha3
 

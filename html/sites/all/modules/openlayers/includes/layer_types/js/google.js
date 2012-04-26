@@ -1,3 +1,4 @@
+// $Id: google.js,v 1.1.2.3 2011/01/31 14:31:32 tmcw Exp $
 
 /**
  * Process Google Layers
@@ -18,7 +19,7 @@ Drupal.openlayers.layer.google = function(title, map, options) {
     'hybrid': G_HYBRID_MAP,
     'physical': G_PHYSICAL_MAP,
     'mapmaker-normal': G_MAPMAKER_NORMAL_MAP,
-    'mapmaker-hybrid': G_MAPMAKER_HYBRID_MAP
+    'mapmaker-hybrid': G_MAPMAKER_HYBRID_MAP,
   };
 
   options.sphericalMercator = true;

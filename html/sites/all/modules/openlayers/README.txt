@@ -1,3 +1,4 @@
+$Id: README.txt,v 1.17.2.8 2010/09/08 11:35:26 strk Exp $
 
 Current for 6.x-2.0-alpha2
 
