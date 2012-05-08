@@ -232,72 +232,6 @@ function exif_gps_field_storage_content_default_fields() {
     ),
   );
 
-  // Exported field: field_location_string
-  $fields['blog-field_location_string'] = array(
-    'field_name' => 'field_location_string',
-    'type_name' => 'blog',
-    'display_settings' => array(
-      'label' => array(
-        'format' => 'above',
-        'exclude' => 0,
-      ),
-      'teaser' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'full' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '5' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-    ),
-    'widget_active' => '1',
-    'type' => 'text',
-    'required' => '0',
-    'multiple' => '0',
-    'module' => 'text',
-    'active' => '1',
-    'text_processing' => '0',
-    'max_length' => '',
-    'allowed_values' => '',
-    'allowed_values_php' => '',
-    'widget' => array(
-      'rows' => 5,
-      'size' => '200',
-      'default_value' => array(
-        '0' => array(
-          'value' => '',
-          '_error_element' => 'default_value_widget][field_location_string][0][value',
-        ),
-      ),
-      'default_value_php' => NULL,
-      'label' => 'Location',
-      'weight' => '2',
-      'description' => '',
-      'type' => 'text_textfield',
-      'module' => 'text',
-    ),
-  );
-
   // Exported field: field_map
   $fields['blog-field_map'] = array(
     'field_name' => 'field_map',
@@ -391,7 +325,6 @@ function exif_gps_field_storage_content_default_fields() {
   // Included for use with string extractors like potx.
   t('Latitude');
   t('Latitude ref');
-  t('Location');
   t('Longitude');
   t('Longitude ref');
   t('Map');
