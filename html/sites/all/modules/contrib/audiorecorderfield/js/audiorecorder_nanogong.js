@@ -1,3 +1,29 @@
+Drupal.behaviors.audiorecorderfield = function (context) {
+	if (!deployJava.isWebStartInstalled("1.4.2"))
+    {
+      //Java is not Enabled
+      $(".nanogong-fallback").show();
+      $(".nanogong-recorder").hide();
+      $(".nanogong-upload").hide();
+    }
+}
+
+
+/*
+function submitVoice(field_name,delta) { 
+  if (!deployJava.isWebStartInstalled("1.4.2")) {
+    //Java is not Enabled
+    submitUpload(field_name,delta)
+  }
+  else {
+    submitRecording(field_name,delta);
+  }
+}
+
+function submitUpload(field_name,delta) {
+  alert("Uploading");
+}*/
+
 function submitVoice(field_name,delta) { 
 	//Remove any error messages
 	$("#edit-field-"+field_name+"-"+delta+"-wrapper .error").remove();
@@ -45,6 +71,7 @@ function submitVoice(field_name,delta) {
                       //$("#edit-field-"+field_name+"-"+delta+"-wrapper div").remove();
                       //$("#edit-field-"+field_name+"-"+delta+"-wrapper").append(data.recorder);
                       $("#audiorecorderfield-"+field_name+"-"+delta+"-wrapper").html(data.recorder);
+                      Drupal.attachBehaviors("#audiorecorderfield-"+field_name+"-"+delta+"-wrapper");
                     }
 	    });
 	}

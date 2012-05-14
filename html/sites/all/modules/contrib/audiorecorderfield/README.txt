@@ -44,6 +44,11 @@ This module also adds new "recorder" uploading method for FileField Sources modu
 2. Change your Audio Recorder widget to File Upload widget.
 3. Under File Sources fieldset you will see various uploading methods (Audio recorder method is added by this module).
 
+Java Fallback (only for Nanogong)
+
+What do do if Java is not enabled at the client? There are two options that are configurable through admin/settings/audiorecorderfield
+( ) Replace recorder for file upload option (DEFAULT)
+( ) Remind user to download and set up Java for their computer
 
 ---
 The AudioRecorderField module has been originally developed by Leo Burd and Tamer Zoubi under the sponsorship of the MIT Center for Future Civic Media (http://civic.mit.edu).
