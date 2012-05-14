@@ -1,0 +1,18 @@
+core = "6.x"
+dependencies[] = "voipcall"
+dependencies[] = "voipextension"
+dependencies[] = "voipviews"
+description = "Sample and starting views for working with the VoIP views module."
+features[views][] = "frontpage_extension"
+features[views_api][] = "api:2"
+name = "VoIP views examples"
+package = "VoIP Drupal"
+project = "voipviews_examples"
+version = "6.x-1.0-alpha1"
+
+; Information added by drupal.org packaging script on 2012-03-10
+version = "6.x-2.0-alpha1"
+core = "6.x"
+project = "voipviews"
+datestamp = "1331395544"
+

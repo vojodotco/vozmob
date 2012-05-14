@@ -1,0 +1,227 @@
+<?php
+
+/**
+ * @file
+ *   Views dev.
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function voipviews_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'voipviews') . '/views',
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function voipviews_theme($existing, $type, $theme, $path) {
+  return array(
+    'voipviews_view_preview' => array(
+      'arguments' => array(
+        'voipscriptstore' => '',
+      ),
+      'file' => 'theme/voipviews.theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * We can check for new, changed, extensions on form submission, but not
+ * programatically similarly on deleting there is nothing in $view->delete
+ * (just form submission if from ui)
+ * a menu rebuild is however always triggered, so updating our extensions
+ * here.
+ */
+function voipviews_menu() {
+  voipviews_refresh_extensions();
+}
+
+/**
+ * Add, update and remove voip views extensions.
+ */
+function voipviews_refresh_extensions() {
+  if (! module_exists('voipextension')) {
+    return;
+  }
+
+  $extensions = voipextension_load_module_extensions('voipviews');
+
+  // Cycle through all voip views displays.
+  $views = views_get_applicable_views('uses voipextension');
+  foreach ($views as $data) {
+    list($view, $display_id) = $data;
+    $view->set_display($display_id);
+    // If the voipextension checkbox is enabled.
+    if ($view->display_handler->get_option('voipextension_enable')) {
+      // Check to see if it exists already.
+      if (isset($extensions[$view->name . '|' . $display_id])) {
+        $extension = $extensions[$view->name . '|' . $display_id];
+        $extension['title'] = $view->display_handler->get_option('voipextension_title');
+        $extension['description'] = $view->display_handler->get_option('voipextension_description');
+        $extension['script_callback'] = 'voipviews_voipextension_script_callback';
+        voipextension_update($extension);
+        unset($extensions[$view->name . '|' . $display_id]);
+      }
+      else {
+        // Otherwise create new extension.
+        $extension = array(
+          'title' => $view->display_handler->get_option('voipextension_title'),
+          'description' =>  $view->display_handler->get_option('voipextension_description'),
+          'module' => 'voipviews',
+          'module_id' => $view->name . '|' . $display_id,
+          'script_callback' => 'voipviews_voipextension_script_callback',
+        );
+        voipextension_create($extension);
+      }
+    }
+  }
+
+  // Remove any extensions that are remaining they are deleted or disabled.
+  foreach ($extensions as $module_id => $extension) {
+    voipextension_delete($extension['eid']);
+  }
+
+  // Save memory: Destroy those views.
+  foreach ($views as $data) {
+    list($view, $display_id) = $data;
+    $view->destroy();
+  }
+}
+
+/**
+ * Voipextension script callback.
+ */
+function voipviews_voipextension_script_callback(&$extension) {
+  list($view_name, $display_id) = explode('|', $extension['module_id']);
+  $extension['script_arguments']['view_name'] = $view_name;
+  $extension['script_arguments']['display_id'] = $display_id;
+  return 'voipviews_read_view';
+}
+
+/**
+ * Implements hook_voipscript_get_script_names().
+ */
+function voipviews_voipscript_get_script_names() {
+  return array(
+    'voipviews_read_view',
+    'voipviews_node_tag_new',
+    'voipviews_node_untag_new',
+  );
+}
+
+/**
+ * Implements hook_voipscript_load_script().
+ */
+function voipviews_voipscript_load_script($script_name, $params = NULL) {
+  switch ($script_name) {
+    case 'voipviews_read_view':
+      $args = (! empty($params['args'])) ? json_decode($params['args']) : array();
+      return voipviews_read_view_script($params['view_name'], $params['display_id'], $args);
+    case 'voipviews_node_tag_new':
+      return voipviews_node_tag_new_script($params['nid']);
+    case 'voipviews_node_untag_new':
+      return voipviews_node_untag_new_script($params['nid']);
+  }
+}
+
+/**
+ * Return a script from a VoIP view display.
+ *
+ * Example:
+ *   $script->addGosub(
+ *     'voipviews_read_view',
+ *     array(
+ *       'view_name' => 'my_view_name',
+ *       'display_id' => 'voipviews_1',
+ *       'args' => json_encode(
+ *         array('first_arg', 'second_arg'),
+ *       ),
+ *     )
+ *   );
+ *
+ * @todo allow passing of filter settings.
+ *
+ * @param string $view_name
+ *   Unique view name.
+ * @param string $display_id
+ *   VoIP View Display ID.
+ * @param array $args
+ *   Arguments to be passed to the View before executing.
+ *
+ * @return object
+ *   The VoipScript returned from the view.
+ */
+function voipviews_read_view_script($view_name, $display_id, $args = array()) {
+  $view = views_get_view($view_name);
+  if (!$view || !$view->access($display_id)) {
+    $script = new VoipScript('voipviews_script_view_read');
+    watchdog('voipviews', 'Unable to load or access view @view_name display @display_id', array('@view_name' => $view_name, '@display_id' => $display_id), WATCHDOG_ERROR);
+    $script->addSay('There has been an error accessing the information you require. Sorry.');
+    $script->addReturn();
+    return $script;
+  }
+  if (! $view->set_display($display_id)) {
+    $script = new VoipScript('voipviews_script_view_read');
+    watchdog('voipviews', 'Unable to set display @display_id on view @view_name', array('@view_name' => $view_name, '@display_id' => $display_id), WATCHDOG_ERROR);
+    $script->addSay('There has been an error accessing the information you require. Sorry.');
+    $script->addReturn();
+    return $script;
+  }
+
+  if (! empty($options['filters'])) {
+    $view->set_exposed_input($options['filters']);
+  }
+
+  $view->pre_execute($args);
+  $stored_script = $view->display_handler->preview();
+  $view->post_execute();
+
+  // @todo put this in the store class.
+  $script = new VoipScript($stored_script->getName(), $stored_script->getVariables());
+  foreach ($stored_script as $line) {
+    list($command, $params) = $line;
+    call_user_func_array(array($script, $command), $params);
+  }
+
+  return $script;
+}
+
+/**
+ * Script callback: Update new tag no a nid.
+ *
+ * Helper script to make a node a seen when it is read out.
+ *
+ * @todo investigate alternative is to evaluate function
+ * as VoipScript does for ^php_function();
+ */
+function voipviews_node_tag_new_script($nid) {
+  $script = new VoipScript('voipviews_script_view_read');
+  node_tag_new($nid);
+  $script->addReturn();
+  return $script;
+}
+
+/**
+ * Script callback: Remove user read history of node. Set "Unread".
+ *
+ * Helper script to make node 'unseen' after it has been marked.
+ */
+function voipviews_node_untag_new_script($nid) {
+  $script = new VoipScript('voipviews_script_view_unread');
+  global $user;
+
+  if ($user->uid) {
+    if (node_last_viewed($nid)) {
+      db_query('DELETE FROM {history} WHERE uid = %d AND nid = %d', $user->uid, $nid);
+    }
+  }
+
+  $script->addReturn();
+  return $script;
+}
