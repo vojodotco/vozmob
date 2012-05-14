@@ -1,8 +1,0 @@
-voipScriptStore
----------------
-
-This module provides an arrayobject to be used by VoIP Views module.
-
-VoipScripStore objects act just like the voipscript objects.
-The store however allows scripts to be built in any order,
-merged, and displayed in a reasonably human readable form.
