@@ -34,3 +34,9 @@
 [submodule "html/sites/all/modules/custom/voipusernumber"]
 	path = html/sites/all/modules/custom/voipusernumber
 	url = git://github.com/ekes/voipusernumber.git
+[submodule "html/sites/all/modules/contrib/voipvoice"]
+	path = html/sites/all/modules/contrib/voipvoice
+	url = http://git.drupal.org/project/voipvoice.git
+[submodule "html/sites/all/modules/contrib/voipviews"]
+	path = html/sites/all/modules/contrib/voipviews
+	url = http://git.drupal.org/project/voipviews.git

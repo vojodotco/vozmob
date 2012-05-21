@@ -49,6 +49,9 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->body = $body;
       $node->teaser = node_teaser($node->body);
 
+      if ($node->title == 'T-Mobile') {
+        $node->title = truncate_utf8(trim(decode_entities(strip_tags(check_markup($node->body)))), 60, TRUE);
+      }
     }
 
     // Get rid of extra text attachments
