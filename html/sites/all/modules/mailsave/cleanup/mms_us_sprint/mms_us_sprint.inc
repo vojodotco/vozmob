@@ -86,6 +86,9 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       }
       sms_registration_mailhandler($node, $result, $i, $header, $mailbox);
 
+      if ($node->title == 'New Message') {
+        $node->title = truncate_utf8($message_object->Results[0]->description, 60, TRUE, TRUE);
+      }
       $node->body .= '<p>' . $message_object->Results[0]->description . '</p>';
 
       $node->teaser = node_teaser($node->body);
