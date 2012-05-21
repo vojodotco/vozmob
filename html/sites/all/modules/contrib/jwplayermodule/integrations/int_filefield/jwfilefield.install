@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function jwfilefield_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'jwfilefield');
+}
+
+function jwfilefield_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'jwfilefield');
+}
+
+function jwfilefield_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'jwfilefield');
+}
+
+function jwfilefield_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'jwfilefield');
+}

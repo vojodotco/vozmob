@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * Implementation of hook_nodeapi.  This method processes jwplayer tag in cck fields and
+ * begins the embed process.
+ * @param $node
+ * @param $op
+ * @param $a3
+ * @param $a4
+ */
+function jwcck_nodeapi(&$node, $op, $a3, $a4) {
+  switch ($op) {
+    case "view":
+      $content = $node->content;
+      foreach ($content as $name => $field) {
+        if (strstr($name, "field_")) {
+          $items = $field["field"]["items"];
+          foreach ($items as $key => $item) {
+            if (is_numeric($key)) {
+              $data = $item["#item"];
+              if (array_key_exists("safe", $data)) {
+                $node->content[$name]["field"]["items"][$key]["#item"]["safe"] = theme("jwplayermodule_tag_processor", $data["value"], $node);
+              }
+            }
+          }
+        }
+      }
+      break;
+  }
+}
