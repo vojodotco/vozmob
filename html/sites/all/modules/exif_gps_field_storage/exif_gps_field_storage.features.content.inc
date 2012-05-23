@@ -283,7 +283,7 @@ function exif_gps_field_storage_content_default_fields() {
       'polygon' => 'polygon',
     ),
     'widget' => array(
-      'openlayers_cck_preset_map' => 'default',
+      'openlayers_cck_preset_map' => 'vojo_default',
       'openlayers_behaviors' => array(
         'openlayers_behavior_zoomtolayer' => array(
           'enabled' => 0,
