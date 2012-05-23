@@ -31,6 +31,18 @@ function vozmob_og_fieldgroup_default_groups() {
           'format' => 'fieldset',
           'exclude' => 0,
         ),
+        '2' => array(
+          'format' => 'fieldset',
+          'exclude' => 0,
+        ),
+        '3' => array(
+          'format' => 'fieldset',
+          'exclude' => 0,
+        ),
+        '5' => array(
+          'format' => 'fieldset',
+          'exclude' => 0,
+        ),
         'token' => array(
           'format' => 'fieldset',
           'exclude' => 0,
@@ -38,7 +50,7 @@ function vozmob_og_fieldgroup_default_groups() {
         'label' => 'above',
       ),
     ),
-    'weight' => '7',
+    'weight' => '10',
     'fields' => array(
       '0' => 'field_voipnode_adesc',
       '1' => 'field_voipnode_agreet',

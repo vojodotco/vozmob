@@ -71,7 +71,7 @@ function vozmob_og_content_default_fields() {
       'use_default_image' => 0,
       'rotate' => 0,
       'label' => 'Group logo',
-      'weight' => '-4',
+      'weight' => '-3',
       'description' => 'Please upload a logo or image for your group! Your image will be resized if over 700px by 200px, so that it fits within the website header. ',
       'type' => 'imagefield_widget',
       'module' => 'imagefield',
@@ -137,10 +137,103 @@ maps|Mapping
       ),
       'default_value_php' => NULL,
       'label' => 'Type of group',
-      'weight' => '-3',
+      'weight' => '-2',
       'description' => '',
       'type' => 'optionwidgets_select',
       'module' => 'optionwidgets',
+    ),
+  );
+
+  // Exported field: field_map
+  $fields['group-field_map'] = array(
+    'field_name' => 'field_map',
+    'type_name' => 'group',
+    'display_settings' => array(
+      'weight' => '26',
+      'parent' => '',
+      'label' => array(
+        'format' => 'above',
+      ),
+      'teaser' => array(
+        'format' => 'hidden',
+        'exclude' => 1,
+      ),
+      'full' => array(
+        'format' => 'openlayers_map_default',
+        'exclude' => 1,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '5' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+    ),
+    'widget_active' => '1',
+    'type' => 'openlayers_wkt',
+    'required' => '0',
+    'multiple' => '0',
+    'module' => 'openlayers_cck',
+    'active' => '1',
+    'openlayers_cck_feature_types' => array(
+      'point' => 'point',
+      'path' => 0,
+      'polygon' => 0,
+    ),
+    'widget' => array(
+      'openlayers_cck_preset_map' => 'vojo_default',
+      'openlayers_behaviors' => array(
+        'openlayers_behavior_zoomtolayer' => array(
+          'enabled' => 0,
+          'options' => array(
+            'zoomtolayer' => 'openlayers_cck_vector_layer',
+            'point_zoom_level' => '5',
+          ),
+        ),
+      ),
+      'keep_points' => 0,
+      'position' => '10',
+      'default_value' => array(
+        '0' => array(
+          'openlayers_wkt' => '',
+        ),
+      ),
+      'default_value_php' => NULL,
+      'autocompletion_field_location_string_enable' => 0,
+      'autocompletion_field_location_string_override' => 0,
+      'autocompletion_field_location_string_content' => '',
+      'autocompletion_field_location_string_type' => 'input',
+      'autocompletion_field_gps_gpslongituderef_enable' => 0,
+      'autocompletion_field_gps_gpslongituderef_override' => 0,
+      'autocompletion_field_gps_gpslongituderef_content' => '',
+      'autocompletion_field_gps_gpslongituderef_type' => 'input',
+      'autocompletion_field_gps_gpslatituderef_enable' => 0,
+      'autocompletion_field_gps_gpslatituderef_override' => 0,
+      'autocompletion_field_gps_gpslatituderef_content' => '',
+      'autocompletion_field_gps_gpslatituderef_type' => 'input',
+      'autocompletion_field_group_type_enable' => 0,
+      'autocompletion_field_group_type_override' => 0,
+      'autocompletion_field_group_type_content' => '',
+      'autocompletion_field_group_type_type' => 'select',
+      'label' => 'Map',
+      'weight' => '7',
+      'description' => 'Type in an address to tell us where this group is located.  This will be helpful for showing other stories on the group map.',
+      'type' => 'openlayers_geocoder_widget',
+      'module' => 'openlayers_geocoder',
     ),
   );
 
@@ -377,7 +470,7 @@ maps|Mapping
       ),
       'default_value_php' => NULL,
       'label' => 'E-mail address',
-      'weight' => '14',
+      'weight' => '11',
       'description' => '',
       'type' => 'mail2og_emailfield',
       'module' => 'mail2og',
@@ -391,6 +484,7 @@ maps|Mapping
   t('"Name" Audio for Phone Calls');
   t('E-mail address');
   t('Group logo');
+  t('Map');
   t('Type of group');
 
   return $fields;
