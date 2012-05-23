@@ -279,8 +279,8 @@ function exif_gps_field_storage_content_default_fields() {
     'active' => '1',
     'openlayers_cck_feature_types' => array(
       'point' => 'point',
-      'path' => 'path',
-      'polygon' => 'polygon',
+      'path' => 0,
+      'polygon' => 0,
     ),
     'widget' => array(
       'openlayers_cck_preset_map' => 'vojo_default',
@@ -315,7 +315,7 @@ function exif_gps_field_storage_content_default_fields() {
       'autocompletion_field_gps_gpslatituderef_type' => 'input',
       'label' => 'Map',
       'weight' => '3',
-      'description' => '',
+      'description' => 'Type in an address to tell us where this story took place.  Your story will then show up on the group map.',
       'type' => 'openlayers_geocoder_widget',
       'module' => 'openlayers_geocoder',
     ),
