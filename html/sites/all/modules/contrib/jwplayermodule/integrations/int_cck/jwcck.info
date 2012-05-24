@@ -1,0 +1,12 @@
+name = CCK Shortcodes
+description = Enables support for the JW Player Module shortcode in CCK fields.  This is experimental.
+package = "JW Player"
+core = 6.x
+dependencies[] = jwplayermodule
+dependencies[] = content
+; Information added by drupal.org packaging script on 2012-02-22
+version = "6.x-1.7"
+core = "6.x"
+project = "jwplayermodule"
+datestamp = "1329946843"
+

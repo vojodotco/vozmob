@@ -1,0 +1,12 @@
+name = Embedded Media Field Integration
+description = Embed the JW Player using an Embedded Media Field.
+package = "JW Player"
+core = 6.x
+dependencies[] = jwplayermodule
+dependencies[] = emvideo
+; Information added by drupal.org packaging script on 2012-02-22
+version = "6.x-1.7"
+core = "6.x"
+project = "jwplayermodule"
+datestamp = "1329946843"
+

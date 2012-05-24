@@ -1,0 +1,48 @@
+<?php
+
+function jwcckformatter_theme() {
+  return array(
+    'jwcckformatter_formatter_jwcckformatter' => array(
+      'arguments' => array(
+        'element' => NULL
+      ),
+    )
+  );
+}
+
+function jwcckformatter_field_formatter_info() {
+  return array(
+    'jwcckformatter' => array(
+      'label' => t('JW Player'),
+      'field types' => array('text'),
+      'multiple values' => CONTENT_HANDLE_MODULE
+    ),
+  );
+}
+
+function theme_jwcckformatter_formatter_jwcckformatter($element) {
+  $output = "";
+  if (array_key_exists("#item", $element)) {
+    if (empty($element['#item']['fid'])) {
+      return '';
+    }
+    $data = $element["#item"]["value"];
+    $output = theme("jwplayermodule_tag_processor", $data);
+  } else {
+    $delta = 0;
+    $items = array();
+    while (true) {
+      if (array_key_exists($delta, $element)) {
+        $items[] = $element[$delta];
+      } else {
+        break;
+      }
+      $delta++;
+    }
+    foreach ($items as $item) {
+      $data = $item["#item"]["value"];
+      $output .= theme("jwplayermodule_tag_processor", $data);
+    }
+  }
+  return $output;
+}
