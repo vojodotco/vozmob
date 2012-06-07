@@ -78,72 +78,6 @@ function vozmob_og_content_default_fields() {
     ),
   );
 
-  // Exported field: field_group_type
-  $fields['group-field_group_type'] = array(
-    'field_name' => 'field_group_type',
-    'type_name' => 'group',
-    'display_settings' => array(
-      'weight' => '-3',
-      'parent' => '',
-      'label' => array(
-        'format' => 'above',
-      ),
-      'teaser' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'full' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '5' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-    ),
-    'widget_active' => '1',
-    'type' => 'text',
-    'required' => '1',
-    'multiple' => '0',
-    'module' => 'text',
-    'active' => '1',
-    'text_processing' => '0',
-    'max_length' => '',
-    'allowed_values' => 'news|News
-maps|Mapping
-',
-    'allowed_values_php' => '',
-    'widget' => array(
-      'default_value' => array(
-        '0' => array(
-          'value' => '',
-        ),
-      ),
-      'default_value_php' => NULL,
-      'label' => 'Type of group',
-      'weight' => '-2',
-      'description' => '',
-      'type' => 'optionwidgets_select',
-      'module' => 'optionwidgets',
-    ),
-  );
-
   // Exported field: field_map
   $fields['group-field_map'] = array(
     'field_name' => 'field_map',
@@ -284,10 +218,10 @@ maps|Mapping
         'reference' => 0,
         'attach' => 0,
       ),
+      'filefield_source_autocomplete' => '0',
       'filefield_source_attach_path' => 'file_attach',
       'filefield_source_attach_absolute' => '0',
       'filefield_source_attach_mode' => 'move',
-      'filefield_source_autocomplete' => '0',
       'label' => '"More Info" Audio for Phone Calls',
       'weight' => 0,
       'description' => 'When people call your group over the phone, they have an option to hear more about the group.  This is the audio that will be played there.  If you don\'t have a recording here, then people will hear the "About this Group" text read aloud in a robot voice.',
@@ -343,10 +277,10 @@ maps|Mapping
         'reference' => 0,
         'attach' => 0,
       ),
+      'filefield_source_autocomplete' => '0',
       'filefield_source_attach_path' => 'file_attach',
       'filefield_source_attach_absolute' => '0',
       'filefield_source_attach_mode' => 'move',
-      'filefield_source_autocomplete' => '0',
       'label' => '"Menu" Audio for Phone Calls',
       'weight' => 0,
       'description' => 'When people call your group over the phone, they hear a menu of options.  You can record that menu in your own voice.  You should be sure to include "Press 2 to record your own story, or press 3 to hear more about the group".',
@@ -402,10 +336,10 @@ maps|Mapping
         'reference' => 0,
         'attach' => 0,
       ),
+      'filefield_source_autocomplete' => '0',
       'filefield_source_attach_path' => 'file_attach',
       'filefield_source_attach_absolute' => '0',
       'filefield_source_attach_mode' => 'move',
-      'filefield_source_autocomplete' => '0',
       'label' => '"Name" Audio for Phone Calls',
       'weight' => 0,
       'description' => 'When people call your group over the phone, this will be the first thing they hear (once they transfer to your group).  If you don\'t have a recording here, then people will hear your group\'s name read in a robot voice.',
@@ -485,7 +419,6 @@ maps|Mapping
   t('E-mail address');
   t('Group logo');
   t('Map');
-  t('Type of group');
 
   return $fields;
 }
