@@ -180,13 +180,7 @@ function vozmob_og_rules_defaults() {
         '#status' => 'default',
         '#conditions' => array(
           '0' => array(
-            '#type' => 'condition',
-            '#settings' => array(
-              '#argument map' => array(
-                'group' => 'node',
-              ),
-            ),
-            '#name' => 'og_rules_condition_content_is_group_post',
+            '#weight' => 0,
             '#info' => array(
               'label' => 'Content is a group post',
               'arguments' => array(
@@ -197,10 +191,24 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#weight' => 0,
+            '#name' => 'og_rules_condition_content_is_group_post',
+            '#settings' => array(
+              '#argument map' => array(
+                'group' => 'node',
+              ),
+            ),
+            '#type' => 'condition',
           ),
           '1' => array(
-            '#weight' => 0,
+            '#type' => 'condition',
+            '#settings' => array(
+              'flag' => 'moderated_group',
+              '#argument map' => array(
+                'object' => 'node',
+                'user' => 'user',
+              ),
+            ),
+            '#name' => 'ogrulesextra_rules_condition_flagged_node',
             '#info' => array(
               'label' => 'Node parent(s) are flagged',
               'base' => 'ogrulesextra_rules_condition_flagged',
@@ -223,29 +231,12 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#name' => 'ogrulesextra_rules_condition_flagged_node',
-            '#settings' => array(
-              'flag' => 'moderated_group',
-              '#argument map' => array(
-                'object' => 'node',
-                'user' => 'user',
-              ),
-            ),
-            '#type' => 'condition',
+            '#weight' => 0,
           ),
         ),
         '#actions' => array(
           '0' => array(
-            '#type' => 'action',
-            '#settings' => array(
-              'flag' => 'moderate_node',
-              'permission_check' => 0,
-              '#argument map' => array(
-                'object' => 'node',
-                'flagging_user' => 'author',
-              ),
-            ),
-            '#name' => 'flag_rules_action_flag_node',
+            '#weight' => 0,
             '#info' => array(
               'label' => 'Flag created content, under "Requires moderation"',
               'base' => 'flag_rules_action_flag',
@@ -268,10 +259,26 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Flag',
             ),
-            '#weight' => 0,
+            '#name' => 'flag_rules_action_flag_node',
+            '#settings' => array(
+              'flag' => 'moderate_node',
+              'permission_check' => 0,
+              '#argument map' => array(
+                'object' => 'node',
+                'flagging_user' => 'author',
+              ),
+            ),
+            '#type' => 'action',
           ),
           '1' => array(
-            '#weight' => 0,
+            '#type' => 'action',
+            '#settings' => array(
+              'auto_save' => 1,
+              '#argument map' => array(
+                'node' => 'node',
+              ),
+            ),
+            '#name' => 'rules_core_node_unpublish_action',
             '#info' => array(
               'label' => 'Unpublish created content',
               'module' => 'Node',
@@ -287,11 +294,32 @@ function vozmob_og_rules_defaults() {
               'label callback' => 'rules_core_node_label_callback',
               'label_skeleton' => 'Unpublish @node',
             ),
-            '#name' => 'rules_core_node_unpublish_action',
+            '#weight' => 0,
+          ),
+          '2' => array(
+            '#weight' => 0,
+            '#info' => array(
+              'label' => 'Page redirect',
+              'module' => 'System',
+              'eval input' => array(
+                '0' => 'path',
+                '1' => 'query',
+                '2' => 'fragment',
+              ),
+            ),
+            '#name' => 'rules_action_drupal_goto',
             '#settings' => array(
-              'auto_save' => 1,
-              '#argument map' => array(
-                'node' => 'node',
+              'path' => '[node:ogalias]',
+              'query' => '',
+              'fragment' => '',
+              'force' => 1,
+              'immediate' => 0,
+              '#eval input' => array(
+                'token_rules_input_evaluator' => array(
+                  'path' => array(
+                    '0' => 'node',
+                  ),
+                ),
               ),
             ),
             '#type' => 'action',
