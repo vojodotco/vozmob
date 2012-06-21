@@ -1,5 +1,4 @@
 <?php
-// $Id: i18n.pages.inc,v 1.1.2.7 2010/06/01 14:15:16 jareyero Exp $
 
 /**
  * @file
@@ -27,9 +26,8 @@ function i18n_translation_node_overview($node) {
   }
 
   $header = array(t('Language'), t('Title'), t('Status'), t('Operations'));
-  $languages = language_list('enabled');
- 
-  foreach ($languages[1] as $language) {
+
+  foreach (language_list() as $language) {
     $options = array();
     $language_name = $language->name;
     // We may need to switch interface language for translations

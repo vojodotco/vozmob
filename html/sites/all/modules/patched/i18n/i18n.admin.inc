@@ -1,5 +1,4 @@
 <?php
-// $Id: i18n.admin.inc,v 1.2.2.8 2010/09/11 12:04:37 jareyero Exp $
 
 /**
  * @file
