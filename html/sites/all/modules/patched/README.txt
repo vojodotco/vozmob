@@ -1,0 +1,1 @@
+Modules in here are hosted on drupal.org, but needed to be patched.  If the path is accepted and rolled upstream, move the module to contrib.
