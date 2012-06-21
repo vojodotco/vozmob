@@ -106,6 +106,13 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
   // If user has authenticated and message was sent to a registration address.
   if ($node->uid && strcasecmp($sms_registration_address, $to_address) == 0) {
+    // Make sure we are looking at the plain text message.
+    foreach ($node->mimeparts as $mimepart) {
+      if ($mimepart->filemime == 'TEXT/PLAIN') {
+        $node->body = $mimepart->data;
+        break;
+      }
+    }
     $command = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $password = user_password(8);

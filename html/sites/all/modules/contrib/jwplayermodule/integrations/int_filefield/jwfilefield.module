@@ -1,0 +1,149 @@
+<?php
+
+module_load_include('inc', 'jwfilefield', 'jwfilefield_widget');
+
+function jwfilefield_theme() {
+  return array(
+    'jwfilefield_formatter_jwfilefield' => array(
+      'arguments' => array(
+        'element' => NULL
+      ),
+    ),
+    'jwfilefield_widget' => array(
+      'arguments' => array(
+        'element' => NULL
+      ),
+      'file' => 'jwfilefield_theme.inc',
+    ),
+    'jwfilefield_widget_item' => array(
+      'arguments' => array(
+        'element' => NULL
+      ),
+      'file' => 'jwfilefield_theme.inc',
+    )
+  );
+}
+
+function jwfilefield_field_formatter_info() {
+  return array(
+    'jwfilefield' => array(
+      'label' => t('JW Player'),
+      'field types' => array('filefield'),
+      'multiple values' => CONTENT_HANDLE_MODULE
+    ),
+  );
+}
+
+function theme_jwfilefield_formatter_jwfilefield($element) {
+  $configs = LongTailFramework::getConfigs();
+  if (array_key_exists("#item", $element)) {
+    if (empty($element['#item']['fid'])) {
+      return '';
+    }
+    $config = $configs[$element["#item"]["data"]["default_player"]];
+    $flash_vars = array(
+      "file" => $GLOBALS["base_url"] . "/" . $element['#item']['filepath']
+    );
+    $output = theme("jwplayermodule_render_player", $config, $flash_vars);
+  } else {
+    $delta = 0;
+    $items = array();
+    while (true) {
+      if (array_key_exists($delta, $element)) {
+        $items[] = $element[$delta];
+      } else {
+        break;
+      }
+      $delta++;
+    }
+    $config = $configs[$items[0]["#item"]["data"]["default_player"]];
+    $flash_vars = array(
+      "playlist" => jwfilefield_generate_playlist($items)
+    );
+    $output = theme("jwplayermodule_render_player", $config, $flash_vars);
+  }
+  return $output;
+}
+
+function jwfilefield_generate_playlist($items) {
+  $output = array();
+  foreach ($items as $item) {
+    $p_item = array();
+    $p_item["file"] = $GLOBALS["base_url"] . "/" . $item["#item"]["filepath"];
+    if (array_key_exists("duration", $item["#item"]["data"])) {
+      $p_item["duration"] = $item["#item"]["data"]["duration"];
+    }
+    $output[] = $p_item;
+  }
+  return $output;
+}
+
+function jwfilefield_widget_info() {
+  return array(
+    "jwfilefield_widget" => array(
+      "label" => "Custom Players",
+      "field types" => array('filefield'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_CUSTOM
+      ),
+      'description' => t('File upload widget with associated JW Player.'),
+      'file_extensions' => 'txt',
+    )
+  );
+}
+
+/**
+ * Implementation of hook_elements().
+ * @return array
+ */
+function jwfilefield_elements() {
+  $filefield_elements = module_invoke('filefield', 'elements');
+  $elements = array();
+  $elements['jwfilefield_widget'] = $filefield_elements['filefield_widget'];
+  $elements['jwfilefield_widget']['#process'][] = 'jwfilefield_widget_process';
+  $elements['jwfilefield_widget']['#value_callback'] = 'jwfilefield_widget_value';
+  return $elements;
+}
+
+function jwfilefield_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      return jwfilefield_widget_settings_form($widget);
+    case 'save':
+      return jwfilefield_widget_settings_save($widget);
+  }
+}
+
+function jwfilefield_widget(&$form, &$form_state, $field, $items, $delta = NULL) {
+  $jwfilefield = array(
+    "data" => array(
+      "default_player" => ""
+    )
+  );
+  $filefield = filefield_widget($form, $form_state, $field, $items, $delta);
+  $element = $filefield;
+  $element['#default_value'] = array_merge($jwfilefield, $filefield['#default_value']);
+  $element['#default_value']['data'] = array_merge($jwfilefield['data'], $filefield['#default_value']['data']);
+  return $element;
+}
+
+/**
+ * Implementation of CCK's hook_default_value().
+ * @param $form
+ * @param $form_state
+ * @param $field
+ * @param $delta
+ * @return array
+ */
+function jwfilefield_default_value(&$form, &$form_state, $field, $delta) {
+  return filefield_default_value($form, $form_state, $field, $delta);
+}
+
+/**
+ * filefield source support
+ * @return array
+ */
+function jwfilefield_filefield_sources_widgets() {
+  return array('jwfilefield_widget');
+}

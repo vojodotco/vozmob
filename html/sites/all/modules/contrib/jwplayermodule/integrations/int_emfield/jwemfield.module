@@ -1,0 +1,66 @@
+<?php
+
+module_load_include('inc', 'jwemfield', 'jwemfield_widget');
+
+function jwemfield_theme() {
+  return array(
+    'jwemfield_formatter_jwemfield' => array(
+      'arguments' => array(
+        'element' => NULL
+      )
+    )
+  );
+}
+
+function jwemfield_field_formatter_info() {
+  return array(
+    "jwemfield" => array(
+      "label" => t('JW Player'),
+      "field types" => array('emvideo'),
+      'multiple values' => CONTENT_HANDLE_MODULE
+    )
+  );
+}
+
+function theme_jwemfield_formatter_jwemfield($element) {
+  $configs = LongTailFramework::getConfigs();
+  if (array_key_exists("#item", $element)) {
+    $config = $configs[$element["#item"]["data"]["default_player"]];
+    $flash_vars = array(
+      "file" => $element['#item']['embed'],
+      "image" => $element["#item"]["thumbnail"]["url"]
+    );
+    $output = theme("jwplayermodule_render_player", $config, $flash_vars);
+  } else {
+    $delta = 0;
+    $items = array();
+    while (true) {
+      if (array_key_exists($delta, $element)) {
+        $items[] = $element[$delta];
+      } else {
+        break;
+      }
+      $delta++;
+    }
+    $config = $configs[$items[0]["#item"]["data"]["default_player"]];
+    $flash_vars = array(
+      "playlist" => jwemfield_generate_playlist($items)
+    );
+    $output = theme("jwplayermodule_render_player", $config, $flash_vars);
+  }
+  return $output;
+}
+
+function jwemfield_generate_playlist($items) {
+  $output = array();
+  foreach ($items as $item) {
+    $p_item = array();
+    $p_item["file"] = $item["#item"]["embed"];
+    $p_item["image"] = $item["#item"]["data"]["thumbnail"]["url"];
+    if (array_key_exists("duration", $item["#item"]["data"])) {
+      $p_item["duration"] = $item["#item"]["data"]["duration"];
+    }
+    $output[] = $p_item;
+  }
+  return $output;
+}
