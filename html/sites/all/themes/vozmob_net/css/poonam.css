@@ -33,6 +33,10 @@ margin: 0px;
 padding: 0px;
 }
 
+body.cke_show_borders {
+  background: none;
+}
+
 .container {
 width:967px;
 background-repeat:repeat-y;
