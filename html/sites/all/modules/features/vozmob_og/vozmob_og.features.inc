@@ -116,8 +116,8 @@ function vozmob_og_imagecache_default_presets() {
           'module' => 'imagecache',
           'action' => 'imagecache_scale',
           'data' => array(
-            'width' => '150',
-            'height' => '90',
+            'width' => '130',
+            'height' => '200',
             'upscale' => 0,
           ),
         ),

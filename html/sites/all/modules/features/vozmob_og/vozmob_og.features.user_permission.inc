@@ -42,8 +42,12 @@ function vozmob_og_user_default_permissions() {
   $permissions['send to group'] = array(
     'name' => 'send to group',
     'roles' => array(
-      '0' => 'group-admin blogger',
-      '1' => 'sysadmin',
+      '0' => 'anonymous user',
+      '1' => 'authenticated user',
+      '2' => 'blogger',
+      '3' => 'editor',
+      '4' => 'group-admin blogger',
+      '5' => 'sysadmin',
     ),
   );
 
