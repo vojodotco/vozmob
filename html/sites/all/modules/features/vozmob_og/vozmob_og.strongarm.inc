@@ -74,25 +74,25 @@ function vozmob_og_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'content_extra_weights_group';
   $strongarm->value = array(
-    'og_user_roles_default_role' => '5',
+    'og_user_roles_default_role' => '6',
     'title' => '-5',
-    'body_field' => '4',
-    'revision_information' => '12',
-    'author' => '13',
-    'options' => '14',
-    'comment_settings' => '16',
-    'language' => '2',
+    'body_field' => '-2',
+    'revision_information' => '11',
+    'author' => '12',
+    'options' => '13',
+    'comment_settings' => '15',
+    'language' => '-4',
     'translation' => '18',
-    'menu' => '-1',
+    'menu' => '3',
     'path' => '19',
     'attachments' => '17',
-    'flag' => '9',
-    'og_description' => '-4',
-    'og_selective' => '3',
-    'og_register' => '1',
-    'og_directory' => '6',
-    'og_language' => '8',
-    'print' => '15',
+    'flag' => '8',
+    'og_description' => '-3',
+    'og_selective' => '5',
+    'og_register' => '4',
+    'og_directory' => '7',
+    'og_language' => '2',
+    'print' => '14',
   );
   $export['content_extra_weights_group'] = $strongarm;
 
@@ -118,7 +118,10 @@ function vozmob_og_strongarm() {
   $strongarm->name = 'og_admin_email_body';
   $strongarm->value = '@body
 
+
+
 --
+
 This message was sent by an administrator in the \'@group\' group at @site. To visit this group, browse to !url_group. To unsubscribe from this group, visit !url_unsubscribe';
   $export['og_admin_email_body'] = $strongarm;
 
@@ -205,9 +208,14 @@ This message was sent by an administrator in the \'@group\' group at @site. To v
   $strongarm->name = 'og_invite_user_body';
   $strongarm->value = 'Hi. I\'m a member of \'@group\' and I welcome you to join this group as well. Please see the link and message below.
 
+
+
 @group
+
 @description
+
 Join: !group_url
+
 @body';
   $export['og_invite_user_body'] = $strongarm;
 
@@ -231,7 +239,10 @@ Join: !group_url
   $strongarm->name = 'og_new_admin_body';
   $strongarm->value = '@username, you are now an administrator for the group \'@group\'.
 
+
+
 You can administer this group by logging in here:
+
  !group_url';
   $export['og_new_admin_body'] = $strongarm;
 
@@ -248,13 +259,22 @@ You can administer this group by logging in here:
   $strongarm->name = 'og_new_node_body';
   $strongarm->value = '@type \'@subject\' by @username
 
+
+
 @node_teaser
 
+
+
 !read_more: !content_url
+
 Post reply: !reply_url
 
+
+
 --
+
 You are subscribed from the group \'@group\' at @site.
+
 To manage your subscription, visit !group_url';
   $export['og_new_node_body'] = $strongarm;
 
@@ -277,10 +297,16 @@ To manage your subscription, visit !group_url';
   $strongarm->api_version = 1;
   $strongarm->name = 'og_request_user_body';
   $strongarm->value = 'To instantly approve this request, visit !approve_url.
+
 You may deny this request or manage members at !group_url. 
 
+
+
 Personal message from @username:
+
 ------------------
+
+
 
 @request';
   $export['og_request_user_body'] = $strongarm;

@@ -15,6 +15,45 @@ function vozmob_og_ctools_plugin_api() {
  */
 function vozmob_og_flag_default_flags() {
   $flags = array();
+  // Exported flag: "Member To Post Group".
+  $flags['member_to_post_group'] = array(
+    'content_type' => 'node',
+    'title' => 'Member To Post Group',
+    'global' => '1',
+    'types' => array(
+      '0' => 'group',
+    ),
+    'flag_short' => 'Make this a group where only members can submit stories (on the web)',
+    'flag_long' => 'If this is unchecked, then anyone can contribute stories to this group via the web',
+    'flag_message' => '',
+    'unflag_short' => 'Make this a group where only members can submit stories (on the web)',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'link_type' => 'toggle',
+    'roles' => array(
+      'flag' => array(
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
+      ),
+      'unflag' => array(
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
+      ),
+    ),
+    'show_on_page' => 0,
+    'show_on_teaser' => 0,
+    'show_on_form' => 1,
+    'access_author' => '',
+    'i18n' => 0,
+    'api_version' => 2,
+    'module' => 'vozmob_og',
+    'locked' => array(
+      '0' => 'name',
+    ),
+  );
   // Exported flag: "Requires moderation".
   $flags['moderate_node'] = array(
     'content_type' => 'node',
@@ -59,7 +98,7 @@ function vozmob_og_flag_default_flags() {
       '0' => 'group',
     ),
     'flag_short' => 'Make this a moderated group',
-    'flag_long' => '',
+    'flag_long' => 'When checked, all stories will need to be approved before being made public',
     'flag_message' => '',
     'unflag_short' => 'Make this an unmoderated group',
     'unflag_long' => '',
@@ -68,10 +107,14 @@ function vozmob_og_flag_default_flags() {
     'link_type' => 'toggle',
     'roles' => array(
       'flag' => array(
-        '0' => '2',
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
       ),
       'unflag' => array(
-        '0' => '2',
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
       ),
     ),
     'show_on_page' => 0,
@@ -116,8 +159,8 @@ function vozmob_og_imagecache_default_presets() {
           'module' => 'imagecache',
           'action' => 'imagecache_scale',
           'data' => array(
-            'width' => '150',
-            'height' => '90',
+            'width' => '130',
+            'height' => '200',
             'upscale' => 0,
           ),
         ),

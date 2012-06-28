@@ -50,7 +50,7 @@ function vozmob_og_fieldgroup_default_groups() {
         'label' => 'above',
       ),
     ),
-    'weight' => '10',
+    'weight' => '7',
     'fields' => array(
       '0' => 'field_voipnode_adesc',
       '1' => 'field_voipnode_agreet',
