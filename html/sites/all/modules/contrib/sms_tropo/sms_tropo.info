@@ -1,0 +1,15 @@
+; $Id$
+name = "Tropo"
+description = "Allows the SMS Framework to use Tropo as a gateway. Tropo supports SMS, IM (AIM, Yahoo, MSN, GTalk, Jabber), as well as phone calls."
+package = SMS Framework
+dependencies[] = sms
+dependencies[] = token
+dependencies[] = notifications
+dependencies[] = messaging
+core = 6.x
+; Information added by drupal.org packaging script on 2011-04-11
+version = "6.x-1.1"
+core = "6.x"
+project = "sms_tropo"
+datestamp = "1302544316"
+
