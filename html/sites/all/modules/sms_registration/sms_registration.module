@@ -57,6 +57,9 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // and also logs out the user. so is not compatible.
   //sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
 
+  $password = user_password(8);
+  $new_user = false;
+
   // If the user was not authenticated via user account email address.
   if (!$node->uid) {
     // Look up the user by phone number.
@@ -68,8 +71,9 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
     // If message is from an SMS/MMS gateway, create a user account.
     if (!$node->uid) {
+      $new_user = true;
       $user = FALSE;
-      $password = user_password(8);
+      
       while (!$user) {
         $user = user_save(NULL, array(
           'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
@@ -82,6 +86,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
           'access' => time(),
         ));
       }
+      
       $node->uid = $user->uid;
       $node->name = $user->name;
       mailhandler_switch_user($node->uid);
@@ -124,6 +129,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
     $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
 
+    // figure out if this is username or email (based on admin setting)
     if (variable_get('sms_registration_request_user', 'name') == 'name') {
       $save['name'] = $info;
     }
@@ -133,13 +139,26 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       }
     }
 
+    // if this is a the first sms and it was sent to the registrar directly, we need a pswd for the user
+    if ($new_user) {
+      $save['pass'] = $password;
+    }
+
     $user = user_save($account, $save);
 
     if ($user) {
-      $message = t('Welcome, !name. We created a blog for you.', array('!name' => $info));
-    }
-    else {
+      if ($new_user) {
+        // first sms right to registrar address
+        $message = t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
+          array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
+      } else {
+        // this is and existing user account, so we changed their name
+        $message = t('We changed your !server_url username to !name', 
+          array('!name' => $info, '!server_url'=>variable_get('site_name', 'the site') ) );
+      }
+    } else {
       $message = t('The blog was not created. Please choose another name.');
+      watchdog('sms_reg', 'Failed [user=%name, new_user=%new_user, from=%number]', array('%name'=> $user->name, '%number'=>$number, '%new_user'=>$new_user));
     }
     $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
     sms_send($number, $message, $options);
