@@ -69,10 +69,11 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     // If message is from an SMS/MMS gateway, create a user account.
     if (!$node->uid) {
       $user = FALSE;
+      $password = user_password(8);
       while (!$user) {
         $user = user_save(NULL, array(
           'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
-          'pass' => user_password(8),
+          'pass' => $password,
           'mail' => $from_address,
           'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
           'status' => 1,
@@ -87,10 +88,12 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
       if (strcasecmp($sms_registration_address, $to_address) != 0) {
         if (variable_get('sms_registration_request_user', 'name') == 'name') {
-          $message = t('Thanks! Do you want to have a blog on !site_name? If yes please send one word identifying the blog.', array('!site_name' => variable_get('site_name', 'Drupal')));
+          $message = t('Welcome, thanks for the story! Your username is !name, password is !pass.  You can login to !server_url on the web with this info. To change your username, reply to this msg w/the name you want!',
+             array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
         }
         elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
-          $message = t('Thanks! To submit your content to !site_name, please reply with your valid e-mail address.', array('!site_name' => variable_get('site_name', 'Drupal')));
+          $message = t('Welcome, thanks for the story! Your username is !name, password is !pass.  You can login to !server_url on the web with this info. To submit your content, please reply with your email address!',
+             array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
         }
         if (isset($message)) {
           $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
@@ -113,28 +116,27 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
         break;
       }
     }
-    $command = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
+    $info = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
-    $password = user_password(8);
     if (empty($account)) {
       $account = user_load(array('uid' => $node->uid, 'status' => 1));
     }
 
-    $save = array('pass' => $password, 'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
+    $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
 
     if (variable_get('sms_registration_request_user', 'name') == 'name') {
-      $save['name'] = $command;
+      $save['name'] = $info;
     }
     elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
-      if (valid_email_address($command)) {
-        $save['mail'] = $command;
+      if (valid_email_address($info)) {
+        $save['mail'] = $info;
       }
     }
 
     $user = user_save($account, $save);
 
     if ($user) {
-      $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $command, '!pass' => $password));
+      $message = t('Welcome, !name. We created a blog for you.', array('!name' => $info));
     }
     else {
       $message = t('The blog was not created. Please choose another name.');
