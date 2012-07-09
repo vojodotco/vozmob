@@ -88,11 +88,11 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
       if (strcasecmp($sms_registration_address, $to_address) != 0) {
         if (variable_get('sms_registration_request_user', 'name') == 'name') {
-          $message = t('Welcome, thanks for the story! Your username is !name, password is !pass.  You can login to !server_url on the web with this info. To change your username, reply to this msg w/the name you want!',
+          $message = t('Welcome to !server_url ! Your username is !name, password is !pass. To change your username, reply to this msg w/the name you want!',
              array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
         }
         elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
-          $message = t('Welcome, thanks for the story! Your username is !name, password is !pass.  You can login to !server_url on the web with this info. To submit your content, please reply with your email address!',
+          $message = t('Welcome to !server_url. Your username is !name, password is !pass. To submit your content, please reply with your email address!',
              array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
         }
         if (isset($message)) {
