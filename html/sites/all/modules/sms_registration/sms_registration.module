@@ -17,11 +17,18 @@ function sms_registration_menu() {
 }
 
 /**
+ * Public API to fetch the registrar's email address
+ */
+function sms_registration_get_address(){
+    return variable_get('sms_registration_address', '');
+}
+
+/**
  * Implementation of hook_mail_alter().
  */
 function sms_registration_mail_alter(&$message) {
   if (isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
-    $message['headers']['Return-Path'] = variable_get('sms_registration_address', '');
+    $message['headers']['Return-Path'] = sms_registration_get_address();
   }
 }
 
@@ -44,7 +51,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
   $providers = sms_carriers();
   $to_address = $header->to[0]->mailbox . '@' . $header->to[0]->host;
-  $sms_registration_address = variable_get('sms_registration_address', '');
+  $sms_registration_address = sms_registration_get_address();
   $number = $from[0];
 
   // If the message is not from SMS gateway, stop processing.
@@ -148,15 +155,16 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
     if ($user) {
       if ($new_user) {
-        // first sms right to registrar address
+        // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
         $message = t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
           array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
       } else {
-        // this is and existing user account, so we changed their name
+        // this is an existing user account, so we're changing their username
         $message = t('We changed your !server_url username to !name', 
           array('!name' => $info, '!server_url'=>variable_get('site_name', 'the site') ) );
       }
     } else {
+      // the save failed - report error and log it
       $message = t('The blog was not created. Please choose another name.');
       watchdog('sms_reg', 'Failed [user=%name, new_user=%new_user, from=%number]', array('%name'=> $user->name, '%number'=>$number, '%new_user'=>$new_user));
     }
