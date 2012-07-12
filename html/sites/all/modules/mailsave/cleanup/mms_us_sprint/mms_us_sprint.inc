@@ -12,26 +12,30 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     //watchdog('mailsave', 'Got email from Sprint');
 
-    $text_attachment_filename = null;
+    $text_attachment_filenames = array();
 
+    $text_content = "";
     // find the "textplain_X.txt" attachement and use it for the body
     foreach ($node->mimeparts as $key => $mimepart) {
       //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
       if(substr($mimepart->filename,0,9)=="textplain") {
         //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
-        $node->body = $mimepart->data;
-        $node->teaser = node_teaser($node->body);
-        $node->title = substr($node->body,0,20);    // totally arbitrary title length
-        $text_attachment_filename = $mimepart->filename;
+        $text_content .= $mimepart->data;
+        $text_attachment_filenames[] = $mimepart->filename;
       }
     }
     //watchdog('mailsave', 'last = '.$temp);
 
+    // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
+    $node->body = $text_content;
+    $node->teaser = node_teaser($node->body);
+    $node->title = substr($node->body,0,20);    // totally arbitrary title length
+
     // remove the "textplain_X.txt" attachement since we used if for the body
-    if ($text_attachement_filename!=null) {
+    foreach($text_attachment_filenames as $filename) {
       //unset($node->mailsave_attachments[$text_attachment_key]);
-      mailsave_discard_attachment($node, $text_attachment_filename);
+      mailsave_discard_attachment($node, $filename);
     }
 
   }
