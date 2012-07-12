@@ -7,7 +7,7 @@ function vozmob_og_fieldgroup_default_groups() {
   $groups = array();
 
   // Exported group: group_voipnode_settings
-  $groups['group-group_blog_publishing_options'] = array(
+  $groups['blog-group_blog_publishing_options'] = array(
     'group_type' => 'standard',
     'type_name' => 'blog',
     'group_name' => 'group_blog_publishing_options',
