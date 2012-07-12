@@ -1,145 +1,41 @@
 <?php
-// $Id$
-
-/**
- * @file
- * Cleanup messages received from sprint.
- */
-
-
-/**
- * callback function to for extracting name/value pairs from html input attributes
- */
-
-function mms_us_sprint_build_zip_get($item, $key, &$zip_get) {
-    //we're building the mms_us_sprint_get array.
-    // $key is the input element's name attribute
-    // $value is the input element's value attribute
-    //ideally we would use preg_filter to extract the useful name/value pairs but it's a new php feature so not everywhere
-
-    $key = preg_replace('!(.+)(name=")(.*?)(".*)(>?)(.*)!',"\\3\n", $item);
-    $value = preg_replace('!(.+)(value=")(.*?)(".*)(>?)(.*)!',"\\3\n", $item);
-    //only add key/value to the mms_us_sprint_get if preg_replace extracted some value
-    if(strcmp($value, $item))
-        $zip_get[] = trim($key).'='.trim($value);
-}
-
-
 
 /**
  * Implementation of hook_mailsave_clean().
+ * The new sprint messages look like they have everything attached inline, which is great 
+ * (no more cloud-CDN!). The email body is HTML, and doesn't actually contain the text 
+ * content of the mms - that is in an attachment called "textplain_X.txt".
  */
 function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-// Check if this message was from sprint
-  if (preg_match('!@pm.sprint.com.?$!i', $header->fromaddress)) {
-    if (preg_match('!(http://pictures\.sprintpcs\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
-      // extract the voice memo url
-      $url = preg_replace('!(.+)href="(.+)">Play Voice Memo</a>(.+)!i', '\\2', preg_replace('!\n!','',$node->body));
-      // create mailsave_attachments array, used for voice .wav then for zipped media files
-      $node->mailsave_attachments = array();
-      // fetch and save voice memo if url is found
-      if(preg_match('!^http(.+)!', $url)) {
-        $attachments = drupal_http_request($url, array('User-Agent' => 'Wget/1.11.2'));
-        $temp_file = tempnam(file_directory_temp(), 'sprint');
-        $filepath = file_save_data($attachments->data, $temp_file);
-        $path_parts = pathinfo($filepath);
-	$filesize = filesize($filepath);
-        $filename = md5(uniqid(mt_rand(), TRUE)) . '.wav'; // . $path_parts['extension'];
-        $node->mailsave_attachments[] = array(
-          'filename' => _mailsave_sanitise_filename($filename),
-          'filepath' => $filepath,
-          'filemime' => 'audio/x-wav',
-          'filesize' => $filesize,
-        );
-      }
-      // replace & entity
-      $url = preg_replace('/&amp;/i', '&', $matches[1]);
-      // Sprint sends HTTP 500 error if user agent is PHP, so we use wget :)
-      $message_view = drupal_http_request($url, array('User-Agent'=>'Wget/1.11.2'));
-      // break up the page by form delimiter so we can toss any other forms & nested preg_replace to get rid of newlines
-      $forms_exploded = preg_split("!<form !i",
-                                   preg_replace("!\n!", "", $message_view->data));
-      // preg_grep returns only the array elements which contain the form name (listForm), so we toss any other forms, then implode the remaining element back into a string
-      $scraped_form = implode('', preg_grep("!listForm!", $forms_exploded));
-      // Get the message subject.
-      if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
-        $node->title = $matches[1];
-      }
+  $pattern = '!@pm.sprint.com.?$!i';
+  if (preg_match($pattern, $header->fromaddress)) {
 
-      // Get invite ID.
-      strtok($url, '=');
-      $invite = strtok('&');
+    //watchdog('mailsave', 'Got email from Sprint');
 
-      //set the node body to the mms message body
-      $node->body = preg_replace('!(.+)<pre id="guestTxtMemoDisplayId" class="guestTxtMemoDisplay">(.+)</pre>(.+)!i', '\\2', $scraped_form);
+    $text_attachment_filename = null;
 
-      // Get the caption / additional text. (where are multiple captions stored?)
-      $json = drupal_http_request('http://pictures.sprintpcs.com/ui-refresh/guest/getMessageContainerJSON.do%3FcomponentType%3DmediaDetail&sortCode=17&count=10&invite=' . $invite . '&externalMessageId=' . $invite . '&folderFullName=null&isDRMProtected=false&drm=false&shareName=MMS&offset=0&cp=cp');
-      $message_object = json_decode($json->data);
-
-      $number = sms_formatter($message_object->from);
-      if (($fromheader = strtolower($mailbox['fromheader'])) && isset($header->$fromheader)) {
-        $header->$fromheader[0]->mailbox = $number;
-      }
-      else {
-        $header->from[0]->mailbox = $number;
-      }
-      sms_registration_mailhandler($node, $result, $i, $header, $mailbox);
-
-      if ($node->title == 'New Message') {
-        $node->title = truncate_utf8($message_object->Results[0]->description, 60, TRUE, TRUE);
-      }
-      $node->body .= '<p>' . $message_object->Results[0]->description . '</p>';
-
-      $node->teaser = node_teaser($node->body);
-      // build an array of input elements to form get string to pull zip file
-      //$input_element_array = preg_split("!<(input )|<(select )!i", $scraped_form);
-      //$zip_get = array();
-      // the call back function will extract the first name/value pairs and build the mms_us_sprint_get array
-      //array_walk($input_element_array, 'mms_us_sprint_build_zip_get', &$zip_get);
-      // implode the mms_us_sprint_get into a formatted GET string
-      //$url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . implode('&',$zip_get);
-      // @fixme: This code only supports downloading up to 10 items. Have to add more elementID parameters to download more.
-      $url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . 'externalMessageId=' . $invite . '&messageId=' . $invite . '&shareType=MultiPictures&fileName=Sprintpictures&invite='
-        . $invite . '&elementID2=2&elementID3=3&elementID4=4&elementID5=5&elementID6=6&elementID7=7&elementID8=8&elementID9=9&elementID10=10&elementID11=11';
-      // Retrieve the ZIP file, currently by reading the entire file into a variable!
-      // Use a working user agent header.
-      $attachments = drupal_http_request($url, array('User-Agent' => 'Wget/1.11.2'));
-      $temp_file = tempnam(file_directory_temp(), 'sprint');
-      $filepath = file_save_data($attachments->data, $temp_file);
-      $zip = zip_open($filepath);
-      if (is_resource($zip)) {
-//        $node->mailsave_attachments = array();
-        while ($zip_entry = zip_read($zip)) {
-          watchdog('mms_us_sprint', 'zip_entry: ' . check_plain(print_r(zip_entry_name($zip_entry), TRUE)), NULL);
-          if (zip_entry_open($zip, $zip_entry)) {
-            // File name is just a digit, so generate a more unique file name.
-            $path_parts = pathinfo(zip_entry_name($zip_entry));
-            $filename = md5(uniqid(mt_rand(), TRUE)) . '.' . $path_parts['extension'];
-            $filesize = zip_entry_filesize($zip_entry);
-            // Save the data to temporary file
-            $temp_file = tempnam(file_directory_temp(), 'mail');
-            $filepath = file_save_data(zip_entry_read($zip_entry, $filesize), $temp_file);
-            // Add the file to the attachments array, and sanitise filename.
-            $node->mailsave_attachments[] = array(
-              'filename' => _mailsave_sanitise_filename($filename),
-              'filepath' => $filepath,
-              'filemime' => file_get_mimetype($filename),
-              'filesize' => $filesize,
-            );
-            zip_entry_close($zip_entry);
-          }
-        }
-        zip_close($zip);
-      }
-      else {
-        watchdog('mms_us_sprint', 'zip is not a resource');
+    // find the "textplain_X.txt" attachement and use it for the body
+    foreach ($node->mimeparts as $key => $mimepart) {
+      //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+      $temp = serialize($mimepart);
+      if(substr($mimepart->filename,0,9)=="textplain") {
+        //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
+        $node->body = $mimepart->data;
+        $node->teaser = node_teaser($node->body);
+        $node->title = substr($node->body,0,20);    // totally arbitrary title length
+        $text_attachment_filename = $mimepart->filename;
       }
     }
-    else {
-      watchdog('mms_us_sprint', 'WTF, THERE IS NO LINKS??!?');
+    //watchdog('mailsave', 'last = '.$temp);
+
+    // remove the "textplain_X.txt" attachement since we used if for the body
+    if ($text_attachement_filename!=null) {
+      //unset($node->mailsave_attachments[$text_attachment_key]);
+      mailsave_discard_attachment($node, $text_attachment_filename);
     }
+
   }
+
 }
 
 /**
@@ -149,7 +45,7 @@ function mms_us_sprint_mailsave_clean_info() {
   $items['mms_us_sprint'] = array(
     'provider'    => t('Sprint'),
     'country'     => 'US',
-    'author'      => 'Josh Haglund',
+    'author'      => 'Rahul Bhargava',
     'description' => t('Clean up MMS messages sent via the Sprint US network.'),
   );
   return $items;
