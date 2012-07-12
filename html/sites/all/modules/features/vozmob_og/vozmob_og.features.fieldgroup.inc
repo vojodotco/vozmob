@@ -6,7 +6,7 @@
 function vozmob_og_fieldgroup_default_groups() {
   $groups = array();
 
-  // Exported group: group_voipnode_settings
+  // Exported group: group_blog_publishing_options
   $groups['blog-group_blog_publishing_options'] = array(
     'group_type' => 'standard',
     'type_name' => 'blog',
@@ -98,8 +98,9 @@ function vozmob_og_fieldgroup_default_groups() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Publishing options');
   t('Custom Phone Audio');
+  t('Promote story');
+  t('VoIP Extension Settings');
 
   return $groups;
 }
