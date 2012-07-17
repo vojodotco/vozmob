@@ -30,7 +30,7 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
     $node->body = $text_content;
     $node->teaser = node_teaser($node->body);
-    $node->title = substr($node->body,0,20);    // totally arbitrary title length
+    $node->title = substr($node->body,0,60);    // title length is based on experience
 
     // remove the "textplain_X.txt" attachement since we used if for the body
     foreach($text_attachment_filenames as $filename) {
