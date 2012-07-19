@@ -61,8 +61,6 @@ function vozmob_og_fieldgroup_default_groups() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Custom Phone Audio');
-  t('Promote story');
-  t('VoIP Extension Settings');
 
   return $groups;
 }
