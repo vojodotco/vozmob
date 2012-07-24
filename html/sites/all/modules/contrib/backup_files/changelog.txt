@@ -1,0 +1,10 @@
+DRUPAL-6--1-1
+=============
+Allow user to control the location of PEAR.php and Tar.php if not found in expected locations.
+Checks to see that PEAR.php and Tar.php have been found - does not permit backup if not found.
+If the system temp directory is in the system file directory - does not backup the backup file (!!) 
+Bug when obtaining system name fixed
+
+DRUPAL-6--1-0
+=============
+Initial build
