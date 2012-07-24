@@ -6,26 +6,21 @@
  * Cleanup messages received from credo.
  */
 
-/**
- * Implementation of hook_mailsave_clean().
- */
 function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  //watchdog('mailsave','Enter credo');
   $pattern = '!@waw.plspictures.com.?$!i';
   if (preg_match($pattern, $header->fromaddress)) {
 
     //watchdog('mailsave', 'Got email from Credo');
-
-    $text_attachment_filenames = array();
 
     $text_content = "";
     // find the "textplain_X.txt" attachement and use it for the body
     foreach ($node->mimeparts as $key => $mimepart) {
       //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
-      if(substr($mimepart->filename,0,9)=="textplain") {
+      if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
         //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
         $text_content .= $mimepart->data;
-        $text_attachment_filenames[] = $mimepart->filename;
       }
     }
     //watchdog('mailsave', 'last = '.$temp);
@@ -34,12 +29,6 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $node->body = $text_content;
     $node->teaser = node_teaser($node->body);
     $node->title = substr($node->body,0,60);    // title length is based on experience
-
-    // remove the "textplain_X.txt" attachement since we used if for the body
-    foreach($text_attachment_filenames as $filename) {
-      //unset($node->mailsave_attachments[$text_attachment_key]);
-      mailsave_discard_attachment($node, $filename);
-    }
 
   }
 
