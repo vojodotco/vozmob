@@ -6,25 +6,25 @@
  */
 function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
-  watchdog('mailsave','Enter metropcs');
+  //watchdog('mailsave','Enter metropcs');
 
   // Build regex to see if this was from MetroPCS.
   $pattern = '@mymetropcs\.com$@';
   if (preg_match($pattern, $header->fromaddress)) {
 
-    watchdog('mailsave', 'Got email from MetroPCS');
+    //watchdog('mailsave', 'Got email from MetroPCS');
 
     $text_content = "";
-    // find the "textplain_X.txt" attachement and use it for the body
+    // find the plain text attachements and stich them together as the body
     foreach ($node->mimeparts as $key => $mimepart) {
-      watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+      //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
       if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
-        watchdog('mailsave', "    replaced body (".$mimepart->data.")");
+        //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
         $text_content .= $mimepart->data;
       }
     }
-    watchdog('mailsave', 'last = '.$temp);
+    //watchdog('mailsave', 'last = '.$temp);
 
     // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
     $node->body = $text_content;

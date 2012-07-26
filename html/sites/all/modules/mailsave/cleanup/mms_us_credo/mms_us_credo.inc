@@ -14,7 +14,7 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //watchdog('mailsave', 'Got email from Credo');
 
     $text_content = "";
-    // find the "textplain_X.txt" attachement and use it for the body
+    // find the plain text attachements and stich them together as the body
     foreach ($node->mimeparts as $key => $mimepart) {
       //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
