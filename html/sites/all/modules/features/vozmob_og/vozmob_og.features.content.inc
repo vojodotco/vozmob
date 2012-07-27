@@ -71,7 +71,7 @@ function vozmob_og_content_default_fields() {
       'use_default_image' => 0,
       'rotate' => 0,
       'label' => 'Group logo',
-      'weight' => '-3',
+      'weight' => '-1',
       'description' => 'Please upload a logo or image for your group! Your image will be resized if over 700px by 200px, so that it fits within the website header. ',
       'type' => 'imagefield_widget',
       'module' => 'imagefield',
@@ -310,9 +310,9 @@ function vozmob_og_content_default_fields() {
         ),
       ),
       'default_value_php' => NULL,
-      'label' => 'E-mail address',
-      'weight' => '10',
-      'description' => '',
+      'label' => 'Group posting address',
+      'weight' => '9',
+      'description' => 'This is the address that group members will send their stories to (via sms or MMS/picture messaging). Leave this field blank and it will automatically be created for you based on your Group\'s name.',
       'type' => 'mail2og_emailfield',
       'module' => 'mail2og',
     ),
@@ -323,8 +323,8 @@ function vozmob_og_content_default_fields() {
   t('"Menu" Audio for Phone Calls');
   t('"More Info" Audio for Phone Calls');
   t('"Name" Audio for Phone Calls');
-  t('E-mail address');
   t('Group logo');
+  t('Group posting address');
 
   return $fields;
 }

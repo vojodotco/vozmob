@@ -1,18 +1,14 @@
 <?php
-// $Id: mms_us_metropcs.inc,v 1.2 2007/10/28 13:36:08 stuartgreenfield Exp $
 
 /**
- * Implementation of hook_mailsave_clean().
+ * Cleanup messages received from Element Mobile.
  */
-function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-
-  //watchdog('mailsave','Enter metropcs');
-
-  // Build regex to see if this was from MetroPCS.
-  $pattern = '@mymetropcs\.com$@';
+function mms_us_elementmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  //watchdog('mailsave','Enter element mobile');
+  $pattern = '!@mms.elementmobile.net.?$!i';
   if (preg_match($pattern, $header->fromaddress)) {
 
-    //watchdog('mailsave', 'Got email from MetroPCS');
+    //watchdog('mailsave', 'Got email from Element Mobile');
 
     $text_content = "";
     // find the plain text attachements and stich them together as the body
@@ -21,7 +17,7 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
       $temp = serialize($mimepart);
       if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
         //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
-        $text_content .= $mimepart->data;
+        $text_content .= str_replace("Message:","",$mimepart->data);
       }
     }
     //watchdog('mailsave', 'last = '.$temp);
@@ -35,16 +31,15 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
 
 }
 
-
 /**
  * Report back module information when requested
  */
-function mms_us_metropcs_mailsave_clean_info() {
-  $items['mms_us_metropcs'] = array(
-    'provider'    => t('MetroPCS'),
+function mms_us_credo_mailsave_clean_info() {
+  $items['mms_us_credo'] = array(
+    'provider'    => t('Element Mobile'),
     'country'     => 'US',
     'author'      => 'Rahul Bhargava',
-    'description' => t('Clean up MMS messages sent via the MetroPCS US network.'),
+    'description' => t('Clean up MMS messages sent via the Element Mobile US network.'),
   );
   return $items;
 }
