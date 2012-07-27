@@ -2,7 +2,7 @@ mailsave to audio
 -----------------
 THIS MODULE IS BETA
 
-Mailsave to image is an extension for mailsave that works with audio.module.
+Mailsave to audio is an extension for mailsave that works with audio.module.
 When activated, and if the user has "convert to audio node" privileges then
 the first mp3 in an email will cause the node to be converted to an audio
 node. At this time the title is taken from the body text, rather than the
