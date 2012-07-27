@@ -34,8 +34,8 @@ function mms_us_elementmobile_mailsave_clean(&$node, $result, $i, $header, $mail
 /**
  * Report back module information when requested
  */
-function mms_us_credo_mailsave_clean_info() {
-  $items['mms_us_credo'] = array(
+function mms_us_elementmobile_mailsave_clean_info() {
+  $items['mms_us_elementmobile'] = array(
     'provider'    => t('Element Mobile'),
     'country'     => 'US',
     'author'      => 'Rahul Bhargava',
