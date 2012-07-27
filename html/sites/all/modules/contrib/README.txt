@@ -1,10 +1,17 @@
 Modules in here are hosted on drupal.org.  All the modules in sites/all/modules/ will be moved in here eventually.  If you patch a module in here, move it to the ../patched/ dir!
 
-adminrole: Used to maintain an automated "admin" role that gets all privileges, even when you add new modules.
+adminrole: Maintain an automated "admin" role that gets all privileges, even when you add new modules.
 
-audiofield: Used to save in-browser recordings into a CCK field.
+audiofield: Save audio recordings into a CCK field.
 
-audiorecorderfield: Used to save in-browser recordings into a CCK field.
+audiorecorderfield: Save in-browser recordings into a CCK field.
 
-auto_nodetitle: Used to name new nodes that don't have titles automatically.
+auto_nodetitle: Name new nodes that don't have titles automatically.
+
+? backup_files: Create backups of the files directory
+
+backup_migrate: Scheduled backups locally and to Amazon S3.
+
+captcha: Stop spam on web signup and web anonymous story submission.
+
 
