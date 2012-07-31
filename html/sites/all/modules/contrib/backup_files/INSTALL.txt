@@ -1,0 +1,21 @@
+This module is intended to provide an easy way to back up any user-uploaded files in your Drupal site.
+
+This module does NOT back up the database - for this you need the backup_migrate module.
+
+So, with a combination of this module and the backup_migrate module you should have a fairly secure Drupal installation.  Note: this module is not intended to back up all the files in the Drupal installation, just the site's "files" directory, which should contain all new and changed files.
+
+INSTALLATION
+============
+Extract the module files and install them in {basepath}/sites/all/modules
+
+The installation contains a copy of Tar.php, downloaded from PHP.  (It's possible that this file gets removed from the distibution due to licensing issues - if this happens you can download it from http://pear.php.net/package/archive_tar.)
+
+The module also depends on the PEAR.php, which needs to be in your php installation.  If PEAR.php is not part of your php installation you could download it from http://pear.php.net/package/PEAR and install it in the module directory.
+
+The module also uses zlib or bz2 (though them should still work without but will not compress files).
+
+RESTORING FILES
+===============
+There is no facility in this module to restore files.  The procedure for restoring is, therefore:
+ - unzip the files needed from the backup archive
+ - upload them to the server using an ftp client (or perhaps the file manager in the IMCE module)

@@ -1,0 +1,229 @@
+<?php
+
+/**
+* Implementation of hook_perm
+*/
+function backup_files_perm() {
+   return array(
+      'use backup_files',
+   );
+}
+
+/**
+* Implementation of hook_menu
+*/
+function backup_files_menu() {
+  $items = array();
+
+  $items['admin/content/backup_files'] = array(
+    'title'              => t('Backup files'),
+    'description'        => t('Configure and perform file backups'),
+    'access callback'    => 'user_access',
+    'access arguments'   => array('use backup_files'),
+    'page callback'      => 'drupal_get_form',
+    'page arguments'     => array('backup_files_main'),
+    'type'               => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function backup_files_main() {
+   // get the file paths
+   $path = drupal_get_path('module', 'backup_files'); // module path
+   $sfp = variable_get('file_directory_path', ''); // system default file path
+   $fp = variable_get('file_backup_path', $sfp); // paths to back up
+   $pp = variable_get('file_backup_pear_path', ''); // path to PEAR.php package
+   $tp = variable_get('file_backup_tar_path', $path); // path to Tar.php
+   $ip = get_include_path(); // system include path
+
+   backup_files_set_include_paths();
+      
+   // build the form
+   $form = array();
+   $form['file_list'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Directories to back up'),
+      '#description' => t('List the paths of the directories which are to be backed up.  Put each path on a separate line.'),
+      '#default_value' => $fp
+   );
+
+   // check for PEAR.php and Tar.php
+   $pear = @include 'PEAR.php';
+   $tar = false;
+   $tar_s = '';
+   if ($pear) {
+      $tar = @include 'Tar.php';
+      $tar_s = $tar ? 'OK' : '!!! Tar.php not found';
+   }
+   $pear_s = $pear ? 'OK' : '!!! PEAR.php not found';
+
+   $form['paths'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Paths to required modules'),
+      '#collapsible' => true,
+      '#collapsed' => ($pear && $tar),
+   );
+   
+   $form['paths']['pear_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Path to PEAR.php'),
+      '#description' => t("This module requires the pear package to be installed on your system.  If PEAR.php has not been found in your system's default include path (%ip), you can specify its location here.  If necessary you can download the package from http://pear.php.net/package/PEAR, install it in your file system (perhaps as a subdirectory to this module) and specify its path here.", array('%ip'=>$ip)),
+      '#default_value' => $pp,
+      '#field_suffix' => $pear_s,
+   );
+
+   $form['paths']['tar_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Path to Tar.php'),
+      '#description' => t("This module requires Tar.php from the Achive_Tar package - this should already be included.  If Tar.php has not been found in the expected location, you can specify its location here.  If necessary you can download the package from http://pear.php.net/package/archive_tar, install it in your file system (perhaps as a subdirectory to this module) and specify its path here."),
+      '#default_value' => $tp,
+      '#field_suffix' => $tar_s,
+   );
+   
+   // save options
+   $form['save'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save settings'),
+      '#prefix' => '<br />',
+   );
+   $form[] = array(
+      '#value' => t('Save the above settings without taking a backup.'),
+   );
+   
+   $form['test'] = array(
+      '#type' => 'submit',
+      '#value' => t('Test settings'),
+      '#prefix' => '<br />',
+   );
+   $form[] = array(
+      '#value' => t('Save the above settings then scan directories to test your settings without taking a backup.'),
+   );
+
+   if ($pear && $tar) {
+      $form['backup'] = array(
+         '#type' => 'submit',
+         '#value' => t('Backup'),
+         '#prefix' => '<br />',
+      );
+      $form[] = array(
+         '#value' => t('Save the above settings and then perform a backup.'),
+      );
+   } else {
+      $form[] = array(
+         '#value' => t('<p>You will not be able to take a backup until the PEAR.php and Tar.php files have been located.</p>'),
+      );
+   }
+   return $form;
+}
+
+/**
+* Handle form submission
+*/
+function backup_files_main_submit($form, &$form_state) {
+   
+   // set the include paths
+   backup_files_set_include_paths();
+
+   require_once('Tar.php');
+
+   // get base path
+   $bp = base_path();
+   $cwd = getcwd();
+   $lcwd = strlen($cwd);
+   $temp = variable_get('file_directory_temp', '');
+   
+   // get the form values
+   $fp = $form_state['values']['file_list'];
+   $pp = $form_state['values']['pear_path'];
+   $tp = $form_state['values']['tar_path'];
+   $button = $form_state['clicked_button']['#id'];
+   
+   // save the settings
+   variable_set('file_backup_path', $fp);
+   variable_set('file_backup_pear_path', $pp);
+   variable_set('file_backup_tar_path', $tp);
+   
+   // build array of files
+   $files = array();
+
+   // perform the backup
+   if ($button == 'edit-backup' || $button == 'edit-test') {
+      $fp = explode("\n", $fp);
+      foreach ($fp as $dir) {
+         if ($dir != '') {
+            $rp = realpath('.'. $bp. trim($dir));
+            if ($rp) {
+               $relpath = substr($rp, $lcwd);
+               backup_files_scan($rp, $lcwd, $files);
+            } else {
+               drupal_set_message('Does not exist: '. $dir, 'warning');
+            }
+         }
+      }
+   }
+   
+   if ($button == 'edit-test') {
+      drupal_set_message('Files selected for backup:<pre>'.print_r($files,1).'</pre>');
+   }
+   
+   // create the backup file
+   if ($button == 'edit-backup') {
+      $bfn = realpath('.'. $bp. $temp). '/backup.tgz';
+      $gz = new Archive_Tar($bfn, true);
+      $gz->create($files);
+
+      $fname = variable_get('site_name', "backup"). '_files_'.  date('Y-m-d\TH-i-s'). '.tgz';
+      backup_files_download($fname, 'application/x-gzip', $bfn);
+   }
+}
+
+function backup_files_set_include_paths() {
+   // add module path to the include path so that Tar.php can be installed in path or somewhere else
+   $path = drupal_get_path('module', 'backup_files');
+   $pp = variable_get('file_backup_pear_path', '');
+   $tp = variable_get('file_backup_tar_path', $path);
+   if ($pp) {set_include_path(get_include_path() . PATH_SEPARATOR . $pp);};
+   if ($tp) {set_include_path(get_include_path() . PATH_SEPARATOR . $tp);};
+}
+
+
+/**
+* Scan a directory
+*/
+function backup_files_scan($dir, $clip, &$files) {
+
+   $dh = opendir($dir);
+   
+   while (false !== ($file = readdir($dh))) {
+      if ($file == '.' || $file == '..' || $file == 'backup.tgz') {
+      } else {
+         $file = realpath($dir. '/'. $file);
+         $fname = substr($file, $clip);
+         if (is_dir($file)) {
+            backup_files_scan($file, $clip, $files);
+         } else {
+            $files[] = '.'.$fname;
+         }
+      }
+   }
+   closedir($dh);
+}
+
+function backup_files_download($filename, $filetype, $file_path) {
+  header('Content-Type: '. $filetype);
+  header('Expires: '. gmdate('D, d M Y H:i:s') .' GMT');
+  header('Content-Length: '. filesize($file_path));
+  header('Content-Disposition: attachment; filename="'. $filename .'"');
+
+  // Transfer file in 1024 byte chunks to save memory usage.
+  if ($fd = fopen($file_path, 'rb')) {
+    while (!feof($fd)) {
+      print fread($fd, 1024);
+    }
+    fclose($fd);
+  }
+
+  module_invoke_all('exit');
+  exit();
+}
