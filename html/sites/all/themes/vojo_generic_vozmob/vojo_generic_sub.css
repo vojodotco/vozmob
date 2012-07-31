@@ -1,0 +1,36 @@
+#vojo-header {
+  padding-top: 0;
+  padding-bottom: 0;
+  clear: both;
+  border: none;
+}
+#vojo-navigation {
+  background: url(images/menu_background.png) repeat-x left top;
+  border-bottom: #FF9900 solid 3px;
+}
+#vojo-navigation ul {
+  margin: 0;
+}
+#vojo-navigation ul li {
+  margin: 0;
+}
+#vojo-navigation a {
+  display: inline;
+  float: left;
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  line-height: 14px;
+}
+#vojo-navigation a:hover {
+  text-decoration: none;
+  background: url(images/menu2_background.png) repeat-x;
+}
+#vojo-footer {
+  background-color: #535353;
+  border: none;
+}
