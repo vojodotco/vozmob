@@ -1,0 +1,14 @@
+; $Id: page.tpl.php,v 1.15.4.1 2008/08/27 04:47:37 m3avrck Exp $
+name = VozMob Sub
+description = A VozMob branded sub theme of Vojo.co Genric Theme. 
+base theme = vojo_generic
+core = 6.x
+engine = phptemplate
+
+stylesheets[all][] = vojo_generic_sub.css
+
+regions[header]         = Header
+regions[navigation]     = Navigation Bar
+regions[sidebar]        = Sidebar
+regions[footer]         = Footer
+regions[page_closure]   = Page Closure
