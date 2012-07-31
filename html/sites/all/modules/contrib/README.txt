@@ -14,4 +14,18 @@ backup_migrate: Scheduled backups locally and to Amazon S3.
 
 captcha: Stop spam on web signup and web anonymous story submission.
 
+coder: Debugging and dev and staging servers.
+
+colorpicker: Let group admins customize their group header color.
+
+devel: Debugging and dev and staging servers.
+
+diff: Helps with feature development and deployment.
+
+features: Packages up drupal config for easier management of dev/production servers.
+
+filefield: Saves attachements to a node in a CCK field.
+
+filefield_sources: Save various things into a CCK file field.
+
 
