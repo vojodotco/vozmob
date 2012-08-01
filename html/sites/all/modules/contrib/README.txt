@@ -28,4 +28,54 @@ filefield: Saves attachements to a node in a CCK field.
 
 filefield_sources: Save various things into a CCK file field.
 
+jquery_ui: Used in various places for UI candy.
 
+jquery_update: Get us a more recent version of jquery than what Drupal ships with.
+
+jwplayermodule: Play all the attached media to a story.
+
+link: Add a link CCK field type. Convenient, but not in use.
+
+nodequeue: Manages the site homepage featured groups.
+
+og_user_roles: Assigns the "group-admin blogger" role to group managers.
+
+override_node_options: Grants the "group-admin blogger" special permissions.
+
+panels: Layout across the entire site.
+
+piwik: Website visitor analytics.
+
+recaptcha: Prevent spam on anonymous web story submissions and registration.
+
+returnpath: Sets the reply-to address on outgoing generated SMSs.
+
+service_links: Block with links to social media sites.
+
+themekey: Set the theme for CdH groups based on the url.
+
+themekey-properties: Set the theme for CdH groups based on the url.
+
+usermerge: Helps manage the confusion of multiple accounts created via web/phone/sms.
+
+view_unpublished: Let "group-admin bloggers" see unpublished content in their group.
+
+views: Used throughout the site extensively.
+
+views_bulk_operations: Used at various times in the past to update nodes based on infrastructure changes.
+
+views_cloud: Show tag clouds on groups.
+
+views_php: Custom php code in various views.
+
+voipdrupal: Phone voice interface to entire site.
+
+voipextension: API for giving things phone numbers.
+
+voipnode: Phone extensions for groups.
+
+voipnumber: Allow phone numbers associated with things.
+
+voipviews: Read group story media to voice phone callers.
+
+voipvoice: Multilingual audio selection for voice phone calls.
