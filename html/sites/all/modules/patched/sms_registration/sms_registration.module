@@ -1,0 +1,198 @@
+<?php
+// $Id: sms_registration.module
+
+/**
+ * Implementation of hook_menu().
+ */
+function sms_registration_menu() {
+  $items['admin/smsframework/registration'] = array(
+    'title' => 'SMS Registration',
+    'description' => 'Configure SMS registration settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sms_registration_settings'),
+    'access arguments' => array('administer smsframework'),
+    'file' => 'sms_registration.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Public API to fetch the registrar's email address
+ */
+function sms_registration_get_address(){
+    return variable_get('sms_registration_address', '');
+}
+
+/**
+ * Implementation of hook_mail_alter().
+ */
+function sms_registration_mail_alter(&$message) {
+  if (isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
+    $message['headers']['Return-Path'] = sms_registration_get_address();
+  }
+}
+
+/**
+ * Implementation of hook_mailhandler().
+ *
+ * Attempt to match sender to a phone number stored by sms_user module.
+ * If no match found and sender is a recognized SMS email gateway,
+ * create a user account.
+ */
+function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
+  // Ignore empty messages.
+  if (empty($node)) {
+    return;
+  }
+
+  list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
+  $from = explode('@', strtolower($from_address));
+  // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
+  $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
+  $providers = sms_carriers();
+  $to_address = $header->to[0]->mailbox . '@' . $header->to[0]->host;
+  $sms_registration_address = sms_registration_get_address();
+  $number = $from[0];
+
+  // If the message is not from SMS gateway, stop processing.
+  if (!isset($providers[$from[1]])) {
+    return $node;
+  }
+
+  // If the message is from SMS gateway, fire sms_incoming callbacks.
+  // Except that firing the sms_incoming callbacks sends a confirmation code
+  // and also logs out the user. so is not compatible.
+  //sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
+
+  $password = user_password(8);
+  $new_user = false;
+  $message = null;
+
+  // If the user was not authenticated via user account email address.
+  if (!$node->uid) {
+    // Look up the user by phone number.
+    if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
+      $node->uid = $account->uid;
+      $node->name = $account->name;
+      mailhandler_switch_user($node->uid);
+    }
+
+    // If message is from an SMS/MMS gateway, create a user account.
+    if (!$node->uid) {
+      $new_user = true;
+      $user = FALSE;
+      
+      while (!$user) {
+        $user = user_save(NULL, array(
+          'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
+          'pass' => $password,
+          'mail' => $from_address,
+          'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
+          'status' => 1,
+          'language' => $node->language,
+          'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+          'access' => time(),
+        ));
+      }
+      
+      $node->uid = $user->uid;
+      $node->name = $user->name;
+      mailhandler_switch_user($node->uid);
+
+      if (strcasecmp($sms_registration_address, $to_address) != 0) {
+        if (variable_get('sms_registration_request_user', 'name') == 'name') {
+          $message = t('Welcome to !server_url ! Your username is !name, password is !pass. To change your username, reply to this msg w/the name you want!',
+             array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
+        }
+        elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+          $message = t('Welcome to !server_url. Your username is !name, password is !pass. To submit your content, please reply with your email address!',
+             array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
+        }
+        if (isset($message)) {
+          $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
+          sms_send($number, $message, $options);
+        }
+      }
+    }
+  }
+
+  if (empty($node->title)) {
+    $node->title = t('New story');
+  }
+
+  // If user has authenticated and message was sent to a registration address.
+  if ($node->uid && strcasecmp($sms_registration_address, $to_address) == 0) {
+    // Make sure we are looking at the plain text message.
+    foreach ($node->mimeparts as $mimepart) {
+      if ($mimepart->filemime == 'TEXT/PLAIN') {
+        $node->body = $mimepart->data;
+        break;
+      }
+    }
+    $info = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
+    //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
+    if (empty($account)) {
+      $account = user_load(array('uid' => $node->uid, 'status' => 1));
+    }
+
+    $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
+
+    // figure out if this is username or email (based on admin setting)
+    if (variable_get('sms_registration_request_user', 'name') == 'name') {
+      $save['name'] = $info;
+    }
+    elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+      if (valid_email_address($info)) {
+        $save['mail'] = $info;
+      }
+    }
+
+    // if this is a the first sms and it was sent to the registrar directly, we need a pswd for the user
+    if ($new_user) {
+      $save['pass'] = $password;
+    }
+
+    // check to make sure the email parsed correctly - often unparsed messages end up with a username of "Delivered-To: registrar@vojo.co"
+    $bad_username = "Delivered-To: ".$sms_registration_address;
+    if ($save['name']==$bad_username) {
+      
+      // tell the user the carrier isn't supported and log it
+      $message = t('Sorry, we don\'t yet support !carrier', array('!carrier'=>$from[1]) );
+      watchdog('sms_reg', 'Unsupported Carrier [from_address=%from, carrier=%carrier, content=%body]', 
+        array('%from'=>$from_address, '%carrier'=>$from[1], '%body'=>$node->body) );
+      
+    } else {
+      
+      // parsed out stuff correctly, so save the changes
+      $user = user_save($account, $save);
+  
+      // if user saved successfully, reply with ack 
+      if ($user) {
+        if ($new_user) {
+          // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
+          $message = t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
+            array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
+        } else {
+          // this is an existing user account, so we're changing their username
+          $message = t('We changed your !server_url username to !name', 
+            array('!name' => $info, '!server_url'=>variable_get('site_name', 'the site') ) );
+        }
+      } else {
+        // the save failed - this assumes the name must have been duplicate
+        $message = t('The blog was not created. Please choose another name.');
+        watchdog('sms_reg', 'Duplicate username %name (id=%id) - did not change and told user',array('%name'=>$user->name,'%id'=>$user->id) );
+      }
+    }
+
+    // send the reply
+    if ($message) {
+      $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
+      sms_send($number, $message, $options);
+    }
+
+    // Do not post content from the registration address.
+    $node = FALSE;
+  }
+
+  return $node;
+}
