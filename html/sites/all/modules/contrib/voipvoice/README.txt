@@ -1,9 +1,12 @@
 VoIPVoice.module
 --------------------------------------------------------------------------------
-This module provides v() function.
+The VoIP Voice module enables users to personalize computer-based phone conversations by adding their own voices to VoIP Drupal scripts.
 
 --------------------------
 Dependencies
+1.AudioRecorderField (http://drupal.org/project/audiorecorderfield)
+2.Locale (comes with Drupal core but not enabled by default)
+3.VoIP Drupal (http://drupal.org/project/voipdrupal)
 
 --------------------------
 Installation

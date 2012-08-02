@@ -31,7 +31,7 @@ function theme_audiorecorderfield_soundcloud($element) {
         
         $output = theme('audiorecorderfield_soundcloud_skin', $field_name, $element['#delta']);
     }
-    $output.='<div><input type="button" onclick="javascript:upload(\'' . $field_name . '\',' . $element['#delta'] . ')"  
+    $output.='<div><input type="button" onclick="javascript:upload(\'' . $field_name . '\',\'' . $element['#delta'] . '\')"  
         id="soundcloud-button-' . $field_name . '-' . $element['#delta'] . '" value="'.$button_op.'"/></div>';
     return $output;
 }
@@ -42,13 +42,13 @@ function theme_audiorecorderfield_soundcloud_skin($field_name, $delta) {
   drupal_add_css(drupal_get_path('module', 'audiorecorderfield') . '/css/audiorecorderfield.css');
   $output = '<div id="soundcloud-' . $field_name . '-' . $delta . '-wrapper">
         <div>
-          <span onclick="record(\'' . $field_name . '\',' . $delta . ')"  class="soundcloud-record">Record</span>
-          <span onclick="stop(\'' . $field_name . '\',' . $delta . ')"    class="soundcloud-stop" style="display:none;">Stop</span>
-          <span onclick="play(\'' . $field_name . '\',' . $delta . ')" style="display:none;"   class="soundcloud-play">Play</span>
-          <span onclick="pause(\'' . $field_name . '\',' . $delta . ')" style="display:none;"   class="soundcloud-pause">Pause</span>
+          <span onclick="record(\'' . $field_name . '\',\'' . $delta . '\')"  class="soundcloud-record">Record</span>
+          <span onclick="stop(\'' . $field_name . '\',\'' . $delta . '\')"    class="soundcloud-stop" style="display:none;">Stop</span>
+          <span onclick="play(\'' . $field_name . '\',\'' . $delta . '\')" style="display:none;"   class="soundcloud-play">Play</span>
+          <span onclick="pause(\'' . $field_name . '\',\'' . $delta . '\')" style="display:none;"   class="soundcloud-pause">Pause</span>
         </div>
         <span id="time-' . $field_name . '-' . $delta . '">0:00</span>
-        <a class="record-again-btn" style="display:none;" href="javascript:record_again(\'' . $field_name . '\',' . $delta . ')">Start over</a>
+        <a class="record-again-btn" style="display:none;" href="javascript:record_again(\'' . $field_name . '\',\'' . $delta . '\')">Start over</a>
         </div>
         ';
   return $output;      
