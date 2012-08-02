@@ -28,6 +28,8 @@ filefield: Saves attachements to a node in a CCK field.
 
 filefield_sources: Save various things into a CCK file field.
 
+flag: Let us create unique options on groups (public, moderated, geo-located).
+
 jquery_ui: Used in various places for UI candy.
 
 jquery_update: Get us a more recent version of jquery than what Drupal ships with.
@@ -51,6 +53,8 @@ recaptcha: Prevent spam on anonymous web story submissions and registration.
 returnpath: Sets the reply-to address on outgoing generated SMSs.
 
 service_links: Block with links to social media sites.
+
+strongarm: ???
 
 themekey: Set the theme for CdH groups based on the url.
 

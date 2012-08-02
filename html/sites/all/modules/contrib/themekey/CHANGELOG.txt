@@ -1,3 +1,21 @@
+ThemeKey 6.x-4.0, 2012-01-19
+----------------------------
+[#1410182] souk: taxonomy:tid_and_childs not working as intended
+
+
+ThemeKey 6.x-4.0-beta2, 2011-10-07
+----------------------------------
+[#1298644] mkalkbrenner: new operators "*", "!*", "!~", fixed typo
+
+
+ThemeKey 6.x-4.0-beta1, 2011-10-07
+----------------------------------
+[#1290754] mkalkbrenner: ThemeKey not working for block detail configuration
+[#1252846] mkalkbrenner: Use of undefined constants when running install.php
+[#1293182] mkalkbrenner: disable theme switching during drupal installation or update
+[#1298644] mkalkbrenner: new operators "*", "!*", "!~"
+
+
 ThemeKey 6.x-3.6, 2011-09-19
 ----------------------------
 [#1254144] mkalkbrenner: integration / support of Revisioning module
