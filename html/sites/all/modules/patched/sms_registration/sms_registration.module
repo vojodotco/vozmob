@@ -182,11 +182,11 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
         $message = t('The blog was not created. Please choose another name.');
         watchdog('sms_reg', 'Duplicate username %name (id=%id) - did not change and told user',array('%name'=>$user->name,'%id'=>$user->id) );
       }
-      $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
     }
 
     // send the reply
     if ($message) {
+      $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
       sms_send($number, $message, $options);
     }
 
