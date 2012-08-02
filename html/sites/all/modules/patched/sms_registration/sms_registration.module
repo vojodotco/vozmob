@@ -66,6 +66,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
   $password = user_password(8);
   $new_user = false;
+  $message = null;
 
   // If the user was not authenticated via user account email address.
   if (!$node->uid) {
@@ -151,25 +152,43 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       $save['pass'] = $password;
     }
 
-    $user = user_save($account, $save);
-
-    if ($user) {
-      if ($new_user) {
-        // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
-        $message = t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
-          array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
-      } else {
-        // this is an existing user account, so we're changing their username
-        $message = t('We changed your !server_url username to !name', 
-          array('!name' => $info, '!server_url'=>variable_get('site_name', 'the site') ) );
-      }
+    // check to make sure the email parsed correctly - often unparsed messages end up with a username of "Delivered-To: registrar@vojo.co"
+    $bad_username = "Delivered-To: ".$sms_registration_address;
+    if ($save['name']==$bad_username) {
+      
+      // tell the user the carrier isn't supported and log it
+      $message = t('Sorry, we don\'t yet support !carrier', array('!carrier'=>$from[1]) );
+      watchdog('sms_reg', 'Unsupported Carrier [from_address=%from, carrier=%carrier, content=%body]', 
+        array('%from'=>$from_address, '%carrier'=>$from[1], '%body'=>$node->body) );
+      
     } else {
-      // the save failed - report error and log it
-      $message = t('The blog was not created. Please choose another name.');
-      watchdog('sms_reg', 'Failed [user=%name, new_user=%new_user, from=%number]', array('%name'=> $user->name, '%number'=>$number, '%new_user'=>$new_user));
+      
+      // parsed out stuff correctly, so save the changes
+      $user = user_save($account, $save);
+  
+      // if user saved successfully, reply with ack 
+      if ($user) {
+        if ($new_user) {
+          // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
+          $message = t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
+            array('!name'=>$user->name, '!pass'=>$password, '!server_url'=>variable_get('site_name', 'the site')) );
+        } else {
+          // this is an existing user account, so we're changing their username
+          $message = t('We changed your !server_url username to !name', 
+            array('!name' => $info, '!server_url'=>variable_get('site_name', 'the site') ) );
+        }
+      } else {
+        // the save failed - this assumes the name must have been duplicate
+        $message = t('The blog was not created. Please choose another name.');
+        watchdog('sms_reg', 'Duplicate username %name (id=%id) - did not change and told user',array('%name'=>$user->name,'%id'=>$user->id) );
+      }
+      $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
     }
-    $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
-    sms_send($number, $message, $options);
+
+    // send the reply
+    if ($message) {
+      sms_send($number, $message, $options);
+    }
 
     // Do not post content from the registration address.
     $node = FALSE;
