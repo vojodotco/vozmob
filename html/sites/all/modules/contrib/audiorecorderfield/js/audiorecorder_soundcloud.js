@@ -31,8 +31,7 @@ function timecode(ms) {
             //alert("recording starts now. press stop when youre done. and then play or upload if you want.");
           },
           progress: function(milliseconds){
-            //document.getElementById("time-"+field_name+"-"+delta).innerHTML = timecode(milliseconds);
-            $("#time-"+field_name+"-"+delta).html(timecode(milliseconds));
+            document.getElementById("time-"+field_name+"-"+delta).innerHTML = timecode(milliseconds);
           }
         });
       }
@@ -40,24 +39,18 @@ function timecode(ms) {
       function play(field_name, delta){
         $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-play").hide();
         $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-pause").show();
-        //Recorder.stop();
+        //$("#edit-field-"+field_name+"-"+delta+"-wrapper .soundcloud-play").hide();
+        //$("#edit-field-"+field_name+"-"+delta+"-wrapper .soundcloud-pause").show();
+        Recorder.stop();
         Recorder.play({
-          finished: function(){               
-            // will be called when playback is finished
-           $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-pause").hide();
-           $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-play").show();
-          },
           progress: function(milliseconds){
-            //document.getElementById("time-"+field_name+"-"+delta).innerHTML = timecode(milliseconds);
-            if ($("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-pause").is(":visible")) {
-              $("#time-"+field_name+"-"+delta).html(timecode(milliseconds));
-            }
-           
-          }
-          
+            document.getElementById("time-"+field_name+"-"+delta).innerHTML = timecode(milliseconds);
+          }/*, 
+          finished: function(field_name, delta){
+            $("#edit-field-"+field_name+"-"+delta+"-wrapper .soundcloud-pause").hide();
+            $("#edit-field-"+field_name+"-"+delta+"-wrapper .soundcloud-play").show();
+          } */
         });
-        
-        
       }
       
       function stop(field_name, delta){
@@ -118,6 +111,8 @@ function timecode(ms) {
 					data: "field_name=" + field_name+"&delta=" +delta,
 					dataType: 'json',
 					success:  function (data) {
+                      //$("#edit-field-"+field_name+"-"+delta+"-wrapper div").remove();
+                      //$("#edit-field-"+field_name+"-"+delta+"-wrapper").append(data.recorder);
                       $("#audiorecorderfield-"+field_name+"-"+delta+"-wrapper").html(data.recorder);
                     }
 				});
@@ -130,7 +125,7 @@ function timecode(ms) {
         $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-stop").hide();
         $("#soundcloud-"+field_name+"-"+delta+"-wrapper .record-again-btn").hide();
         $("#soundcloud-"+field_name+"-"+delta+"-wrapper .soundcloud-record").show();
-        $("#time-"+field_name+"-"+delta).html(timecode(0));
+        $("#time-"+field_name+"-"+delta).html("0:00");
       }
       
 function SoundcloudPreview(data){

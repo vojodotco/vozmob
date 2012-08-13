@@ -1,70 +1,66 @@
 var Recorder = {
-  swfCode: '<object id="Recorder" style="z-index: 200" width="231" height="141" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"><param value="transparent" name="wmode"><param value="RECORDER_URI" name="movie"><param value="always" name="allowScriptAccess"><embed width="231" height="141" wmode="transparent" name="Recorder" type="application/x-shockwave-flash" src="RECORDER_URI" allowscriptaccess="always">  </object>',
+  swfCode: '<object id="Recorder" style="z-index: 200" width="230" height="140" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"><param value="transparent" name="wmode"><param value="RECORDER_URI" name="movie"><param value="always" name="allowScriptAccess"><embed width="230" height="140" wmode="transparent" name="Recorder" type="application/x-shockwave-flash" src="RECORDER_URI" allowscriptaccess="always">  </object>',
   swfObject: null,
-  _callbacks: {},
-  _events: {},
+  events: {},
   options: {},
   initialize: function(options){
     options = options || {};
     this.options = options;
     if(!options.flashContainer){
       options.flashContainer = document.createElement("div");
-      options.flashContainer.setAttribute("id", "recorderFlashContainer");
-      options.flashContainer.setAttribute("style", "position: fixed; left: -9999px; top: -9999px; width: 230px; height: 140px; margin-left: 10px; border-top: 6px solid rgba(128, 128, 128, 0.6); border-bottom: 6px solid rgba(128, 128, 128, 0.6); border-radius: 5px 5px; padding-bottom: 1px; padding-right: 1px;");
+      options.flashContainer.style.left= "-230px";
+      options.flashContainer.style.top = "-140px";
+      options.flashContainer.style.width  = "230px";
+      options.flashContainer.style.height = "140px";
+      options.flashContainer.style.position = "absolute";
+      
       document.body.appendChild(options.flashContainer);
     }
 
     if(!options.onFlashSecurity){
       options.onFlashSecurity = function(){
         var flashContainer = Recorder.options.flashContainer;
-        flashContainer.style.left   = ((window.innerWidth  || document.body.offsetWidth)  / 2) - 115 + "px";
-        flashContainer.style.top    = ((window.innerHeight || document.body.offsetHeight) / 2) - 70  + "px";
+        flashContainer.style.left   = (window.innerWidth / 2) - 115 + "px";
+        flashContainer.style.top    = (window.innerHeight / 2) - 70 + "px";
       }
     }
-
-    this.bind('initialized', options.initialized);
+    options.swfSrc = options.swfSrc;
     this.bind('showFlash', options.onFlashSecurity);
     options.flashContainer.innerHTML = this.swfCode.replace(/RECORDER_URI/g, options.swfSrc);
     this.swfObject = options.flashContainer.children[0];
   },
 
   clear: function(){
-    Recorder._events = {};
+    Recorder.events = {};
   },
 
   record: function(options){
     options = options || {};
     this.clearBindings("recordingStart");
     this.clearBindings("recordingProgress");
-    this.clearBindings("recordingCancel");
 
-    hideFlash = function(){
+    this.bind('recordingStart', function(){
       var flashContainer = Recorder.options.flashContainer;
-      flashContainer.style.left = "-9999px";
-      flashContainer.style.top  = "-9999px";
-    }
-
-    this.bind('recordingStart',  hideFlash);
-    this.bind('recordingCancel', hideFlash);
-
-    this.bind('recordingStart',    options['start']);
+      flashContainer.style.left= "-230px";
+      flashContainer.style.top = "-140px";
+    });
+//    this.bind('recordingStart', options['onRecording']);
+    this.bind('recordingStart', options['start']);
     this.bind('recordingProgress', options['progress']);
-    this.bind('recordingCancel',   options['cancel']);
 
-    this.flashInterface().record();
+    this.flashInterface().startRecording();
   },
   
   stop: function(){
-    return this.flashInterface()._stop();
+    this.flashInterface().stopRecording();
+    this.flashInterface().stopPlaying();
   },
   
   play: function(options){
-    options = options || {};
     this.clearBindings("playingProgress");
     this.bind('playingProgress', options['progress']);
-    this.bind('playingStop', options['finished']);
     
-    this.flashInterface()._play();
+    this.flashInterface().startPlaying();
   },
 
   upload: function(options){
@@ -72,57 +68,50 @@ var Recorder = {
     options.params     = options.params || {};
     this.clearBindings("uploadSuccess");
     this.bind("uploadSuccess", function(responseText){
-      options.success(Recorder._externalInterfaceDecode(responseText));
+      options.success(responseText);
     });
     
     this.flashInterface().upload(options.url, options.audioParam, options.params);
   },
   
-  audioData: function(){
-    return this.flashInterface().audioData().split(";");
-  },
-
-  request: function(method, uri, contentType, data, callback){
-    var callbackName = this.registerCallback(callback);
-    this.flashInterface().request(method, uri, contentType, data, callbackName);
-  },
+  /*data: function(pitch){
+    var rawData = this.flashInterface().data().split(";");
+    
+    var pitcher = new Pitchshift(2048, 44100, "FFT");
+    pitcher.process(pitch, rawData.length, 4, rawData);
+    xxx = pitcher;
+    console.log(pitcher);
+    
+    if(webkitAudioContext){
+      var context = new webkitAudioContext();
+      var buffer = context.createBuffer(1, rawData.length, 44100);
+      for (var i=0; i < rawData.length; i++) {
+        buffer.getChannelData(0)[i] = pitcher.outdata[i];
+      }
+      
+      return buffer;
+    }else{
+      throw "enable Chrome web audio in about:flags";
+    }
+    return null;
+  },*/
   
   clearBindings: function(eventName){
-    Recorder._events[eventName] = [];
+    Recorder.events[eventName] = [];
   },
 
   bind: function(eventName, fn){
-    if(!Recorder._events[eventName]){ Recorder._events[eventName] = [] }
-    Recorder._events[eventName].push(fn);
+    if(!Recorder.events[eventName]){ Recorder.events[eventName] = [] }
+    Recorder.events[eventName].push(fn);
   },
   
-  triggerEvent: function(eventName, arg0, arg1){
-    for(var cb in Recorder._events[eventName]){
-      Recorder._events[eventName][cb](arg0, arg1);
+  trigger: function(eventName, args){
+    for(var cb in Recorder.events[eventName]){
+      Recorder.events[eventName][cb](args);
     }
-  },
-
-  triggerCallback: function(name, args){
-    Recorder._callbacks[name].apply(null, args);
-  },
-
-  registerCallback: function(fn){
-    var name = "CB" + parseInt(Math.random() * 999999, 10);
-    Recorder._callbacks[name] = fn;
-    return name;
   },
 
   flashInterface: function(){
-    if(!this.swfObject){
-      return null;
-    }else if(this.swfObject.record){
-      return this.swfObject;
-    }else if(this.swfObject.children[3].record){
-      return this.swfObject.children[3];
-    }
+    return this.swfObject.startRecording ? this.swfObject : this.swfObject.children[3];
   },
-
-  _externalInterfaceDecode: function(data){
-    return data.replace(/%22/g, "\"").replace(/%5c/g, "\\").replace(/%26/g, "&").replace(/%25/g, "%");
-  }
 };

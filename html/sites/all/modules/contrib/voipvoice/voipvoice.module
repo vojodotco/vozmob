@@ -91,20 +91,6 @@ function voipvoice_menu() {
     'weight' => 1,
   );
   
-  $items['admin/settings/voipvoice/voice-phrase/%'] = array(
-    'title' => 'Voice advanced',
-    'page callback' => 'voipvoice_voice_phrase_readmore',
-    'page arguments' => array(4),
-    'access arguments' => array('manage voip voices'),
-  ); 
-
-  $items['admin/settings/voipvoice/voice-phrase-translated/%/%'] = array(
-    'title' => 'Voice advanced',
-    'page callback' => 'voipvoice_voice_phrase_translated_readmore',
-    'page arguments' => array(4,5),
-    'access arguments' => array('manage voip voices'),
-  );
-  
  /* $items['voipvoice/lexicons'] = array(
     'title' => 'AJAX Autocomplete callback',
     'page callback' => 'voipvoice_lexicons_ajax',
@@ -260,7 +246,7 @@ function voipvoice_get_prompt($prompt_string, $args = array(), $voice_code=NULL)
       if (!$phrase) {
         unset($speech_array[$index]);
       }
-      else if (($phrase{0} == '%' || $phrase{0} == '@') && (array_key_exists($phrase, $args))) {
+      else if (($phrase{0} == '%') && (array_key_exists($phrase, $args))) {
         $speech_array[$index] = $args[$phrase];
       }
       else {
@@ -304,10 +290,7 @@ function voipvoice_get_audio_phrase($phrase, $voice_code) {
     $phrase_file_name = voipvoice_recording_exists($voice_code, $phrase_hash);
     // replace phrase by the file
     if ($phrase_file_name) {
-      //Attach version query as the timestamp of the file in order to prevent caching the new file
-      //More at: http://forum.twilio.com/twilio/topics/clear_cache_of_audio_files_on_twilio
-      $timestamp = filemtime($phrase_file_name);
-      $rc = file_create_url($phrase_file_name).'?version='.$timestamp;
+      $rc = file_create_url($phrase_file_name);
       //Update the access time without updating the modified time:
       touch($phrase_file_name, date('U', filemtime($phrase_file_name)), time());
     }
@@ -654,9 +637,9 @@ function voipvoice_add_voice(&$form_state, $voice=NULL) {
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Voice Name'),
-    '#required' => $voice ? FALSE : TRUE,
-    '#default_value' => $name,
-    '#disabled' => $voice ? TRUE : FALSE,
+    '#required' => TRUE,
+    '#value' => $name,
+    '#disabled' => TRUE,
   );
   $installed_languages = language_list();
   foreach ($installed_languages as $key=>$l) {
@@ -701,7 +684,7 @@ function voipvoice_add_voice(&$form_state, $voice=NULL) {
 }
 
 function voipvoice_add_voice_submit(&$form, &$form_state) {
-  $name = strtolower($form_state['values']['name']);
+  $name = $form_state['values']['name'];
   $language = $form_state['values']['language'];
   $lexicon = $form_state['values']['lexicon'];
   $gender = $form_state['values']['gender'];
@@ -744,7 +727,6 @@ function voipvoice_add_voice_submit(&$form, &$form_state) {
 
 function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
   drupal_add_js(drupal_get_path('module','voipvoice').'/voipvoice.js');
-  drupal_add_css(drupal_get_path('module','voipvoice').'/voipvoice.css');
   $recorder = audiorecorderfield_get_recorder();
   $langcode = voipvoice_get_language($voice_code);
   //$new_voice_dir = _voipvoice_get_voice_dir($voice_code);
@@ -762,14 +744,7 @@ function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
       'field' => 'phrase',
       'sort'  => 'asc',
       ),
-     array(
-      'data' => t('PID'),
-      'field' => 'pid',
-      //'sort'  => 'asc',
-      ),
      );
-     
-     
   //db query
   $sql = "SELECT * FROM {voipvoice_phrases} WHERE lexicon='%s'".tablesort_sql($header);
   //set limit for pager
@@ -820,7 +795,7 @@ function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
             $element['#value']['filepath'] = $phrase_file_name;
             $element['#value']['filename'] = $phrase_hash . "." . $phrase_file['extension'];
           }
-
+               
           $audio_rec .= "<div class='source source-recorder' id='audiorecorderfield-voipvoice-". $id.'-'.$i."-wrapper'>".$recorder['callback']($element, $field['widget'])."</div>";
           // this would be the hidden field the applet would insert the newly uploaded file fid to.
           $form[$id]['fid']['field-voipvoice-'.$id.'-'.$i.'-fid'] = array(
@@ -845,17 +820,6 @@ function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
         }
       }
       $translated_string .= '</ul>';
-      
-      $tokenized_string = strtr($phrase['phrase'], $tokenized_keys);
-      $phrase['phrase']='<div>'.$phrase['phrase'].'</div><ul>';
-      // then split the string into an array of text chunks and arguments
-      $speech_array = explode($token, $tokenized_string);
-    
-      foreach ($speech_array as $index => $speech_phrase) {
-        if($speech_phrase && !(($speech_phrase{0} == '%') && (array_key_exists($speech_phrase, $args)))) {
-          $phrase['phrase'].="<li>".$speech_phrase."</li>"; 
-        }
-      }
     }
     else {
       /*String without arguments*/   
@@ -872,6 +836,7 @@ function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
         $element['#value']['filename'] = $phrase_hash . "." . $phrase_file['extension'];
       }
 
+     
       //$audio_rec = "<div class='voipvoice-uploaders'>".$sources."<div class='source source-recorder' id='audiorecorderfield-voipvoice-".$id."-wrapper'>".$recorder['callback']($element, $field['widget'])."</div>";
       $audio_rec = "<div class='source source-recorder' id='audiorecorderfield-voipvoice-".$id."-wrapper'>".$recorder['callback']($element, $field['widget']).'</div>';
       
@@ -921,15 +886,6 @@ function voipvoice_manage_recordings_form(&$form_state, $voice_code) {
   
   //store voice code
   $form_state['data']['voice_code'] = $voice_code;
-  $form['voice_code'] = array(
-    '#type' => 'hidden', 
-    '#value' => $voice_code,
-  );
-  
-  $form['to_delete'] = array(
-    '#type' => 'hidden', 
-    '#default_value' => '',
-  );
   $form['#attributes'] = array('enctype' => "multipart/form-data"); 
   //pager
   $form['pager'] = array('#value' => theme('pager', NULL, $limit, 0));
@@ -944,20 +900,6 @@ function voipvoice_manage_recordings_form_submit(&$form,&$form_state) {
   $voice_code = $form_state['data']['voice_code'];
   $new_voice_dir = _voipvoice_get_voice_dir($voice_code);
   $extensions = variable_get('voipvoice_allowed_extensions', array('wav' => 'wav', 'mp3' => '0'));
-  
-  /*Delete removed files*/
-  $to_delete = explode(' ', $form_state['values']['to_delete']);
-  foreach($to_delete as $pid) {
-    $hash = $form_state['data']['hash-'.$pid]['#value'];
-    //Delete previous files
-      foreach($extensions as $ext) {
-        if($ext) {
-          $delete_file = $new_voice_dir . $hash . "." . $ext;
-          @unlink($delete_file); 
-        }
-      }
-  }
-  
   /*Save recordings uploaded via recorder*/
   foreach ($form_state['values'] as $key => $fid) {
     if ($fid && strpos($key, 'field-voipvoice') === 0) {
@@ -1020,37 +962,13 @@ function voipvoice_manage_recordings_form_submit(&$form,&$form_state) {
 
 function theme_voipvoice_manage_recordings_form($form) {
   $rows = array();
-
+ 
   foreach ($form as $name => $element) {
     if (isset($element['id']) && is_array($element['id'])) {
       $id = $element['id']['#value'];
-      $args = db_result(db_query("SELECT args FROM {voipvoice_phrases} WHERE pid=%d", $id));
-      $args = unserialize($args);
-      if (empty($args)) {
-        //String with no arguments
-        if(strlen($element['original_phrase']['#value'])>50) {
-        $original_phrase = substr($element['original_phrase']['#value'], 0, 50).'... '.l(t('Read more'), 'admin/settings/voipvoice/voice-phrase/'.$id, array('attributes' => array('target'=>'_blank')));
-      }
-      else {
-        $original_phrase =$element['original_phrase']['#value'];
-      }
-      
-      if(strlen($element['translated_phrase']['#value'])>50) {
-        $translated_phrase = substr($element['translated_phrase']['#value'], 0, 50).'... '.l(t('Read more'), 'admin/settings/voipvoice/voice-phrase-translated/'.$form['voice_code']['#value'].'/'.$id, array('attributes' => array('target'=>'_blank')));
-      }
-      else {
-        $translated_phrase =$element['translated_phrase']['#value'];
-      }
-      }
-      else {
-         $original_phrase =$element['original_phrase']['#value'];
-        $translated_phrase =$element['translated_phrase']['#value'];
-      }
-      
       $rows[] = array(
-        $id,
-        $original_phrase,
-        $translated_phrase, 
+        $element['original_phrase']['#value'],
+        $element['translated_phrase']['#value'], 
         drupal_render($element['applet']).drupal_render($element['fid']).'<div class="source source-upload">'.drupal_render($element['upload']).'</div></div>',
         $element['translate']['#value'],
         $element['advanced']['#value'],
@@ -1060,12 +978,6 @@ function theme_voipvoice_manage_recordings_form($form) {
    
   }
   $header = array(
-      array(
-        'data' => t('PID'),
-        'field' => 'pid',
-        'sort'  => 'asc',
-      ),
-      //t('PID'),
       array(
         'data' => t('Original Phrase'),
         'field' => 'phrase',
@@ -1574,16 +1486,4 @@ function voipvoice_export_voice_zip($voice_code) {
     readfile($zipname);
     exit;
   }
-}
-
-function voipvoice_voice_phrase_readmore($pid) {
-  $phrase = db_result(db_query("SELECT phrase FROM {voipvoice_phrases} WHERE pid=%d", $pid));
-  return $phrase;
-}
-
-function voipvoice_voice_phrase_translated_readmore($voice_code, $pid) {
-  $phrase = db_result(db_query("SELECT phrase FROM {voipvoice_phrases} WHERE pid=%d", $pid));
-  $langcode = voipvoice_get_language($voice_code);
-  $translated_string = t($phrase, array(), $langcode);
-  return $phrase;
 }

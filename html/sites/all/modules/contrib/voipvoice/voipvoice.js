@@ -6,12 +6,4 @@ Drupal.behaviors.voipvoice = function (context) {
         $Element.find('div.source').not('div.' + fileFieldSourceClass).css('display', 'none');
       $Element.find('div.' + fileFieldSourceClass).css('display', '');
   });
-  
-  $("#voipvoice-manage-recordings-form .audiorecorderfield-remove").click(function(){
-    var pid = $(this).parent().parent().attr("id");
-    pid = pid.replace("audiorecorderfield-voipvoice-","");
-    pid = pid.replace("-wrapper","");
-    var old_pids = $("#edit-to-delete").val();
-    $("#edit-to-delete").val(old_pids + pid + " ");
-  });
 }
