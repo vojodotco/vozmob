@@ -191,34 +191,34 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
 // the save failed - this assumes the name must have been duplicate
 function sms_registration_failed_msg($username){
-  t('A blog for !name was not created. Please choose another name.', array('!name'=>$username) );
+  return t( variable_get('sms_registration_failed_msg','Error') , array('!name'=>$username) );
 }
 
 // this is an existing user account, so we're changing their username
 function sms_registration_name_changed_msg($username, $url){
-  return t('We changed your !server_url username to !name', 
-            array('!name' => $username, '!server_url'=>$url ) );
+  return t( variable_get('sms_registration_name_changed_msg','Success'), array('!name' => $username, '!server_url'=>$url ) );
 }
 
 // sent in content, reply asking for email address
 function sms_registration_welcome_email_msg($username, $password, $url){
-  return t('Welcome to !server_url. Your username is !name, password is !pass. To submit your content, please reply with your email address!',
+  return t( variable_get('sms_registration_welcome_email_msg', 'Success') ,
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url) );
 }
 
 // sent in content, reply asking for username change
 function sms_registration_welcome_username_msg($username, $password, $url){
-  return t('Welcome to !server_url ! Your username is !name, password is !pass. To change your username, reply to this msg w/the name you want!',
+  return t( variable_get('sms_registration_welcome_username_msg', 'Success'), 
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url) );
 }
 
 // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
 function sms_registration_registrar_welcome_msg($username, $password, $url){
-  return t('Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info', 
+  return t( variable_get('sms_registration_registrar_welcome_msg' 'Success'), 
             array('!name'=>username, '!pass'=>$password, '!server_url'=>$url) );
 }
 
 // tell the user the carrier isn't supported and log it
 function sms_registration_parse_error_msg($carrier_name){
-  return t('Sorry, we don\'t yet support !carrier', array('!carrier'=>$carrier_name) );
+  return t( variable_get('sms_registration_parse_error_msg', 'Error') , 
+            array('!carrier'=>$carrier_name) );
 }
