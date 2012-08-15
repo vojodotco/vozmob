@@ -9,7 +9,7 @@ function sms_registration_settings() {
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Core Options'),
-    '#tree' => TRUE,
+    '#tree' => FALSE,
   );
   $form['options']['sms_registration_address'] = array(
     '#type' => 'textfield',
@@ -41,7 +41,7 @@ function sms_registration_settings() {
   $form['feedback'] = array(
     '#type' => 'fieldset',
     '#title' => t('Feedback to Registrants'),
-    '#tree' => TRUE,
+    '#tree' => FALSE,
   );
   $form['feedback']['sms_registration_failed_msg'] = array(
     '#type' => 'textarea',
