@@ -213,7 +213,7 @@ function sms_registration_welcome_username_msg($username, $password, $url){
 
 // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
 function sms_registration_registrar_welcome_msg($username, $password, $url){
-  return t( variable_get('sms_registration_registrar_welcome_msg' 'Success'), 
+  return t( variable_get('sms_registration_registrar_welcome_msg', 'Success'), 
             array('!name'=>username, '!pass'=>$password, '!server_url'=>$url) );
 }
 
