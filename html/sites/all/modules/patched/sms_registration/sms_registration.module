@@ -99,6 +99,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       $node->name = $user->name;
       mailhandler_switch_user($node->uid);
 
+      _sms_registration_switch_language( user_load($node->uid) );
+
       if (strcasecmp($sms_registration_address, $to_address) != 0) {
         if (variable_get('sms_registration_request_user', 'name') == 'name') {
           $message = sms_registration_welcome_username_msg( $user->name, $password, variable_get('site_name', 'the site') );
@@ -112,6 +114,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
         }
       }
     }
+  } else {
+    _sms_registration_switch_language( user_load($node->uid) );
   }
 
   if (empty($node->title)) {
@@ -181,6 +185,31 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   }
 
   return $node;
+}
+
+/**
+ * Make sure SMS msgs are translated to the correct language by switching based on a set
+ * of heuristics
+ */ 
+function _sms_registration_switch_language($u){
+  global $language;
+  $new_lang = null;
+  // start off with the user's chosen language, if they have set one
+  if($user->language) {
+    $new_lang = $user->language;
+  }
+  // if no user language, then try to set the language from the primary group the user is a member of
+  if (empty($new_lang) && module_exists('og')) {
+    if(count($u->og_groups)>0) {
+      $gid = current(array_keys($u->og_groups));
+      $group = node_load($gid);
+      $new_lang = $group->language;
+    }
+  }
+  // switch language if required to
+  if($new_lang) {
+    $language = $new_lang;
+  }
 }
 
 // the save failed - this assumes the name must have been duplicate
