@@ -99,14 +99,14 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       $node->name = $user->name;
       mailhandler_switch_user($node->uid);
 
-      _sms_registration_switch_language( user_load($node->uid) );
+      $user_language = sms_registration_get_user_language( user_load($node->uid) );
 
       if (strcasecmp($sms_registration_address, $to_address) != 0) {
         if (variable_get('sms_registration_request_user', 'name') == 'name') {
-          $message = sms_registration_welcome_username_msg( $user->name, $password, variable_get('site_name', 'the site') );
+          $message = sms_registration_welcome_username_msg( $user->name, $password, variable_get('site_name', 'the site'), $user_language );
         }
         elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
-          $message = sms_registration_welcome_email_msg( $user->name, $password, variable_get('site_name', 'the site') );
+          $message = sms_registration_welcome_email_msg( $user->name, $password, variable_get('site_name', 'the site'), $user_language );
         }
         if (isset($message)) {
           $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
@@ -115,7 +115,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       }
     }
   } else {
-    _sms_registration_switch_language( user_load($node->uid) );
+    $user_language = sms_registration_get_user_language( user_load($node->uid) );
   }
 
   if (empty($node->title)) {
@@ -152,7 +152,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     $bad_username = "Delivered-To: ".$sms_registration_address;
     if ($save['name']==$bad_username) {
       
-      $message = sms_registration_parse_error_msg( $from[1] );
+      $message = sms_registration_parse_error_msg( $from[1], $user_language );
       watchdog('sms_reg', 'Unsupported Carrier [from_address=%from, carrier=%carrier, content=%body]', 
         array('%from'=>$from_address, '%carrier'=>$from[1], '%body'=>$node->body) );
       
@@ -164,12 +164,12 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
       // if user saved successfully, reply with ack 
       if ($user) {
         if ($new_user) {
-          $message = sms_registration_registrar_welcome_msg($user->name, $password, variable_get('site_name', 'the site') );
+          $message = sms_registration_registrar_welcome_msg($user->name, $password, variable_get('site_name', 'the site'), $user_language );
         } else {
-          $message = sms_registration_name_changed_msg( $info, variable_get('site_name', 'the site') );
+          $message = sms_registration_name_changed_msg( $info, variable_get('site_name', 'the site'), $user_language );
         }
       } else {
-        $message = sms_registration_failed_msg( $user->name );
+        $message = sms_registration_failed_msg( $user->name, $user_language );
         watchdog('sms_reg', 'Duplicate username %name (id=%id) - did not change and told user',array('%name'=>$user->name,'%id'=>$user->id) );
       }
     }
@@ -191,57 +191,58 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
  * Make sure SMS msgs are translated to the correct language by switching based on a set
  * of heuristics
  */ 
-function _sms_registration_switch_language($u){
+function sms_registration_get_user_language($u){
   global $language;
-  $new_lang = null;
+  $user_language = null;
   // start off with the user's chosen language, if they have set one
   if($user->language) {
-    $new_lang = $user->language;
+    $user_language = $user->language;
   }
   // if no user language, then try to set the language from the primary group the user is a member of
-  if (empty($new_lang) && module_exists('og')) {
+  if (empty($user_language) && module_exists('og')) {
     if(count($u->og_groups)>0) {
       $gid = current(array_keys($u->og_groups));
       $group = node_load($gid);
-      $new_lang = $group->language;
+      $user_language = $group->language;
     }
   }
   // switch language if required to
-  if($new_lang) {
-    $language = $new_lang;
+  if(empty($user_language)) {
+    $user_language = $language;
   }
+  return $user_language;
 }
 
 // the save failed - this assumes the name must have been duplicate
-function sms_registration_failed_msg($username){
-  return t( variable_get('sms_registration_failed_msg','Error') , array('!name'=>$username) );
+function sms_registration_failed_msg($username, $language){
+  return t( variable_get('sms_registration_failed_msg','Error') , array('!name'=>$username), $language );
 }
 
 // this is an existing user account, so we're changing their username
-function sms_registration_name_changed_msg($username, $url){
-  return t( variable_get('sms_registration_name_changed_msg','Success'), array('!name' => $username, '!server_url'=>$url ) );
+function sms_registration_name_changed_msg($username, $url, $language){
+  return t( variable_get('sms_registration_name_changed_msg','Success'), array('!name' => $username, '!server_url'=>$url ), $language );
 }
 
 // sent in content, reply asking for email address
-function sms_registration_welcome_email_msg($username, $password, $url){
+function sms_registration_welcome_email_msg($username, $password, $url, $language){
   return t( variable_get('sms_registration_welcome_email_msg', 'Success') ,
-             array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url) );
+             array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // sent in content, reply asking for username change
-function sms_registration_welcome_username_msg($username, $password, $url){
+function sms_registration_welcome_username_msg($username, $password, $url, $language){
   return t( variable_get('sms_registration_welcome_username_msg', 'Success'), 
-             array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url) );
+             array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
-function sms_registration_registrar_welcome_msg($username, $password, $url){
+function sms_registration_registrar_welcome_msg($username, $password, $url, $language){
   return t( variable_get('sms_registration_registrar_welcome_msg', 'Success'), 
-            array('!name'=>username, '!pass'=>$password, '!server_url'=>$url) );
+            array('!name'=>username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // tell the user the carrier isn't supported and log it
-function sms_registration_parse_error_msg($carrier_name){
+function sms_registration_parse_error_msg($carrier_name, $language){
   return t( variable_get('sms_registration_parse_error_msg', 'Error') , 
-            array('!carrier'=>$carrier_name) );
+            array('!carrier'=>$carrier_name), $language );
 }
