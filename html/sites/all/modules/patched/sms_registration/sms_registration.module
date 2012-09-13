@@ -2,6 +2,14 @@
 // $Id: sms_registration.module
 
 /**
+ * Wrapper around all calls to send an SMS - this is helpful for debugging things without
+ * sending actual SMSs to users.
+ */
+function _sms_registration_really_send(){
+  return true;
+}
+
+/**
  * Implementation of hook_menu().
  */
 function sms_registration_menu() {
@@ -112,7 +120,9 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
         }
         if (isset($message)) {
           $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
-          sms_send($number, $message, $options);
+          if (_sms_registration_really_send()) {
+            sms_send($number, $message, $options);
+          }
         }
       }
     }
@@ -179,7 +189,9 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     // send the reply
     if ($message) {
       $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
-      sms_send($number, $message, $options);
+      if (_sms_registration_really_send()) {
+        sms_send($number, $message, $options);
+      }
     }
 
     // Do not post content from the registration address.
