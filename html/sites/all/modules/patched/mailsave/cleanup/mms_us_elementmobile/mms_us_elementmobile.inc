@@ -5,7 +5,7 @@
  */
 function mms_us_elementmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   //watchdog('mailsave','Enter element mobile');
-  $pattern = '@\.elementmobile\.net$@';
+  $pattern = '@\.elementmobile\.net@';
   if (preg_match($pattern, $header->fromaddress)) {
 
     //watchdog('mailsave', 'Got email from Element Mobile');
