@@ -11,7 +11,7 @@ function mms_us_verizon2_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
     //watchdog('mailsave', 'Got email from Verion2 vtext.com');
 
     $text_content = "";
-    if(count($node->mimeparts)>1)) {
+    if(count($node->mimeparts)>1) {
       // find the plain text attachements and stich them together as the body
       foreach ($node->mimeparts as $key => $mimepart) {
         //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
