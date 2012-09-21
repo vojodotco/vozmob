@@ -222,7 +222,7 @@ function sms_registration_get_user_language($u){
   }
   // switch language if required to
   if(empty($user_language)) {
-    $user_language = $language;
+    $user_language = $language->language;
   }
   return $user_language;
 }
