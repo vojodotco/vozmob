@@ -11,16 +11,20 @@ function mms_us_verizon2_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
     //watchdog('mailsave', 'Got email from Verion2 vtext.com');
 
     $text_content = "";
-    // find the plain text attachements and stich them together as the body
-    foreach ($node->mimeparts as $key => $mimepart) {
-      //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
-      $temp = serialize($mimepart);
-      if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
-        //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
-        $text_content .= str_replace("Message:","",$mimepart->data);
+    if(count($node->mimeparts)>1) {
+      // find the plain text attachements and stich them together as the body
+      foreach ($node->mimeparts as $key => $mimepart) {
+        //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+        $temp = serialize($mimepart);
+        if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
+          //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
+          $text_content .= str_replace("Message:","",$mimepart->data);
+        }
       }
+      //watchdog('mailsave', 'last = '.$temp);
+    } else {
+      $text_content = $node->body;  // handle simple one line SMS msgs to reg for name change
     }
-    //watchdog('mailsave', 'last = '.$temp);
 
     // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
     $node->body = $text_content;

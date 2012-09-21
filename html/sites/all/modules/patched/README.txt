@@ -10,4 +10,4 @@ i18n:
 Applied some patch from Drupal.org (what issue is this?)
 
 sms_registration:
-Changed username/password workflow, added logging to catch registration errors.
+Changed username/password workflow, added logging to catch registration errors.  Moved feedback messages into variables and added admin UI to change them.

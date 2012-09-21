@@ -5,22 +5,27 @@
  */
 function mms_us_elementmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   //watchdog('mailsave','Enter element mobile');
-  $pattern = '!@mms.elementmobile.net.?$!i';
+  $pattern = '@\.elementmobile\.net@';
   if (preg_match($pattern, $header->fromaddress)) {
 
     //watchdog('mailsave', 'Got email from Element Mobile');
 
     $text_content = "";
-    // find the plain text attachements and stich them together as the body
-    foreach ($node->mimeparts as $key => $mimepart) {
-      //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
-      $temp = serialize($mimepart);
-      if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
-        //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
-        $text_content .= str_replace("Message:","",$mimepart->data);
+    if( count($node->mimeparts) > 1) {
+      // find the plain text attachements and stich them together as the body
+      foreach ($node->mimeparts as $key => $mimepart) {
+        //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+        $temp = serialize($mimepart);
+        if( ($mimepart->filemime=="TEXT/PLAIN") && ($key!=0) ) {
+          //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
+          $text_content .= str_replace("Message:","",$mimepart->data);
+        }
       }
+      //watchdog('mailsave', 'last = '.$temp);
+    } else {
+      // handle simple one-line sms
+      $text_content = $node->body;
     }
-    //watchdog('mailsave', 'last = '.$temp);
 
     // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
     $node->body = $text_content;
