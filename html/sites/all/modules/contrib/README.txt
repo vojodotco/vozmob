@@ -52,6 +52,8 @@ recaptcha: Prevent spam on anonymous web story submissions and registration.
 
 returnpath: Sets the reply-to address on outgoing generated SMSs.
 
+rules: ???
+
 service_links: Block with links to social media sites.
 
 strongarm: ???
