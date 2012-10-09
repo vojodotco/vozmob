@@ -255,20 +255,6 @@ function flag_link($type, $object = NULL, $teaser = FALSE) {
 
 /**
  * Implementation of hook_flag_link().
- *
- * When Flag uses a link type provided by this module, it will call this
- * implementation of hook_flag_link(). It returns a single link's attributes,
- * using the same structure as hook_link(). Note that "title" is provided by
- * the Flag configuration if not specified here.
- *
- * @param $flag
- *   The full flag object of for the flag link being generated.
- * @param $action
- *   The action this link will perform. Either 'flag' or 'unflag'.
- * @param $content_id
- *   The ID of the node, comment, user, or other object being flagged.
- * @return
- *   An array defining properties of the link.
  */
 function flag_flag_link($flag, $action, $content_id) {
   $token = flag_get_token($content_id);
@@ -662,15 +648,7 @@ function flag_page($action, $flag, $content_id) {
   if ($js) {
     drupal_set_header('Content-Type: text/javascript; charset=utf-8');
     $flag->link_type = 'toggle';
-    print drupal_to_js(array(
-      'status' => TRUE,
-      'newLink' => $flag->theme($flag->is_flagged($content_id) ? 'unflag' : 'flag', $content_id, TRUE),
-      // Further information for the benefit of custom JavaScript event handlers:
-      'contentId' => $content_id,
-      'contentType' => $flag->content_type,
-      'flagName' => $flag->name,
-      'flagStatus' => $flag->is_flagged($content_id) ? 'flagged' : 'unflagged',
-    ));
+    print drupal_to_js(flag_build_javascript_info($flag, $content_id));
     exit;
   }
   else {
@@ -680,10 +658,33 @@ function flag_page($action, $flag, $content_id) {
 }
 
 /**
+ * Builds the JavaScript structure describing the flagging operation.
+ */
+function flag_build_javascript_info($flag, $content_id){
+  $info = array(
+    'status' => TRUE,
+    'newLink' => $flag->theme($flag->is_flagged($content_id) ? 'unflag' : 'flag', $content_id, TRUE),
+    // Further information for the benefit of custom JavaScript event handlers:
+    'contentId' => $content_id,
+    'contentType' => $flag->content_type,
+    'flagName' => $flag->name,
+    'flagStatus' => $flag->is_flagged($content_id) ? 'flagged' : 'unflagged',
+  );
+  drupal_alter('flag_javascript_info', $info);
+  return $info;
+}
+
+/**
  * Form for confirming the (un)flagging of a piece of content.
  *
  * @param $action
  *   Either 'flag' or 'unflag'.
+ * @param $flag
+ *   A loaded flag object.
+ * @param $content_id
+ *   The id of the content to operate on. The type is implicit in the flag.
+ *
+ * @see flag_confirm_submit()
  */
 function flag_confirm(&$form_state, $action, $flag, $content_id) {
   $form = array();
@@ -707,6 +708,14 @@ function flag_confirm(&$form_state, $action, $flag, $content_id) {
   return confirm_form($form, $question, $path, '', $yes);
 }
 
+/**
+ * Submit handler for the flag confirm form.
+ *
+ * Note that validating whether the user may perform the action is done here,
+ * rather than in a form validation handler.
+ *
+ * @see flag_confirm()
+ */
 function flag_confirm_submit(&$form, &$form_state) {
   $action = $form_state['values']['action'];
   $flag_name = $form_state['values']['flag_name'];
@@ -770,7 +779,11 @@ function flag_flag($action, $flag, $content_id, $account) {
 
   if (module_exists('rules')) {
     $event_name = ($action == 'flag' ? 'flag_flagged_' : 'flag_unflagged_') . $flag->name;
-    $arguments = array('flag' => $flag, 'flag_content_id' => $content_id, 'flagging_user' => $account);
+    $arguments = array(
+      'flag' => $flag,
+      'flag_content_id' => $content_id,
+      'flagging_user' => $account,
+    );
     rules_invoke_event($event_name, $arguments);
   }
 }
@@ -915,6 +928,8 @@ function flag_reset_flag($flag, $content_id = NULL) {
   }
   module_invoke_all('flag_reset', $flag, $content_id, $rows);
 
+  // Update the flag_counts table.
+  db_query("DELETE FROM {flag_counts} WHERE fid = %d" . ($content_id ? " AND content_id = %d" : ''), $flag->fid, $content_id);
   db_query("DELETE FROM {flag_content} WHERE fid = %d" . ($content_id ? " AND content_id = %d" : ''), $flag->fid, $content_id);
   return db_affected_rows();
 }
