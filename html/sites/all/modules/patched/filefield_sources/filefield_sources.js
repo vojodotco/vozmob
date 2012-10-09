@@ -30,8 +30,10 @@ Drupal.behaviors.fileFieldSources = function(context) {
       Drupal.fileFieldSources.updateHintText($fileFieldElement.get(0));
     });
 
-    // Hide all the other upload mechanisms on page load.
+    // Show the first upload mechanism and hide all others
     $fileFieldElement.find('div.filefield-source', this).css('display', 'none');
+    $fileFieldElement.find('div.filefield-source:first', this).css('display', 'block');
+    $fileFieldElement.find('div.filefield-upload', this).parent().css('display', 'none');
     $(this).find('a:first').addClass('active');
   });
 

@@ -343,7 +343,7 @@ function theme_filefield_sources_list($element, $sources) {
     'label' => t('Upload'),
     'description' => t('Upload a file from your computer.'),
   );
-  $sources = array_merge($default, $sources);
+  $sources = array_merge($sources, $default);
 
   foreach ($sources as $name => $source) {
     $links[] = '<a href="#" onclick="return false;" title="' . $source['description'] . '" id="' . $element['#id'] . '-' . $name . '-source" class="filefield-source filefield-source-' . $name . '">' . $source['label'] . '</a>';
