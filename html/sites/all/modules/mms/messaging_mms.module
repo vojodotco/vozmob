@@ -52,8 +52,8 @@ function messaging_mms_send_msg($destination, $message, $params = array()) {
 function messaging_mms_user_destination($account, $message) {
   // Check for active mobile infomation. Simply return it so that the send
   // callback has a destination array and access everything.
-  if (!empty($account->sms_user) && $account->sms_user['status'] == 2 && !empty($account->sms_user['number']) && !empty($account->sms_user['gateway']['carrier'])) {
-    return $account->sms_user['number'] . '@' . mms_email_gateway_rewrite_to_mms($account->sms_user['gateway']['carrier']);
+  if (!empty($account->sms_user[0]) && ($account->sms_user[0]['status'] == SMS_USER_CONFIRMED || $account->sms_user[0]['status'] == SMS_USER_ACTIVE) && !empty($account->sms_user[0]['number']) && !empty($account->sms_user[0]['gateway']['carrier'])) {
+    return $account->sms_user[0]['number'] . '@' . mms_email_gateway_rewrite_to_mms($account->sms_user[0]['gateway']['carrier']);
   }
 }
 

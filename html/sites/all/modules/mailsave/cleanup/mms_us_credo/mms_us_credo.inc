@@ -14,7 +14,9 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match('!@waw.plspictures.com$!i', $header->fromaddress)) {
     if (preg_match('!(http://www\.plspictures\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
       // Connect via HTTPS to (help) protect private data.
-      $url = str_replace('http://', 'https://', $matches[1]);
+      // $url = str_replace('http://', 'https://', $matches[1]);
+      // But as of 2012-10-08 HTTPS does not work :(
+      $url = $matches[1];
       // credo sends HTTP 500 error if user agent is PHP, so we use Drupal :)
       $message_view = drupal_http_request($url);
       // Get the message subject.
