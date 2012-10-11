@@ -15,12 +15,14 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     $text_attachment_filenames = array();
 
+    if($debug) watchdog('mailsave'," - title:".$node->title);
+    if($debug) watchdog('mailsave'," - body:".$node->body);
     $text_content = "";
-    // find the "textplain_X.txt" attachement and use it for the body
+    // find the "text_X.txt" attachement and use it for the body
     foreach ($node->mimeparts as $key => $mimepart) {
       if($debug) watchdog('mailsave', " - mimepart ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
-      if(substr($mimepart->filename,0,9)=="textplain") {
+      if(substr($mimepart->filename,0,4)=="text") {
         if($debug) watchdog('mailsave', " -- replaced body (".$mimepart->data.")");
         $text_content .= $mimepart->data;
         $text_attachment_filenames[] = $mimepart->filename;
