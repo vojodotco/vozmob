@@ -7,25 +7,26 @@
  * content of the mms - that is in an attachment called "textplain_X.txt".
  */
 function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  $debug = false;
   $pattern = '!@pm.sprint.com.?$!i';
   if (preg_match($pattern, $header->fromaddress)) {
 
-    //watchdog('mailsave', 'Got email from Sprint');
+    if($debug) watchdog('mailsave', 'Got email from Sprint');
 
     $text_attachment_filenames = array();
 
     $text_content = "";
     // find the "textplain_X.txt" attachement and use it for the body
     foreach ($node->mimeparts as $key => $mimepart) {
-      //watchdog('mailsave', "  ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+      if($debug) watchdog('mailsave', " - mimepart ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
       $temp = serialize($mimepart);
       if(substr($mimepart->filename,0,9)=="textplain") {
-        //watchdog('mailsave', "    replaced body (".$mimepart->data.")");
+        if($debug) watchdog('mailsave', " -- replaced body (".$mimepart->data.")");
         $text_content .= $mimepart->data;
         $text_attachment_filenames[] = $mimepart->filename;
       }
     }
-    //watchdog('mailsave', 'last = '.$temp);
+    if($debug) watchdog('mailsave', ' - last mimepart = '.$temp);
 
     // there can be more than one "textplain_X.txt" attachment, so do this all outside the for loop
     $node->body = $text_content;
@@ -36,6 +37,7 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     foreach($text_attachment_filenames as $filename) {
       //unset($node->mailsave_attachments[$text_attachment_key]);
       mailsave_discard_attachment($node, $filename);
+      if($debug) watchdog('mailsave', ' - discarded attachment'.$filename);
     }
 
   }
