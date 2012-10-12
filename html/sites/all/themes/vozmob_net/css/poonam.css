@@ -268,17 +268,6 @@ float: left;
 }
 
 body.page-taxonomy .node {
-padding-left: 30px;
-}
-
-
-body.page-taxonomy .span-18 h2 {
-width: 100%;
-margin-bottom: 10px;
-margin-left: 30px;
-}
-
-body.page-taxonomy .node {
 border-bottom: 1px dotted #ff9900;
 
 }

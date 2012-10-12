@@ -97,20 +97,48 @@ function flag_create_handler($content_type) {
  */
 class flag_flag {
 
-  // The database ID. Null for flags that haven't been saved to the database yet.
+  /**
+   * The database ID.
+   *
+   * NULL for flags that haven't been saved to the database yet.
+   *
+   * @var integer
+   */
   var $fid = NULL;
 
-  // The content-type this flag works with.
+  /**
+   * The content type (aka entity type) this flag works with.
+   *
+   * @var string
+   */
   var $content_type = NULL;
 
-  // The flag's "machine readable" name.
+  /**
+   * The flag's "machine readable" name.
+   *
+   * @var string
+   */
   var $name = '';
 
-  // Various non-serialized properties of the flag, corresponding directly to
-  // database columns.
+  /**
+   * The human-readable title for this flag.
+   *
+   * @var string
+   */
   var $title = '';
+
+  /**
+   * Whether this flag state should act as a single toggle to all users.
+   *
+   * @var bool
+   */
   var $global = FALSE;
-  // The sub-types, e.g. node types, this flag applies to.
+
+  /**
+   * The sub-types, AKA bundles, this flag applies to.
+   *
+   * @var array
+   */
   var $types = array();
 
   /**
@@ -262,6 +290,9 @@ class flag_flag {
 
   /**
    * Validates that the current flag's name is valid.
+   *
+   * @return
+   *   A list of errors encountered while validating this flag's name.
    */
   function validate_name() {
     $errors = array();
@@ -364,6 +395,7 @@ class flag_flag {
 
   /**
    * Returns TRUE if the flag applies to the given content.
+   *
    * Derived classes must implement this.
    *
    * @abstract
@@ -384,7 +416,7 @@ class flag_flag {
   }
 
   /**
-   * Returns TRUE if user has access to use this flag.
+   * Determines whether the user has access to use this flag.
    *
    * @param $action
    *   Optional. The action to test, either "flag" or "unflag". If none given,
@@ -410,7 +442,7 @@ class flag_flag {
   }
 
   /**
-   * Returns TRUE if the user can flag, or unflag, the given content.
+   * Determines whether the user may flag, or unflag, the given content.
    *
    * This method typically should not be overridden by child classes. Instead
    * they should implement type_access(), which is called by this method.
@@ -423,6 +455,10 @@ class flag_flag {
    * @param $account
    *   The user on whose behalf to test the flagging action. Leave NULL for the
    *   current user.
+   *
+   * @return
+   *   Boolean TRUE if the user is allowed to flag/unflag the given content.
+   *   FALSE otherwise.
    */
   function access($content_id, $action = NULL, $account = NULL) {
     if (!isset($account)) {
@@ -462,7 +498,9 @@ class flag_flag {
   }
 
   /**
-   * Similar to access() but works on multiple IDs at once. It is called in the
+   * Determine access to multiple objects.
+   *
+   * Similar to user_access() but works on multiple IDs at once. Called in the
    * pre_render() stage of the 'Flag links' field within Views to find out where
    * that link applies. The reason we do a separate DB query, and not lump this
    * test in the Views query, is to make 'many to one' tests possible without
@@ -478,6 +516,12 @@ class flag_flag {
    * @param $account
    *   Optional. The account for which the actions will be compared against.
    *   If left empty, the current user will be used.
+   *
+   * @return
+   *   An array whose keys are the object IDs and values are booleans indicating
+   *   access.
+   *
+   * @see hook_flag_access_multiple()
    */
   function access_multiple($content_ids, $account = NULL) {
     $account = isset($account) ? $account : $GLOBALS['user'];
@@ -575,12 +619,15 @@ class flag_flag {
    *   applicable to the item, etc.), TRUE otherwise.
    */
   function flag($action, $content_id, $account = NULL, $skip_permission_check = FALSE) {
+     // Get the user.
     if (!isset($account)) {
       $account = $GLOBALS['user'];
     }
     if (!$account) {
       return FALSE;
     }
+
+    // Check access and applicability.
     if (!$skip_permission_check) {
       if (!$this->access($content_id, $action, $account)) {
         // User has no permission to flag/unflag this object.
