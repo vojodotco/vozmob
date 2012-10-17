@@ -13,6 +13,20 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from credo.
   if (preg_match('!@waw.plspictures.com$!i', $header->fromaddress)) {
     if (preg_match('!(http://www\.plspictures\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
+      
+      // Check for text attachments to get body text
+      $text_content = '';
+      foreach ($node->mimeparts as $key => $mimepart) {
+        if($debug) watchdog('mailsave', " - mimepart ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
+        $temp = serialize($mimepart);
+        if(substr($mimepart->filename,0,4)=="text") {
+          if($debug) watchdog('mailsave', " -- replaced body (".$mimepart->data.")");
+          $text_content .= $mimepart->data;
+        }
+      }
+      $node->body = $text_content;
+      $node->teaser = node_teaser($node->body);
+      
       // Connect via HTTPS to (help) protect private data.
       // $url = str_replace('http://', 'https://', $matches[1]);
       // But as of 2012-10-08 HTTPS does not work :(
@@ -69,9 +83,6 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         }
       }
     }
-    // There seems to be nothing useful in the body so we nuke it!
-    $node->body = '';
-    $node->teaser = node_teaser($node->body);
   }
 }
 
