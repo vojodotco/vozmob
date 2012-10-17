@@ -24,7 +24,8 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
           $text_content .= $mimepart->data;
         }
       }
-      $node->body = $text_content;
+      //$node->body = $text_content;
+      $node->body = '';
       $node->teaser = node_teaser($node->body);
       
       // Connect via HTTPS to (help) protect private data.
