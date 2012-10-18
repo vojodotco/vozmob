@@ -1,0 +1,19 @@
+<?php
+// $Id$
+/**
+ * @file
+ */
+ 
+/**
+ * Implementation of hook_install().
+ */
+function audiorecorderfield_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'audiorecorderfield');
+  variable_set('audiofield_audioplayer_wav', 'nanogong');
+}
+
+function audiorecorderfield_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'audiorecorderfield');
+}
