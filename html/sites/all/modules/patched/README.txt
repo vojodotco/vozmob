@@ -1,5 +1,8 @@
 Modules in here are hosted on drupal.org, but needed to be patched.  If the path is accepted and rolled upstream, move the module to contrib.
 
+audiorecorderfield:
+Changes text of button from "Upload" to "Save Recording".
+
 filefield_sources:
 Reversed order of default and custom file sources in the module.  Modified the javascript to display the first custom source by default.
 
