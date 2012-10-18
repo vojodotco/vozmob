@@ -16,6 +16,8 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       
       // Check for text attachments to get body text
       $text_content = '';
+      //$debug = true;
+      if ($debug) watchdog('mailsave', "Credo SMS/MMS with " . count($node->mimeparts)) . " MIME parts";
       foreach ($node->mimeparts as $key => $mimepart) {
         if($debug) watchdog('mailsave', " - mimepart ".$key." = ".$mimepart->filemime." - ".$mimepart->filename." (".strlen($mimepart->data).")");
         $temp = serialize($mimepart);
