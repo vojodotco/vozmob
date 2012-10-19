@@ -132,6 +132,7 @@ function vozmob_og_flag_default_flags() {
     'api_version' => 2,
   );
   return $flags;
+
 }
 
 /**
