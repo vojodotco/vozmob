@@ -56,6 +56,12 @@ function mailsave_perm() {
  */
 function mailsave_mailhandler($node, $result, $i, $header, $mailbox) {
 
+  list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
+  watchdog('mailsave', 'hook_mailhandler from ' . $from_address);
+  watchdog('mailsave', 'files: ' . print_r($node->files, true));
+  watchdog('mailsave', 'field_image: ' . print_r($node->field_image, true));
+  watchdog('mailsave', 'mailsave_attachments: ' . print_r($node->mailsave_attachments, true));
+  
   // Initialise attachments array
   $attachments = array();
 

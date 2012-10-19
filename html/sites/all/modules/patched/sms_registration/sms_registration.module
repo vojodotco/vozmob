@@ -61,6 +61,10 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $to_address = $header->to[0]->mailbox . '@' . $header->to[0]->host;
   $sms_registration_address = sms_registration_get_address();
   $number = $from[0];
+  watchdog('sms_registration', 'hook_mailhandler from ' . $from_address);
+  watchdog('sms_registration', 'files: ' . print_r($node->files, true));
+  watchdog('sms_registration', 'field_image: ' . print_r($node->field_image, true));
+  watchdog('sms_registration', 'mailsave_attachments: ' . print_r($node->mailsave_attachments, true));
 
   // If the message is not from SMS gateway, stop processing.
   if (!isset($providers[$from[1]])) {

@@ -79,7 +79,7 @@ function timecode(ms) {
 	    $("#edit-field-"+field_name+"-"+delta+"-wrapper .error").remove();
 	    //Disable the button
 	    $("#soundcloud-button-"+field_name+"-"+delta).attr('disabled', 'disabled');
-        if($("#soundcloud-button-"+field_name+"-"+delta).val()=='Upload') {
+        if($("#soundcloud-button-"+field_name+"-"+delta).val()=='Save Recording') {
 	     //Upload button
          var path=Drupal.settings.basePath +"?q=audiorecorderfield_file_receive";
          Recorder.upload({
@@ -111,7 +111,7 @@ function timecode(ms) {
           //$("#edit-field-"+field_name+"-"+delta+"-wrapper .filefield-file-info").remove();
 	      $("#edit-field-"+field_name+"-"+delta+"-fid").val("");
 	      $("#soundcloud-button-"+field_name+"-"+delta).removeAttr("disabled");
-	      $("#soundcloud-button-"+field_name+"-"+delta).val('Upload');
+	      $("#soundcloud-button-"+field_name+"-"+delta).val('Save Recording');
           $.ajax({
 					type: "GET",
 					url: Drupal.settings.basePath +"?q=audiorecorderfield_recorder_reload",

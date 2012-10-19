@@ -26,7 +26,7 @@ function theme_audiorecorderfield_soundcloud($element) {
         //watchdog('audiorecorderfield','File detected '.print_r($element,true));
     }
     else {
-        $button_op='Upload';
+        $button_op='Save Recording';
         
         
         $output = theme('audiorecorderfield_soundcloud_skin', $field_name, $element['#delta']);
