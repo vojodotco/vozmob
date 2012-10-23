@@ -386,7 +386,10 @@ function _mailsave_save_file($attachment, $validators = array()) {
     $errors = array();
     foreach ($validators as $function => $args) {
       array_unshift($args, $file);
-      $errors = array_merge($errors, call_user_func_array($function, $args));
+      $new_errors = call_user_func_array($function, $args);
+      if (is_array($new_errors)) {
+        $errors = array_merge($errors, $new_errors);
+      }
     }
 
     // Check for validation errors.
