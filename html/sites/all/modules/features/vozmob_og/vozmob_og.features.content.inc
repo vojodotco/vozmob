@@ -6,6 +6,75 @@
 function vozmob_og_content_default_fields() {
   $fields = array();
 
+  // Exported field: field_translated_by
+  $fields['blog-field_translated_by'] = array(
+    'field_name' => 'field_translated_by',
+    'type_name' => 'blog',
+    'display_settings' => array(
+      'label' => array(
+        'format' => 'above',
+        'exclude' => 0,
+      ),
+      'teaser' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'full' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+    ),
+    'widget_active' => '1',
+    'type' => 'userreference',
+    'required' => '0',
+    'multiple' => '0',
+    'module' => 'userreference',
+    'active' => '1',
+    'referenceable_roles' => array(
+      '3' => 3,
+      '4' => 4,
+      '8' => 8,
+      '2' => 0,
+      '5' => 0,
+    ),
+    'referenceable_status' => '1',
+    'advanced_view' => '--',
+    'advanced_view_args' => '',
+    'widget' => array(
+      'autocomplete_match' => 'contains',
+      'size' => '60',
+      'reverse_link' => 0,
+      'default_value' => array(
+        '0' => array(
+          'uid' => NULL,
+          '_error_element' => 'default_value_widget][field_translated_by][0][uid][uid',
+        ),
+      ),
+      'default_value_php' => NULL,
+      'label' => 'Translated by',
+      'weight' => '-2',
+      'description' => '',
+      'type' => 'userreference_autocomplete',
+      'module' => 'userreference',
+    ),
+  );
+
   // Exported field: field_group_logo
   $fields['group-field_group_logo'] = array(
     'field_name' => 'field_group_logo',
@@ -338,6 +407,7 @@ function vozmob_og_content_default_fields() {
   t('"Name" Audio for Phone Calls');
   t('Group logo');
   t('Group posting address');
+  t('Translated by');
 
   return $fields;
 }
