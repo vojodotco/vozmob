@@ -41,6 +41,190 @@ function sms_registration_mail_alter(&$message) {
 }
 
 /**
+ * Implementation of hook_mailhandler_authenticate_info()
+ */
+function sms_registration_mailhandler_authenticate_info() {
+  $info = array(
+    'sms_registration_default' => array(
+      'title' => 'SMS Registration',
+      'description' => "Checks whether the sender's email or phone number matches the database.  Optionally creates a new user if necessary.",
+      'callback' => 'sms_registration_authenticate_default',
+      'module' => 'sms_registration',
+      'extension' => NULL,
+      'basename' => NULL,
+    )
+  );
+  return $info;
+}
+
+/**
+ * Authenticate message based on sender's email address and phone number
+ *   If the sender's email address or phone number matches an email address of a valid user, then
+ *   assign that user's uid and name to the node object.  If the sender's info does not match,
+ *   then a new user will be created.
+ *   
+ * @param $node
+ *   Object a node object
+ * @param $header
+ *   Object of message header information
+ * @param $origbody
+ *   String message body text
+ * @param $mailbox
+ *   Array of mailbox configuration
+ * 
+ * @return object, the node object
+ */
+function sms_registration_authenticate_default(&$node, $header, $origbody, $mailbox) {
+  list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
+  $from = explode('@', strtolower($from_address));
+  // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
+  $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
+  $providers = sms_carriers();
+  $to_address = $header->to[0]->mailbox . '@' . $header->to[0]->host;
+  $sms_registration_address = sms_registration_get_address();
+  $number = $from[0];
+  watchdog('sms_registration', 'hook_authenticate_default from ' . $from_address);
+
+  // If the message is not from SMS gateway, stop processing.
+  if (!isset($providers[$from[1]])) {
+    return $node;
+  }
+
+  // If the message is from SMS gateway, fire sms_incoming callbacks.
+  // Except that firing the sms_incoming callbacks sends a confirmation code
+  // and also logs out the user. so is not compatible.
+  //sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
+
+  $password = user_password(8);
+  $new_user = false;
+  $message = null;
+  $user_language = null;
+
+  // If the user was not authenticated via user account email address.
+  if (!$node->uid) {
+    // Look up the user by phone number.
+    if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
+      $node->uid = $account->uid;
+      $node->name = $account->name;
+      mailhandler_switch_user($node->uid);
+      $user_language = sms_registration_get_user_language( user_load($node->uid) );
+    }
+
+    // If message is from an SMS/MMS gateway, create a user account.
+    if (!$node->uid) {
+      $new_user = true;
+      $user = FALSE;
+      
+      while (!$user) {
+        $user = user_save(NULL, array(
+          'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
+          'pass' => $password,
+          'mail' => $from_address,
+          'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
+          'status' => 1,
+          'language' => $node->language,
+          'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+          'access' => time(),
+        ));
+      }
+      
+      $node->uid = $user->uid;
+      $node->name = $user->name;
+      mailhandler_switch_user($node->uid);
+
+      $user_language = sms_registration_get_user_language( user_load($node->uid) );
+
+      if (strcasecmp($sms_registration_address, $to_address) != 0) {
+        if (variable_get('sms_registration_request_user', 'name') == 'name') {
+          $message = sms_registration_welcome_username_msg( $user->name, $password, variable_get('site_name', 'the site'), $user_language );
+        }
+        elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+          $message = sms_registration_welcome_email_msg( $user->name, $password, variable_get('site_name', 'the site'), $user_language );
+        }
+        if (isset($message)) {
+          $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
+          if (_sms_registration_really_send()) {
+            sms_send($number, $message, $options);
+          }
+        }
+      }
+    }
+  } else {
+    $user_language = sms_registration_get_user_language( user_load($node->uid) );
+  }
+
+  if (empty($node->title)) {
+    $node->title = t('New story');
+  }
+
+  // If user has authenticated and message was sent to a registration address.
+  if ($node->uid && strcasecmp($sms_registration_address, $to_address) == 0) {
+    // at this point mailsave should have parsed the message for us, so we don't need to do any more than this to get our content
+    $info = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
+    //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
+    if (empty($account)) {
+      $account = user_load(array('uid' => $node->uid, 'status' => 1));
+    }
+
+    $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
+
+    // figure out if this is username or email (based on admin setting)
+    if (variable_get('sms_registration_request_user', 'name') == 'name') {
+      $save['name'] = $info;
+    }
+    elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+      if (valid_email_address($info)) {
+        $save['mail'] = $info;
+      }
+    }
+
+    // if this is a the first sms and it was sent to the registrar directly, we need a pswd for the user
+    if ($new_user) {
+      $save['pass'] = $password;
+    }
+
+    // check to make sure the email parsed correctly - often unparsed messages end up with a username of "Delivered-To: registrar@vojo.co"
+    $bad_username = "Delivered-To: ".$sms_registration_address;
+    if ($save['name']==$bad_username) {
+      
+      $message = sms_registration_parse_error_msg( $from[1], $user_language );
+      watchdog('sms_reg', 'Unsupported Carrier [from_address=%from, carrier=%carrier, content=%body]', 
+        array('%from'=>$from_address, '%carrier'=>$from[1], '%body'=>$node->body) );
+      
+    } else {
+      
+      // parsed out stuff correctly, so save the changes
+      $user = user_save($account, $save);
+  
+      // if user saved successfully, reply with ack 
+      if ($user) {
+        if ($new_user) {
+          $message = sms_registration_registrar_welcome_msg($user->name, $password, variable_get('site_name', 'the site'), $user_language );
+        } else {
+          $message = sms_registration_name_changed_msg( $info, variable_get('site_name', 'the site'), $user_language );
+        }
+      } else {
+        $message = sms_registration_failed_msg( $user->name, $user_language );
+        watchdog('sms_reg', 'Duplicate username %name (id=%id) - did not change and told user',array('%name'=>$user->name,'%id'=>$user->id) );
+      }
+    }
+
+    // send the reply
+    if ($message) {
+      $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
+      if (_sms_registration_really_send()) {
+        sms_send($number, $message, $options);
+      }
+    }
+
+    // Do not post content from the registration address.
+    $node = FALSE;
+  }
+
+  return $node;
+}
+
+/**
  * Implementation of hook_mailhandler().
  *
  * Attempt to match sender to a phone number stored by sms_user module.
