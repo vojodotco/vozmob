@@ -127,7 +127,6 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
   // If the not authenticated by email or phone num and message is from an SMS/MMS gateway,
   // then create a user account.
   if (!$node->uid) {
-    watchdog('sms_reg', 'Creating new user for unrecognized email and phone number.');
     $user = FALSE;
     $new_user = true;
     
@@ -143,6 +142,7 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
         'access' => time(),
       ));
     }
+    watchdog('sms_reg', 'Creating new user for unrecognized email and phone number: ' . $user->name);
     
     $node->uid = $user->uid;
     $node->name = $user->name;
@@ -201,8 +201,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $password = user_password(8);
   $new_user = $node->sms_registration_new;
   $message = null;
-  $account = user_load($node->uid);
-  $user_language = sms_registration_get_user_language($account);
+  $user = user_load($node->uid);
+  $user_language = sms_registration_get_user_language($user);
 
   if (empty($node->title)) {
     $node->title = t('New story');
@@ -231,8 +231,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     $info = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
     watchdog('sms_reg', 'Registrar message with body: ' . $info);
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
-    if (empty($account)) {
-      $account = user_load(array('uid' => $node->uid, 'status' => 1));
+    if (empty($user)) {
+      $user = user_load(array('uid' => $node->uid, 'status' => 1));
     }
 
     $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
@@ -263,7 +263,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     } else {
       
       // parsed out stuff correctly, so save the changes
-      $user = user_save($account, $save);
+      $user = user_save($user, $save);
   
       // if user saved successfully, reply with ack 
       if ($user) {
