@@ -28,7 +28,7 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         $text_attachment_filenames[] = $mimepart->filename;
       }
     }
-    if (empty($test_content) && $node->title !== 'New Message') {
+    if (empty($text_content) && $node->title !== 'New Message') {
       // No text attachments, pull body from subject unless it's the default
       $text_content = $node->title;
     }
