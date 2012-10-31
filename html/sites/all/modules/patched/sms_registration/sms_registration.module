@@ -252,7 +252,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     $added_picture = false;
     if(property_exists($node,'mimeparts') ){
       foreach($node->mimeparts as $key=>$attachment){
-        if($added_picture==false && substr($attachment->filemime,0,5)=="IMAGE"){
+        if( ($added_picture==false) && (strtolower(substr($attachment->filemime,0,5))=="image") ){
           $existing = ($new_user) ? null : $user->picture;
           $unique_prefix = ($new_user) ? rand(0,1000) : $user->uid;
           $dest = file_directory_path().'/'.variable_get('user_picture_path','').'/'.$unique_prefix.'_'.$attachment->filename;
