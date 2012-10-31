@@ -11,7 +11,10 @@
  */
 function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from boost.
-  if (preg_match('!@myboostmobile.com$!i', $header->fromaddress)) {
+  if (preg_match('!@sms\.myboostmobile\.com$!i', $header->fromaddress)) {
+    watchdog('mailsave', 'cleaning up boost sms');
+    $node->body = preg_replace('/re:new message[\r\n]*/i', '', $node->body);
+  } else if (preg_match('!@myboostmobile.com$!i', $header->fromaddress)) {
     if (preg_match('!(http://mediamail\.boostmobile\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
       // Sprint-based providers used to link to a gallery rather than attaching content to eamails
       // but this seems to have been discontinued.
