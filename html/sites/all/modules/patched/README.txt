@@ -5,6 +5,7 @@ Changes text of button from "Upload" to "Save Recording".
 
 filefield_sources:
 Reversed order of default and custom file sources in the module.  Modified the javascript to display the first custom source by default.
+Applied the patch from http://drupal.org/node/1795160
 
 i18n:
 Applied some patch from Drupal.org (what issue is this?)

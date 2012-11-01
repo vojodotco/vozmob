@@ -25,6 +25,10 @@ function mms_us_credo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         $text_attachment_filenames[] = $mimepart->filename;
       }
     }
+    if (empty($text_content) && $node->title !== 'New Message') {
+      // No text attachments, pull body from subject unless it's the default
+      $text_content = $node->title;
+    }
     $node->body = $text_content;
     $node->teaser = node_teaser($node->body);
     $node->title = substr($node->body,0,60);    // title length is based on experience
