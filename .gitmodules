@@ -10,9 +10,6 @@
 [submodule "html/sites/all/modules/contrib/mimedetect"]
 	path = html/sites/all/modules/contrib/mimedetect
 	url = git://git.drupal.org/project/mimedetect
-[submodule "html/sites/all/libraries/blueprint"]
-	path = html/sites/all/libraries/blueprint
-	url = git://github.com/joshuaclayton/blueprint-css.git
 [submodule "html/sites/all/modules/custom/vojo"]
 	path = html/sites/all/modules/custom/vojo
 	url = git://gitorious.org/vozmob/vojo.git
