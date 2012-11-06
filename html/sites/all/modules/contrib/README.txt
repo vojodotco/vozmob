@@ -28,6 +28,8 @@ diff: Helps with feature development and deployment.
 
 features: Packages up drupal config for easier management of dev/production servers.
 
+filebanlist: Lets editors create a list of files that cannot be uploaded (by file content hash).
+
 filefield: Saves attachements to a node in a CCK field.
 
 filefield_sources: Save various things into a CCK file field.

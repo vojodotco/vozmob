@@ -1,4 +1,3 @@
-// $Id: README.txt,v 1.1.2.2 2009/03/06 21:02:19 mfb Exp $
 
 FILE BAN LIST
 -------------

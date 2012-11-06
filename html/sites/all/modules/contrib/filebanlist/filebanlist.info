@@ -1,7 +1,13 @@
-; $Id: filebanlist.info,v 1.1.2.2 2009/06/12 01:41:05 mfb Exp $
 name = File ban list
 description = Create a ban list of files which are not permitted to be uploaded.
 core = 6.x
 dependencies[] = views
 dependencies[] = views_bulk_operations
 php = 5
+
+; Information added by drupal.org packaging script on 2011-02-25
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "filebanlist"
+datestamp = "1298619256"
+
