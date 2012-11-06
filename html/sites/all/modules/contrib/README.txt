@@ -38,6 +38,8 @@ imageapi: Required by imagecache.
 
 imagecache: Auto-generate thumbnails for images based on presets.
 
+imagecache_profiles: Auto-generate standard-sized user profile pics on various pages.
+
 jcarousel: Used in the CDH Monterrey view for the group homepage.
 
 jquery_ui: Used in various places for UI candy.
