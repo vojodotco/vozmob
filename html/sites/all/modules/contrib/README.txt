@@ -58,6 +58,8 @@ override_node_options: Grants the "group-admin blogger" special permissions.
 
 panels: Layout across the entire site.
 
+pathauto: Creates human-friendly URLs based on patterns.
+
 piwik: Website visitor analytics.
 
 recaptcha: Prevent spam on anonymous web story submissions and registration.
