@@ -12,8 +12,6 @@ audiorecorderfield: Save in-browser recordings into a CCK field.
 
 auto_nodetitle: Name new nodes that don't have titles automatically.
 
-? backup_files: Create backups of the files directory
-
 backup_migrate: Scheduled backups locally and to Amazon S3.
 
 captcha: Stop spam on web signup and web anonymous story submission.
