@@ -1,5 +1,7 @@
 Modules in here are hosted on drupal.org.  All the modules in sites/all/modules/ will be moved in here eventually.  If you patch a module in here, move it to the ../patched/ dir!
 
+admin_menu: Persistant menu for all admin links across top of page for administrator role.
+
 adminrole: Maintain an automated "admin" role that gets all privileges, even when you add new modules.
 
 audiofield: Save audio recordings into a CCK field.
