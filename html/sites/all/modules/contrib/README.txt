@@ -4,6 +4,8 @@ admin_menu: Persistant menu for all admin links across top of page for administr
 
 adminrole: Maintain an automated "admin" role that gets all privileges, even when you add new modules.
 
+advanced_help: Give administrators more helpful tips while administering modules.
+
 audiofield: Save audio recordings into a CCK field.
 
 audiorecorderfield: Save in-browser recordings into a CCK field.
