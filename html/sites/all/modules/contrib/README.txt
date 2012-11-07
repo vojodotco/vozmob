@@ -1,14 +1,16 @@
 Modules in here are hosted on drupal.org.  All the modules in sites/all/modules/ will be moved in here eventually.  If you patch a module in here, move it to the ../patched/ dir!
 
+admin_menu: Persistant menu for all admin links across top of page for administrator role.
+
 adminrole: Maintain an automated "admin" role that gets all privileges, even when you add new modules.
+
+advanced_help: Give administrators more helpful tips while administering modules.
 
 audiofield: Save audio recordings into a CCK field.
 
 audiorecorderfield: Save in-browser recordings into a CCK field.
 
 auto_nodetitle: Name new nodes that don't have titles automatically.
-
-? backup_files: Create backups of the files directory
 
 backup_migrate: Scheduled backups locally and to Amazon S3.
 
@@ -24,11 +26,19 @@ diff: Helps with feature development and deployment.
 
 features: Packages up drupal config for easier management of dev/production servers.
 
+filebanlist: Lets editors create a list of files that cannot be uploaded (by file content hash).
+
 filefield: Saves attachements to a node in a CCK field.
 
 filefield_sources: Save various things into a CCK file field.
 
 flag: Let us create unique options on groups (public, moderated, geo-located).
+
+imageapi: Required by imagecache.
+
+imagecache: Auto-generate thumbnails for images based on presets.
+
+imagecache_profiles: Auto-generate standard-sized user profile pics on various pages.
 
 jcarousel: Used in the CDH Monterrey view for the group homepage.
 
@@ -47,6 +57,8 @@ og_user_roles: Assigns the "group-admin blogger" role to group managers.
 override_node_options: Grants the "group-admin blogger" special permissions.
 
 panels: Layout across the entire site.
+
+pathauto: Creates human-friendly URLs based on patterns.
 
 piwik: Website visitor analytics.
 
