@@ -14,6 +14,7 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $node->body = trim(preg_replace('/--.*?This mobile text message is brought to you by AT&T/s', '', $node->body));
     // Remove HTML <title>.
     $node->body = preg_replace('@<title>.*</title>@', '', $node->body);
+    $node->title = substr($node->body,0,60);    // title length is based on experience
     $node->teaser = node_teaser($node->body);
 
     // Discard empty messages.
