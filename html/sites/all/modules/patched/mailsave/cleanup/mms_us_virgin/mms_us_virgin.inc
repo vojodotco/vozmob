@@ -6,9 +6,7 @@
  */
 function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Build regex to see if this was from virgin mobile
-  $pattern = '@vmpix.com@';
-  
-  if (preg_match($pattern, $header->fromaddress)) {
+  if (preg_match('@vmpix.com@', $header->fromaddress)) {
 
     $node->body = str_replace('<p ALIGN=LEFT><font size=2 color="#cc0000" face=Verdana>This message is from', '', $node->body);
     $node->body = str_replace('a Virgin Mobile user. Enjoy.<br>', '', $node->body);
@@ -27,6 +25,13 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         unset($node->mailsave_attachments[$key]);
       }
     }
+  } else if (preg_match('@pixmbl.com@', $header->fromaddress)) {
+    $node->body = $node->title;
+    $node->body = preg_replace('/^.*<title>/i', '', $node->body);
+    $node->body = preg_replace('!</title>.*$!i', '', $node->body);
+    $node->body = trim($node->body);
+    $node->title = truncate_utf8(decode_entities(strip_tags($node->body)), 60, TRUE, TRUE);
+    $node->teaser = node_teaser($node->body);
   }
 }
 
