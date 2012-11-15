@@ -6,7 +6,7 @@
  */
 function mms_br_vivo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match('/@vivomms.com.br$/', $header->fromaddress)) {
-    $body = $node->body;
+    $body = strip_tags($node->body);
     $body = str_replace('New Page 1', '', $body);
     $body = str_replace('Conteudo enviado do meu Celular Vivo', '', $body);
     $body = trim($body);
