@@ -5,10 +5,10 @@
  * Implementation of hook_mailsave_clean().
  */
 function mms_br_tim_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-  if (preg_match('/@tim.com.br$/', $header->fromaddress)) {
+  if (preg_match('/@tim\.com\.br$/', $header->fromaddress)) {
     // Discard text attachments
     foreach ($node->mimeparts as $key => $mimepart) {
-      $filename = $mimepart->filename;
+      $filename = strtolower($mimepart->filename);
       if(substr($filename, -4)=='.txt') {
         mailsave_discard_attachment($node, $filename);
       }
