@@ -13,6 +13,14 @@ function mms_br_vivo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $node->body = $body;
     $node->title = substr($node->body,0,60);    // title length is based on experience
     $node->teaser = node_teaser($node->body);
+    
+    // Discard text attachments
+    foreach ($node->mimeparts as $key => $mimepart) {
+      $filename = $mimepart->filename;
+      if(substr($filename, -4)=='.txt') {
+        mailsave_discard_attachment($node, $filename);
+      }
+    }
   }
 }
 
