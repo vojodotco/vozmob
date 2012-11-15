@@ -6,7 +6,13 @@
  */
 function mms_br_claro_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match('/@clarotorpedo\.com\.br$/', $header->fromaddress)) {
-    // TODO
+    // Discard text attachments
+    foreach ($node->mimeparts as $key => $mimepart) {
+      $filename = strtolower($mimepart->filename);
+      if(substr($filename, -4)=='.txt') {
+        mailsave_discard_attachment($node, $filename);
+      }
+    }
   }
 }
 
