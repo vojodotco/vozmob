@@ -9,6 +9,7 @@ function mms_br_claro_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     // Discard text attachments
     foreach ($node->mimeparts as $key => $mimepart) {
       $filename = strtolower($mimepart->filename);
+      $filename = str_replace(' ', '_', $filename);
       if(substr($filename, -4)=='.txt') {
         mailsave_discard_attachment($node, $filename);
       }
