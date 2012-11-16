@@ -6,7 +6,7 @@
  */
 function mms_br_oi_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match('/@mms\.oi\.com\.br$/', $header->fromaddress)) {
-    // TODO
+    $node->title = substr($node->body, 0, 60);
   }
 }
 
