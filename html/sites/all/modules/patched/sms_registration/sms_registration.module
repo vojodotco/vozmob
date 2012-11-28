@@ -78,12 +78,12 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
   list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
   
   // Try to authenticate using email address
-  if ($from_user = mailhandler_user_load($fromaddress, $node->pass, $mailbox)) {
+  if ($from_user = mailhandler_user_load($from_address, $node->pass, $mailbox)) {
     $node->uid = $from_user->uid;
     $node->name = $from_user->name;
   }
   // Try using mailalias email aliases
-  else if (function_exists('mailalias_user') && $from_user = mailhandler_user_load_alias($fromaddress, $node, $mailbox)) {
+  else if (function_exists('mailalias_user') && $from_user = mailhandler_user_load_alias($from_address, $node, $mailbox)) {
     $node->uid = $from_user->uid;
     $node->name = $from_user->name;
   }
