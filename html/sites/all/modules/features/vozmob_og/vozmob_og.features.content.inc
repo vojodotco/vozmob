@@ -11,19 +11,9 @@ function vozmob_og_content_default_fields() {
     'field_name' => 'field_translated_by',
     'type_name' => 'blog',
     'display_settings' => array(
-      'label' => array(
-        'format' => 'above',
-        'exclude' => 0,
-      ),
-      'teaser' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      'full' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
+      'weight' => '-2',
+      'parent' => '',
+      'token' => array(
         'format' => 'default',
         'exclude' => 0,
       ),
@@ -35,7 +25,18 @@ function vozmob_og_content_default_fields() {
         'format' => 'default',
         'exclude' => 0,
       ),
-      'token' => array(
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'label' => array(
+        'format' => 'above',
+      ),
+      'teaser' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'full' => array(
         'format' => 'default',
         'exclude' => 0,
       ),
