@@ -11,24 +11,8 @@ function exif_gps_field_storage_content_default_fields() {
     'field_name' => 'field_gps_gpslatitude',
     'type_name' => 'blog',
     'display_settings' => array(
-      'weight' => '14',
+      'weight' => '29',
       'parent' => '',
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
       'label' => array(
         'format' => 'hidden',
       ),
@@ -38,6 +22,14 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'full' => array(
         'format' => 'hidden',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
         'exclude' => 0,
       ),
     ),
@@ -65,7 +57,7 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Latitude',
-      'weight' => '14',
+      'weight' => '10',
       'description' => '',
       'type' => 'number',
       'module' => 'number',
@@ -77,24 +69,8 @@ function exif_gps_field_storage_content_default_fields() {
     'field_name' => 'field_gps_gpslatituderef',
     'type_name' => 'blog',
     'display_settings' => array(
-      'weight' => '19',
+      'weight' => '31',
       'parent' => '',
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
       'label' => array(
         'format' => 'hidden',
       ),
@@ -104,6 +80,14 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'full' => array(
         'format' => 'hidden',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
         'exclude' => 0,
       ),
     ),
@@ -128,7 +112,7 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Latitude ref',
-      'weight' => '19',
+      'weight' => '12',
       'description' => '',
       'type' => 'text_textfield',
       'module' => 'text',
@@ -140,24 +124,8 @@ function exif_gps_field_storage_content_default_fields() {
     'field_name' => 'field_gps_gpslongitude',
     'type_name' => 'blog',
     'display_settings' => array(
-      'weight' => '13',
+      'weight' => '28',
       'parent' => '',
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
       'label' => array(
         'format' => 'hidden',
       ),
@@ -167,6 +135,14 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'full' => array(
         'format' => 'hidden',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
         'exclude' => 0,
       ),
     ),
@@ -194,7 +170,7 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Longitude',
-      'weight' => '13',
+      'weight' => '9',
       'description' => '',
       'type' => 'number',
       'module' => 'number',
@@ -206,24 +182,8 @@ function exif_gps_field_storage_content_default_fields() {
     'field_name' => 'field_gps_gpslongituderef',
     'type_name' => 'blog',
     'display_settings' => array(
-      'weight' => '17',
+      'weight' => '30',
       'parent' => '',
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
       'label' => array(
         'format' => 'hidden',
       ),
@@ -233,6 +193,14 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'full' => array(
         'format' => 'hidden',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
         'exclude' => 0,
       ),
     ),
@@ -257,7 +225,7 @@ function exif_gps_field_storage_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Longitude ref',
-      'weight' => '17',
+      'weight' => '11',
       'description' => '',
       'type' => 'text_textfield',
       'module' => 'text',
@@ -269,24 +237,8 @@ function exif_gps_field_storage_content_default_fields() {
     'field_name' => 'field_map',
     'type_name' => 'blog',
     'display_settings' => array(
-      'weight' => '6',
+      'weight' => '26',
       'parent' => '',
-      'token' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '2' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '3' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
-      '4' => array(
-        'format' => 'default',
-        'exclude' => 0,
-      ),
       'label' => array(
         'format' => 'above',
       ),
@@ -298,7 +250,23 @@ function exif_gps_field_storage_content_default_fields() {
         'format' => 'openlayers_map_default',
         'exclude' => 1,
       ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
       '5' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
         'format' => 'default',
         'exclude' => 0,
       ),
@@ -346,7 +314,7 @@ function exif_gps_field_storage_content_default_fields() {
       'autocompletion_field_gps_gpslatituderef_content' => '',
       'autocompletion_field_gps_gpslatituderef_type' => 'input',
       'label' => 'Map',
-      'weight' => '6',
+      'weight' => '3',
       'description' => 'Type in an address to tell us where this story took place.  Your story will then show up on the group map.',
       'type' => 'openlayers_geocoder_widget',
       'module' => 'openlayers_geocoder',
