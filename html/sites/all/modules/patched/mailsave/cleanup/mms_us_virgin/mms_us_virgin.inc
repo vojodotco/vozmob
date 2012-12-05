@@ -26,11 +26,16 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       }
     }
   } else if (preg_match('@pixmbl.com@', $header->fromaddress)) {
-    $node->body = $node->title;
-    $node->body = preg_replace('/^.*<title>/i', '', $node->body);
-    $node->body = preg_replace('!</title>.*$!i', '', $node->body);
-    $node->body = trim($node->body);
-    $node->title = truncate_utf8(decode_entities(strip_tags($node->body)), 60, TRUE, TRUE);
+    $matches = array();
+    preg_match('@<TITLE>(.*)</TITLE>.*<PRE>(.*)</PRE>@s', $node->body, $matches);
+    $node->title = trim(strip_tags($matches[1]));
+    $node->body = trim(strip_tags($matches[2]));
+    if (empty($node->title)) {
+      $node->title = truncate_utf8(decode_entities(strip_tags($node->body)), 60, TRUE, TRUE);
+    }
+    if (empty($node->body)) {
+      $node->body = $node->title;
+    }
     $node->teaser = node_teaser($node->body);
   }
 }
