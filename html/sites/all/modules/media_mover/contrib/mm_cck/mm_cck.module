@@ -24,6 +24,8 @@ function phptemplate_filefield_file($file) {
     return '';
   }
 
+  $options = array();
+  
   // can we find a MM file for this file?
   // This is the only change to this theme function
   if ($mm_file = media_mover_api_file_fetch(array('fid' => $file['fid']))) {
@@ -32,25 +34,24 @@ function phptemplate_filefield_file($file) {
       // should we set an absolute url?
       if (strstr('http', $url)) {
         $options['absolute'] = true;
+      } else {
+        $url = file_create_url($url);
       }
     }
+    $options['attributes'] = array('type' => $mm_file['data']['file']['filemime'] . '; length=' . $mm_file['data']['file']['filesize']);
   }
   else {
     $path = $file['filepath'];
     $url = file_create_url($path);
+    // Set options as per anchor format described at
+    // http://microformats.org/wiki/file-format-examples
+    // TODO: Possibly move to until I move to the more complex format described
+    // at http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
+    $options['attributes'] = array('type' => $file['filemime'] . '; length=' . $file['filesize']);
   }
 
   $icon = theme('filefield_icon', $file);
 
-  // Set options as per anchor format described at
-  // http://microformats.org/wiki/file-format-examples
-  // TODO: Possibly move to until I move to the more complex format described
-  // at http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
-  $options = array(
-    'attributes' => array(
-      'type' => $file['filemime'] . '; length=' . $file['filesize'],
-    ),
-  );
 
   // Use the description as the link text if available.
   if (empty($file['data']['description'])) {
