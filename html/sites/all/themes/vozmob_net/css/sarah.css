@@ -188,7 +188,7 @@ div.view-overlay {
 .overlay_wrapper .views-field-title {
 	color: #ff9900;
 	font-weight: bold;
-	padding-top:30px}
+}
 .overlay_wrapper .views-field-body {
 	color: #333333;
 	overflow:auto;
@@ -223,16 +223,11 @@ div.overlay-links ul.links li.service_links_delicious, div.overlay-links ul.link
 }
 
 .field-content p  { color: #555555; font-weight: 400 }
-	
-.cycle-nav {
-	padding-bottom: 10px;
-	}
 
 .cycle-nav a:link.activeSlide {
 	background:#ff9900;
 	color:#ffffff;
 	font-weight:bold;
 	border: 1px solid #ff9900;
-	}
-	
-.cycle-nav a:link	  { color: #ff9900; background: #ffffff; overflow: scroll; border: solid 1px }
+}
+.cycle-nav a:link	  { color: #ff9900; background: #ffffff; border: solid 1px }
