@@ -57,6 +57,9 @@ function vozmob_support_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'view' && isset($node->content['messaging_sendto']['#weight'])) {
     unset($node->content['messaging_sendto']);
   }
+  if(($op == 'presave') && ($node->type == 'blog')) {
+    _vozmob_support_media_mover_cleanup($node);
+  }
 }
 
 /**
@@ -172,5 +175,96 @@ function vozmob_support_link_alter(&$links, $node) {
   }
   if (isset($links['upload_attachments'])) {
     unset($links['upload_attachments']);
+  }
+}
+
+function _vozmob_support_media_mover_cleanup(&$node) {
+  
+  // this variable keeps track of whether cleanup occurred - if it did, then we'll
+  // also need to clear some cache items.
+  $clean_up = FALSE;
+
+  // If the node is being saved to the database for the first time, do nothing and quit
+ if ($node->nid == NULL) {
+   return;
+ }
+ 
+  // get the media_mover array - normally it's in the node object, but if not fetch via API
+  $mm_node_data = array();
+  if (!empty($node->media_mover)){
+    $mm_node_data = $node->media_mover;
+  } 
+  else {
+    $mm_node_data = media_mover_api_node_files_fetch($node->nid);
+  }
+  
+  // process each media mover item
+  foreach ($mm_node_data as $cid => $cid_config) {
+    foreach ($cid_config as $config) {
+      $fid = $config['fid'];
+      
+      // mm items w/ a CID of 6 are derivitave thumbnails, so we don't want to handle them
+      // directly.  we handled them explicitly later on if we find a thumbnail that has been
+      // derived from a video.
+      if ($cid != 6) {
+
+        // Check to see if a file attached to the node is slated for removal.
+        $remove_key_exists = array_key_exists('remove', $node->files[$fid]);
+	$remove_file = 0;
+	if ($remove_key_exists) {
+	  $remove_file = $node->files[$fid]['remove'];
+	}
+
+        // if we find a file slated for removal, begin the process of cleaning up
+	// the media mover tables.
+	if ($remove_file) {
+	
+	  // there's at least one file to remove, so we'll need to do some cleanup
+	  $clean_up = TRUE;
+
+          // Delete the explicit media_movie entry for this derived cid item
+	  db_query('DELETE FROM media_mover_files WHERE mmfid = %d AND nid = %d AND fid = %d AND cid = %d', $config['mmfid'], $config['nid'], $config['fid'], $config['cid']);
+	  
+	  // time to look for a thumbnail, then delete it:
+	  //.thumb4_0.jpg
+	  
+	  // This next section is somewhat arcane.  Basically, there is no direct relationship between
+	  // an uploaded video and its derived thumbnails, so we have to do some filename surgery
+	  // to check for a match.  If we find a match, we delete the media_mover_files entry for it
+	  // and remove it from the field_image cck field if it's been attached.
+	  
+	  foreach ($node->field_image as $image_index=>$field_image) {
+	    
+	    // Compare the harvest_file for the video w/ what its systematically created thumnail derivative would be
+	    $harvest_file = basename($config['harvest_file']);
+	    $possible_thumbnail = $harvest_file . '.thumb4_0.jpg';
+	    
+	    // If a match is found, proceed with cleanup.
+	    if ($field_image['filename'] == $possible_thumbnail) {
+	    
+	      // process all thumbnail derivatives and act when we find the right one
+	      foreach ($mm_node_data[6] as $thumb_config) {
+		$check_thumb = basename($thumb_config['complete_file']);
+	        if ($check_thumb == $possible_thumbnail) {
+		  // delete the media_mover_files entry
+                  db_query('DELETE FROM media_mover_files WHERE mmfid = %d AND nid = %d AND fid = %d AND cid = %d', $thumb_config['mmfid'], $thumb_config['nid'], $thumb_config['fid'], $thumb_config['cid']);
+		  // delete the cck reference to the thumbnail
+		  unset($node->field_image[$image_index]);
+		}
+	      }
+	    }
+	  }
+        }
+      }
+    }
+  }
+  // if files were removed, we need to remove some caching records so that the node
+  // will display properly to end users.
+  if ($clean_up) {
+    $cache_cid = 'content:' . $node->nid;
+    cache_clear_all($cache_cid, 'cache_content', TRUE);
+    cache_clear_all('media_mover_files_node_'. $node->nid, 'cache_media_mover', TRUE);
+    //db_query('DELETE FROM cache_media_mover WHERE cid = %d', 'media_mover_files_node_' . $node->nid . '_8');
+    watchdog('vozmob_support', 'Cleaned up media_mover entries for ' . url('node/' . $node->nid, array('absolute' => TRUE)));
   }
 }
