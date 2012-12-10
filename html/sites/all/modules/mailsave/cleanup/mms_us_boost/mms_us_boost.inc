@@ -69,7 +69,16 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     }
     // There seems to be nothing useful in the body so we nuke it!
     $node->body = '';
+    // Add extra text parts into node body.
+    foreach ($node->mimeparts as $key => $mimepart) {
+      if ($key > 1 && (strpos($mimepart->filemime, 'TEXT/') === 0 || file_get_mimetype($mimepart->filename) === 'text/plain')) {
+        $node->body .= "\n" . $mimepart->data;
+      }
+    }
     $node->teaser = node_teaser($node->body);
+    if ($node->title == 'You have received a Multimedia Message') {
+      $node->title = truncate_utf8($node->body, 140, TRUE, TRUE);
+    }
   }
 }
 
