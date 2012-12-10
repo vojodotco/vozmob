@@ -63,6 +63,10 @@ div.overlay-links {
    overflow: hidden;
    clear: both;
 }
+#send-to {
+   clear: both;
+   margin-top: 20px;
+}
 div.overlay-links ul.links li {
     display: inline;
     margin-bottom: 0;
@@ -74,6 +78,7 @@ div.overlay-links ul.links li {
 .overlay_wrapper .views-field-name,
 .overlay_wrapper .views-field-created {
    padding-top: 5px;
+   display: inline;
 }
 .overlay_wrapper .views-field-title {
    color: #333;
