@@ -61,6 +61,7 @@ div.overlay-links ul {
 }
 div.overlay-links {
    overflow: hidden;
+   clear: both;
 }
 div.overlay-links ul.links li {
     display: inline;
