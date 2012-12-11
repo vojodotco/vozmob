@@ -158,6 +158,68 @@ function vozmob_og_content_default_fields() {
     ),
   );
 
+  // Exported field: field_submission_info
+  $fields['group-field_submission_info'] = array(
+    'field_name' => 'field_submission_info',
+    'type_name' => 'group',
+    'display_settings' => array(
+      'label' => array(
+        'format' => 'above',
+        'exclude' => 0,
+      ),
+      'teaser' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'full' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '4' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '2' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      '3' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+      'token' => array(
+        'format' => 'default',
+        'exclude' => 0,
+      ),
+    ),
+    'widget_active' => '1',
+    'type' => 'text',
+    'required' => '0',
+    'multiple' => '0',
+    'module' => 'text',
+    'active' => '1',
+    'text_processing' => '1',
+    'max_length' => '',
+    'allowed_values' => '',
+    'allowed_values_php' => '',
+    'widget' => array(
+      'rows' => '5',
+      'size' => 60,
+      'default_value' => array(
+        '0' => array(
+          'value' => '',
+          '_error_element' => 'default_value_widget][field_submission_info][0][value',
+        ),
+      ),
+      'default_value_php' => NULL,
+      'label' => 'Submission Info',
+      'weight' => '8',
+      'description' => '',
+      'type' => 'text_textarea',
+      'module' => 'text',
+    ),
+  );
+
   // Exported field: field_voipnode_adesc
   $fields['group-field_voipnode_adesc'] = array(
     'field_name' => 'field_voipnode_adesc',
@@ -393,7 +455,7 @@ function vozmob_og_content_default_fields() {
       ),
       'default_value_php' => NULL,
       'label' => 'Group posting address',
-      'weight' => '9',
+      'weight' => '10',
       'description' => 'This is the address that group members will send their stories to (via sms or MMS/picture messaging). Leave this field blank and it will automatically be created for you based on your Group\'s name.',
       'type' => 'mail2og_emailfield',
       'module' => 'mail2og',
@@ -407,6 +469,7 @@ function vozmob_og_content_default_fields() {
   t('"Name" Audio for Phone Calls');
   t('Group logo');
   t('Group posting address');
+  t('Submission Info');
   t('Translated by');
 
   return $fields;
