@@ -74,25 +74,24 @@ function vozmob_og_strongarm() {
   $strongarm->api_version = 1;
   $strongarm->name = 'content_extra_weights_group';
   $strongarm->value = array(
-    'og_user_roles_default_role' => '6',
+    'og_user_roles_default_role' => '5',
     'title' => '-5',
     'body_field' => '-2',
     'revision_information' => '11',
     'author' => '12',
     'options' => '13',
-    'comment_settings' => '15',
+    'comment_settings' => '14',
     'language' => '-4',
-    'translation' => '18',
-    'menu' => '3',
-    'path' => '19',
-    'attachments' => '17',
-    'flag' => '8',
+    'translation' => '17',
+    'menu' => '2',
+    'path' => '18',
+    'attachments' => '16',
+    'flag' => '9',
     'og_description' => '-3',
-    'og_selective' => '5',
-    'og_register' => '4',
-    'og_directory' => '7',
-    'og_language' => '2',
-    'print' => '14',
+    'og_selective' => '4',
+    'og_register' => '3',
+    'og_directory' => '6',
+    'og_language' => '1',
   );
   $export['content_extra_weights_group'] = $strongarm;
 
