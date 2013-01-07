@@ -469,11 +469,15 @@ function notifications_process_message($account, $event, $subscriptions, $send_m
   $info = notifications_event_text($event);
 
   // Create message. Do all this in one replacemente
+  $module = 'notifications';
+  if (is_array($event->params)) {
+    $module = $event->params['module'];
+  }
   $text = array(
-    'subject' => notifications_message_part('event', 'subject', $send_method, $event),
-    'header' => notifications_message_part('event' , 'header', $send_method, $event),
-    'event'  => notifications_message_part('event', 'main', $send_method, $event),
-    'footer' => notifications_message_part('event', 'footer', $send_method, $event),
+    'subject' => notifications_message_part('event', 'subject', $send_method, $event, $module),
+    'header' => notifications_message_part('event' , 'header', $send_method, $event, $module),
+    'event'  => notifications_message_part('event', 'main', $send_method, $event, $module),
+    'footer' => notifications_message_part('event', 'footer', $send_method, $event, $module),
   );
 
   // We pass only the first subscription, which is at least something
@@ -538,11 +542,11 @@ function notifications_message_part($type, $key, $method, $param = NULL, $module
   // - notifications-event-node-update
   // - notifications-event-node
   // - notifications-event
-  // - notifications
-  $search = $keyparts = array_merge(array($module, $type), $options);
+  // - notifications  
+  $search = $keyparts = array_merge(array(str_replace('_', '-', $module), $type), $options);
   while ($keyparts) {
     $groupkey = implode('-', $keyparts);
-     if ($text = messaging_message_part($groupkey, $key, $method)) {
+    if ($text = messaging_message_part($groupkey, $key, $method)) {
       $output = $text == MESSAGING_EMPTY ? '' : $text;
       break;
     }
