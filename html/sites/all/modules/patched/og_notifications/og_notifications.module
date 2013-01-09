@@ -168,7 +168,7 @@ function og_notifications_og($op, $gid, $uid, $args) {
     case 'user broadcast':
       $destinations = is_array($uid) ? $uid : array($uid);
       foreach ($destinations as $uid) {
-        notifications_lite_send($uid, $args['subject'], $args['body']);
+        notifications_lite_send($uid, $args['subject'], $args['body'], 'default', array('module'=>'og_notifications'));
       }
       break;
   }
@@ -224,16 +224,13 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
     case 'messages':
       $template = array(
         'subject' => t('[site-name] [ogname]: [title]'),
-        'header' => t("Greetings, [user],"),
+        'header' => '',
         'main' => array(
           t('A [type-name] has been updated in group [ogname]: [title]'),
           t('[node-teaser]'),
           t('Read more at [node-url].')
         ),
-        'footer' => array(
-          t('This is an automatic message from [site-name]'),
-          t('To manage your subscriptions, browse to [subscriptions-manage]')
-        )
+        'footer' => ''
       );
       switch ($arg1) {
         case 'og-notifications':
@@ -275,26 +272,42 @@ function og_notifications_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NUL
  *   Sending method information.
  */
 function og_notifications_message_alter(&$message, $info) {
-  if ($sid = _og_notification_check_message($message)) {
+  $sid = _og_notification_check_message($message);
+  $module = '';
+
+  // Check whether the event parameters have the module set to og_notifications
+  if (isset($message->notifications['events'])) {
+    $event = $message->notifications['events'][0];
+    if (isset($event->params)) {
+      $module = $event->params['module'];
+    }
+  }
+  if ($sid || $event->params['module'] === 'og_notifications') {
     $event = $message->notifications['events'][0];
     // Cater for different message groups (actions).
-    $group = 'og-notifications-'. $event->action;
+    if ($event->action === 'default') {
+      $group = 'og-notifications';
+    } else {
+      $group = 'og-notifications-'. $event->action;
+    }
     $send_method = $message->method;
     $subscription = notifications_load_subscription($sid);
 
-    $text = array(
-      'subject' => messaging_message_part($group, 'subject', $send_method, $event),
-      'header' => messaging_message_part($group, 'header', $send_method, $event),
-      'footer' => messaging_message_part($group, 'footer', $send_method, $event)
-    );
-
-    if (isset($message->body['main']) ) {
-      $text['main'] = messaging_message_part($group, 'main', $send_method, $event);
+    // Get key data from either event if possible, otherwise use messaging module
+    $keys = array('subject', 'header', 'footer', 'main');
+    $text = array();
+    foreach ($keys as $key) {
+      if (isset($event->text[$key])) {
+        $text[$key] = $event->text[$key];
+      } else {
+        $text[$key] = messaging_message_part($group, $key, $send_method);
+      }
     }
-    else {
-      $text['event'] = messaging_message_part($group, 'main', $send_method, $event);
+    
+    if (!isset($message->body['main']) ) {
+      $text['event'] = $text['main'];
+      unset($text['main']);
     }
-
 
     $objects = array('user' => $message->account, 'node' => $event->objects['node'], 'subscription' => $subscription);
     if ($event->action == 'comment') {
@@ -563,7 +576,6 @@ function _og_notification_check_message($message) {
         break;
       }
     }
-
   }
 
   return $sid > 0 ? $sid : 0;
