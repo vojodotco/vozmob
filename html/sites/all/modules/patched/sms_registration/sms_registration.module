@@ -175,10 +175,6 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     return;
   }
 
-  if ($node->sms_registration_new) {
-    watchdog('sms_reg', 'First message from new user');
-  }
-  
   list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
   $from = explode('@', strtolower($from_address));
   // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
@@ -220,6 +216,11 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   
   if (strcasecmp($sms_registration_address, $to_address) != 0) {
     if ($new_user) {
+      // Set password
+      $user = user_save($user, array('pass'=>$password));
+      if (!$user) {
+        watchdog('sms_registration', 'Unable to save password for new user');
+      }
       // Email was not to the registrar, handle as content
       watchdog('sms_reg', 'Content received by new user');
       if (variable_get('sms_registration_request_user', 'name') == 'name') {

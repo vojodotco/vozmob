@@ -52,7 +52,11 @@ function messaging_mms_send_msg($destination, $message, $params = array()) {
 function messaging_mms_user_destination($account, $message) {
   // Check for active mobile infomation. Simply return it so that the send
   // callback has a destination array and access everything.
-  if (!empty($account->sms_user[0]) && ($account->sms_user[0]['status'] == SMS_USER_CONFIRMED || $account->sms_user[0]['status'] == SMS_USER_ACTIVE) && !empty($account->sms_user[0]['number']) && !empty($account->sms_user[0]['gateway']['carrier'])) {
+  $exists = !empty($account->sms_user[0]);
+  $is_valid_status = $account->sms_user[0]['status'] == SMS_USER_CONFIRMED || $account->sms_user[0]['status'] == SMS_USER_ACTIVE || $account->sms_user[0]['status'] == SMS_USER_PENDING;
+  $has_number = !empty($account->sms_user[0]['number']);
+  $has_carrier = !empty($account->sms_user[0]['gateway']['carrier']);
+  if ($exists && $is_valid_status && $has_number && $has_carrier) {
     return $account->sms_user[0]['number'] . '@' . mms_email_gateway_rewrite_to_mms($account->sms_user[0]['gateway']['carrier']);
   }
 }
