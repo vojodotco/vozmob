@@ -28,4 +28,5 @@ smsframework:
 This has been modified by ekes, and we should think about contributing these back upstream  to the module maintainers.
 
 sms_registration:
-Changed username/password workflow, added logging to catch registration errors.  Moved feedback messages into variables and added admin UI to change them.
+* Changed username/password workflow, added logging to catch registration errors.  Moved feedback messages into variables and added admin UI to change them.
+* Added hook_init to set up config variables for i18n.
