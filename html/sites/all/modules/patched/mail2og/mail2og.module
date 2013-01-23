@@ -707,7 +707,9 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
   // Check for content type permission
   $content_type = variable_get('mail2og_default_node_type', FALSE);
-  if (!user_access("create $content_type content", $user)) {
+  // We check both node_access() and user_access() because CCK-defined types do not fully
+  // support node_access('create'). http://drupal.org/node/965200
+  if (! node_access('create', $node, $user) && ! user_access("create $content_type content", $user)) {
     watchdog('mail2og', 'User !user did not have sufficient permissions to create !content content',
       array(
         '!user' => l($user->name, 'user/'. $user->uid),

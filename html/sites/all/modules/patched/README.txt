@@ -10,6 +10,9 @@ Applied the patch from http://drupal.org/node/1795160
 i18n:
 Applied some patch from Drupal.org (what issue is this?)
 
+mail2og: Posts received emails to the right organic group (based on "to" address).
+* Patched to fix permissions check: http://drupal.org/node/965200
+
 mailsave:
 A number of the cleanup email gateway filters have been changed to keep up to date with changes in the emails sent by providers.
 
