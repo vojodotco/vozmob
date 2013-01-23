@@ -16,13 +16,21 @@ backup_migrate: Scheduled backups locally and to Amazon S3.
 
 captcha: Stop spam on web signup and web anonymous story submission.
 
+cck: Add custom fields to nodes.
+
+ctools: APIs and tools used by Panels and other modules.
+
 coder: Debugging and dev and staging servers.
 
 colorpicker: Let group admins customize their group header color.
 
 devel: Debugging and dev and staging servers.
 
+exif: Reads metadata, such as location, from images.
+
 diff: Helps with feature development and deployment.
+
+drush: Command line and shell scripting interface.
 
 features: Packages up drupal config for easier management of dev/production servers.
 
