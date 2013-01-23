@@ -44,6 +44,8 @@ flag: Let us create unique options on groups (public, moderated, geo-located).
 
 imageapi: Required by imagecache.
 
+i18nviews: Lets us translate strings used in views.
+
 imagecache: Auto-generate thumbnails for images based on presets.
 
 imagecache_profiles: Auto-generate standard-sized user profile pics on various pages.
