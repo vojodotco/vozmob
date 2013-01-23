@@ -54,6 +54,8 @@ jcarousel: Used in the CDH Monterrey view for the group homepage.
 
 jquery_ui: Used in various places for UI candy.
 
+jquery_plugin: Used by the homepage with the jquery_cycle jquery plugin.
+
 jquery_update: Get us a more recent version of jquery than what Drupal ships with.
 
 jwplayermodule: Play all the attached media to a story.
