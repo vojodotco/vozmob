@@ -60,6 +60,8 @@ jquery_update: Get us a more recent version of jquery than what Drupal ships wit
 
 jwplayermodule: Play all the attached media to a story.
 
+l10n_client: Give us that handy little block on the bottom of pages to translate UI strings.
+
 link: Add a link CCK field type. Convenient, but not in use.
 
 nodequeue: Manages the site homepage featured groups.
