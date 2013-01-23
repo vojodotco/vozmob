@@ -64,6 +64,8 @@ l10n_client: Give us that handy little block on the bottom of pages to translate
 
 link: Add a link CCK field type. Convenient, but not in use.
 
+mail2og: Posts received emails to the right organic group (based on "to" address).
+
 nodequeue: Manages the site homepage featured groups.
 
 og_user_roles: Assigns the "group-admin blogger" role to group managers.
