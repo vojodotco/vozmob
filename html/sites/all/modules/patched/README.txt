@@ -22,7 +22,8 @@ Only insert footer glue string if footer is not empty.
 notifications:
 In notifications_preprocess_message() use module name as notification group and replace underscores with dashes.
 
-og_notifications:
+og: Enables the creation of multiple groups.
+Patches to og_notifications:
 * Specify module name when sending message.
 * Make default strings empty.
 * Modifications to og_notifications_message_alter for consistency with notifications_process_compose()
