@@ -78,6 +78,8 @@ nodequeue: Manages the site homepage featured groups.
 
 og_user_roles: Assigns the "group-admin blogger" role to group managers.
 
+openlayers: Used for rendering maps.
+
 override_node_options: Grants the "group-admin blogger" special permissions.
 
 panels: Layout across the entire site.
