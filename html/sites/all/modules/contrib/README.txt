@@ -106,11 +106,13 @@ strongarm: ???
 
 tagadelic: ???
 
-token: Replaces tokens in strings with values.  For instance, used to insert username into registration sms.
-
 themekey: Set the theme for CdH groups based on the url.
 
 themekey-properties: Set the theme for CdH groups based on the url.
+
+token: Replaces tokens in strings with values.  For instance, used to insert username into registration sms.
+
+transliteration: Replaces non-roman Unicode filenames with romanized versions.
 
 usermerge: Helps manage the confusion of multiple accounts created via web/phone/sms.
 
