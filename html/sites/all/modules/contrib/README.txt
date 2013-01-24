@@ -66,6 +66,12 @@ link: Add a link CCK field type. Convenient, but not in use.
 
 mailhandler: Fetches stories submitted by email.
 
+masquerade: Allow admins to see the site as other users.
+
+media_mover: Convert media files to common formats.
+
+messaging_sendto: Send stories via MMS or other messaging method.
+
 nodequeue: Manages the site homepage featured groups.
 
 og_user_roles: Assigns the "group-admin blogger" role to group managers.
