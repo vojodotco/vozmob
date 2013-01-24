@@ -92,6 +92,8 @@ pathauto: Creates human-friendly URLs based on patterns.
 
 piwik: Website visitor analytics.
 
+potx: Provides "extract strings" interface for translators.
+
 recaptcha: Prevent spam on anonymous web story submissions and registration.
 
 returnpath: Sets the reply-to address on outgoing generated SMSs.
