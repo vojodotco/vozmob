@@ -4,6 +4,8 @@ exif_gps_field_storage: Adds specially-named latitude and longitude fields to th
 
 hastag: Pulls '#tag's out of node title/body and adds them to the node as tags from a taxonomy on that content type.  TODO: should we replace this with the 'hashtags' module? http://drupal.org/project/hashtags
 
+mailsave_to_textpart: Process multiple text parts such as in an mms slideshow.
+
 ogrulesextra: 
 
 voipusernumber:
