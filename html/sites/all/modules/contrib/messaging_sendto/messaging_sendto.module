@@ -301,7 +301,6 @@ function messaging_sendto_token_list($type = 'all') {
   if ($type == 'node' || $type == 'all') {
     $tokens['node']['node-teaser']    = t('The node teaser.');
     $tokens['node']['node-body']    = t('The node body.');
-    $tokens['node']['node-url']      = t('The node view url for read more links.');
     $tokens['node']['node-teaser-raw']    = t('Unfiltered node teaser. WARNING - raw user input.');
     $tokens['node']['node-body-raw']    = t('Unfiltered node body. WARNING - raw user input.');
   }
@@ -325,7 +324,6 @@ function messaging_sendto_token_values($type, $object = NULL, $options = array()
       if ($node = $object) {
         $values['node-teaser'] = $node->teaser ? check_markup($node->teaser, $node->format, FALSE) : '';
         $values['node-body'] = $node->body ? check_markup($node->body, $node->format, FALSE) : '';
-        $values['node-url'] = url('node/'. $node->nid, array('absolute' => TRUE));
         $values['node-teaser-raw'] = $node->teaser ? $node->teaser : '';
         $values['node-body-raw'] = $node->body ? $node->body : '';
         return $values;
@@ -507,22 +505,7 @@ function _messaging_sendto_compose($method, $destination, $values, $preview = FA
   $message['destinations'] = array($destination);
   $message['sender_account'] = $values['sender'];
   $message['sending_method'] = $method;
-  if (isset($values['gateway'])) {
-    $message['params']['sms'] = $values['gateway'];
-  }
-  if (!empty($values['node']->files)) {
-    $message['files'] = $values['node']->files;
-  }
-  // This is site-specific code, should be moved to some hook implementation. 
-  if (!empty($values['node']->field_image)) {
-    foreach ($values['node']->field_image as $file) {
-      $message['files'][$file['fid']] = (object) $file;
-    }
-  }
-  // Add node object for later message altering purposes.
-  if (!empty($values['node'])) {
-    $message['params']['node'] = $values['node'];
-  }
+ 
   // Compose message text. Do all this in one replacement
   // Hidden feature: token replacement on custom text
   $text = array(
