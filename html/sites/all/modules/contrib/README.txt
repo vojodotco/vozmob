@@ -104,6 +104,8 @@ service_links: Block with links to social media sites.
 
 strongarm: ???
 
+tagadelic: ???
+
 token: Replaces tokens in strings with values.  For instance, used to insert username into registration sms.
 
 themekey: Set the theme for CdH groups based on the url.
