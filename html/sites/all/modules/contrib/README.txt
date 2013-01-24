@@ -72,6 +72,8 @@ media_mover: Convert media files to common formats.
 
 messaging_sendto: Send stories via MMS or other messaging method.
 
+mimemail: Send emails with mail attachments, such as stories with audio/pictures.
+
 nodequeue: Manages the site homepage featured groups.
 
 og_user_roles: Assigns the "group-admin blogger" role to group managers.
