@@ -82,6 +82,8 @@ openlayers: Used for rendering maps.
 
 openlayers_geocoder: Used to geocode addresses.
 
+openlayers_plus: Adds behaviors for openlayers.
+
 override_node_options: Grants the "group-admin blogger" special permissions.
 
 panels: Layout across the entire site.
