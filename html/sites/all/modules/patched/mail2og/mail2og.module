@@ -686,14 +686,18 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // Get the full user object. We need to make sure this user is a member
   // @TODO This should hook into OG's check if a user can post to a group
   $user = user_load($node->uid);
-  if (!$user->og_groups[$group->nid]) {
-    watchdog('mail2og', 'User !user attempted to post to !group that they are not a member of.',
-      array(
-        '!user' => l($user->name, 'user/' . $user->uid),
-        '!group' => l($group->title, 'node/' . $group->nid)
-      ),
-      'warning');
-    return;
+  if (! $user->og_groups[$group->nid]) {
+    $params = og_subscribe_user($group->nid, $user);
+    if ($params['type'] != 'subscribed') {
+      watchdog('mail2og', 'User !user attempted to post to !group that they are not a member of.',
+        array(
+          '!user' => l($user->name, 'user/' . $user->uid),
+          '!group' => l($group->title, 'node/' . $group->nid)
+        ),
+        'warning');
+      return $node;
+    }
+    
   }
   // Is this user in this group and can they send to it?
   if (!user_access('send to group')) {
