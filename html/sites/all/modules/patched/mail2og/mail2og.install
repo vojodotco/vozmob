@@ -1,0 +1,55 @@
+<?php
+
+// Notify CCK when this module is enabled, disabled, installed, 
+// and uninstalled so CCK can do any necessary preparation or cleanup.
+
+/**
+* @file
+* Implementation of hook_install().
+*/
+function mail2og_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'mail2og');
+}
+
+/**
+* Implementation of hook_uninstall().
+*/
+function mail2og_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'mail2og');
+
+  $variables = array(
+    'mail2og_fields',
+    'mail2og_default_email_domain',
+    'mail2og_enabled_groups',
+    'mail2og_default_public',
+    'mail2og_default_node_type',
+    'mail2og_mailbox_setting',
+  );
+
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+
+}
+
+/**
+* Implementation of hook_enable().
+*
+* Notify content module when this module is enabled.
+*/
+function mail2og_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'mail2og');
+}
+
+/**
+* Implementation of hook_disable().
+*
+* Notify content module when this module is disabled.
+*/
+function mail2og_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'mail2og');
+}

@@ -2,6 +2,21 @@
 // $Id: sms_registration.module
 
 /**
+ * Implementation of hook_init().
+ */
+function sms_registration_init () {
+  global $conf;
+  
+  // Make settings variables translatable
+  $conf['i18n_variables'][] = 'sms_registration_failed_msg';
+  $conf['i18n_variables'][] = 'sms_registration_name_changed_msg';
+  $conf['i18n_variables'][] = 'sms_registration_welcome_email_msg';
+  $conf['i18n_variables'][] = 'sms_registration_welcome_username_msg';
+  $conf['i18n_variables'][] = 'sms_registration_registrar_welcome_msg';
+  $conf['i18n_variables'][] = 'sms_registration_parse_error_msg';
+}
+
+/**
  * Wrapper around all calls to send an SMS - this is helpful for debugging things without
  * sending actual SMSs to users.
  */
