@@ -18,6 +18,9 @@
  *   @see http://drupal.org/user/35192
  */
 
+define('THEMEKEY_PAGECACHE_UNSUPPORTED', 0);
+define('THEMEKEY_PAGECACHE_SUPPORTED', 1);
+define('THEMEKEY_PAGECACHE_TIMEBASED', 2);
 
 /**
  * Implements hook_theme().
@@ -107,19 +110,17 @@ function themekey_menu() {
 function themekey_init() {
   global $theme, $custom_theme;
 
-  if (!defined('THEMEKEY_PAGECACHE_UNSUPPORTED')) {
-    define('THEMEKEY_PAGECACHE_UNSUPPORTED', 0);
-    define('THEMEKEY_PAGECACHE_SUPPORTED', 1);
-    define('THEMEKEY_PAGECACHE_TIMEBASED', 2);
-  }
-
   if (isset($theme)) {
     if (variable_get('themekey_debug_trace_rule_switching', FALSE)) {
       themekey_set_debug_message('Skipped rule checking because another module already initialized the theme engine. $theme has been set to %theme.<br />This seems to be a bug. Visit !link and help us improve other modules.', array('%theme' => $theme, '!link' => l('drupal.org/node/754970', 'http://drupal.org/node/754970')));
     }
   }
-  // don't change theme when administer blocks or during cron run executed by cron.php or drush
-  elseif (strpos($_GET['q'], 'admin/build/block') !== 0 && strpos($_SERVER['SCRIPT_FILENAME'], 'cron.php') === FALSE && strpos($_SERVER['SCRIPT_FILENAME'], 'drush.php') === FALSE) {
+  // don't change theme when ...
+  elseif ('admin/build/block' != $_GET['q'] && strpos($_GET['q'], 'admin/build/block/list') !== 0 // ... block list administration
+    && strpos($_SERVER['SCRIPT_FILENAME'], 'cron.php') === FALSE // ... during cron run executed by cron.php
+    && strpos($_SERVER['SCRIPT_FILENAME'], 'drush.php') === FALSE // ... during cron run executed by drush
+    && (!defined('MAINTENANCE_MODE') || (MAINTENANCE_MODE != 'install' && MAINTENANCE_MODE != 'update')) // ... during drupal installation or update
+    ) {
     // don't change theme when another module already set a $custom_theme like system.module does (administration theme) until administrator turns on this feature
     if (!$custom_theme || variable_get('themekey_override_custom_theme', 0)) {
       require_once(drupal_get_path('module', 'themekey') . '/themekey_base.inc');

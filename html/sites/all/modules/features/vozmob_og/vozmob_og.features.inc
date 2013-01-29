@@ -15,6 +15,46 @@ function vozmob_og_ctools_plugin_api() {
  */
 function vozmob_og_flag_default_flags() {
   $flags = array();
+  // Exported flag: "Member To Post Group".
+  $flags['member_to_post_group'] = array(
+    'content_type' => 'node',
+    'title' => 'Member To Post Group',
+    'global' => '1',
+    'types' => array(
+      '0' => 'group',
+    ),
+    'flag_short' => 'Make this a group where only members can submit stories (on the web)',
+    'flag_long' => 'If this is unchecked, then anyone can contribute stories to this group via the web',
+    'flag_message' => '',
+    'unflag_short' => 'Make this a group where only members can submit stories (on the web)',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'link_type' => 'toggle',
+    'roles' => array(
+      'flag' => array(
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
+      ),
+      'unflag' => array(
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
+      ),
+    ),
+    'weight' => 0,
+    'show_on_page' => 0,
+    'show_on_teaser' => 0,
+    'show_on_form' => 1,
+    'access_author' => '',
+    'i18n' => 0,
+    'module' => 'vozmob_og',
+    'locked' => array(
+      '0' => 'name',
+    ),
+    'api_version' => 2,
+  );
   // Exported flag: "Requires moderation".
   $flags['moderate_node'] = array(
     'content_type' => 'node',
@@ -39,6 +79,7 @@ function vozmob_og_flag_default_flags() {
         '0' => 4,
       ),
     ),
+    'weight' => 0,
     'show_on_page' => 0,
     'show_on_teaser' => 0,
     'show_on_form' => 0,
@@ -59,7 +100,7 @@ function vozmob_og_flag_default_flags() {
       '0' => 'group',
     ),
     'flag_short' => 'Make this a moderated group',
-    'flag_long' => '',
+    'flag_long' => 'When checked, all stories will need to be approved before being made public',
     'flag_message' => '',
     'unflag_short' => 'Make this an unmoderated group',
     'unflag_long' => '',
@@ -68,12 +109,17 @@ function vozmob_og_flag_default_flags() {
     'link_type' => 'toggle',
     'roles' => array(
       'flag' => array(
-        '0' => '2',
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
       ),
       'unflag' => array(
-        '0' => '2',
+        '0' => 4,
+        '1' => 8,
+        '2' => 5,
       ),
     ),
+    'weight' => 0,
     'show_on_page' => 0,
     'show_on_teaser' => 0,
     'show_on_form' => 1,
@@ -86,6 +132,7 @@ function vozmob_og_flag_default_flags() {
     'api_version' => 2,
   );
   return $flags;
+
 }
 
 /**
@@ -116,8 +163,8 @@ function vozmob_og_imagecache_default_presets() {
           'module' => 'imagecache',
           'action' => 'imagecache_scale',
           'data' => array(
-            'width' => '150',
-            'height' => '90',
+            'width' => '130',
+            'height' => '200',
             'upscale' => 0,
           ),
         ),
@@ -151,9 +198,9 @@ function vozmob_og_node_info() {
       'module' => 'features',
       'description' => t('Create a new group.'),
       'has_title' => '1',
-      'title_label' => t('Título'),
+      'title_label' => t('Title'),
       'has_body' => '1',
-      'body_label' => t('Cuerpo'),
+      'body_label' => t('About this Group'),
       'min_word_count' => '0',
       'help' => '',
     ),
@@ -180,13 +227,7 @@ function vozmob_og_rules_defaults() {
         '#status' => 'default',
         '#conditions' => array(
           '0' => array(
-            '#type' => 'condition',
-            '#settings' => array(
-              '#argument map' => array(
-                'group' => 'node',
-              ),
-            ),
-            '#name' => 'og_rules_condition_content_is_group_post',
+            '#weight' => 0,
             '#info' => array(
               'label' => 'Content is a group post',
               'arguments' => array(
@@ -197,10 +238,24 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#weight' => 0,
+            '#name' => 'og_rules_condition_content_is_group_post',
+            '#settings' => array(
+              '#argument map' => array(
+                'group' => 'node',
+              ),
+            ),
+            '#type' => 'condition',
           ),
           '1' => array(
-            '#weight' => 0,
+            '#type' => 'condition',
+            '#settings' => array(
+              'flag' => 'moderated_group',
+              '#argument map' => array(
+                'object' => 'node',
+                'user' => 'user',
+              ),
+            ),
+            '#name' => 'ogrulesextra_rules_condition_flagged_node',
             '#info' => array(
               'label' => 'Node parent(s) are flagged',
               'base' => 'ogrulesextra_rules_condition_flagged',
@@ -223,29 +278,12 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#name' => 'ogrulesextra_rules_condition_flagged_node',
-            '#settings' => array(
-              'flag' => 'moderated_group',
-              '#argument map' => array(
-                'object' => 'node',
-                'user' => 'user',
-              ),
-            ),
-            '#type' => 'condition',
+            '#weight' => 0,
           ),
         ),
         '#actions' => array(
           '0' => array(
-            '#type' => 'action',
-            '#settings' => array(
-              'flag' => 'moderate_node',
-              'permission_check' => 0,
-              '#argument map' => array(
-                'object' => 'node',
-                'flagging_user' => 'author',
-              ),
-            ),
-            '#name' => 'flag_rules_action_flag_node',
+            '#weight' => 0,
             '#info' => array(
               'label' => 'Flag created content, under "Requires moderation"',
               'base' => 'flag_rules_action_flag',
@@ -268,10 +306,26 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Flag',
             ),
-            '#weight' => 0,
+            '#name' => 'flag_rules_action_flag_node',
+            '#settings' => array(
+              'flag' => 'moderate_node',
+              'permission_check' => 0,
+              '#argument map' => array(
+                'object' => 'node',
+                'flagging_user' => 'author',
+              ),
+            ),
+            '#type' => 'action',
           ),
           '1' => array(
-            '#weight' => 0,
+            '#type' => 'action',
+            '#settings' => array(
+              'auto_save' => 1,
+              '#argument map' => array(
+                'node' => 'node',
+              ),
+            ),
+            '#name' => 'rules_core_node_unpublish_action',
             '#info' => array(
               'label' => 'Unpublish created content',
               'module' => 'Node',
@@ -287,11 +341,32 @@ function vozmob_og_rules_defaults() {
               'label callback' => 'rules_core_node_label_callback',
               'label_skeleton' => 'Unpublish @node',
             ),
-            '#name' => 'rules_core_node_unpublish_action',
+            '#weight' => 0,
+          ),
+          '2' => array(
+            '#weight' => 0,
+            '#info' => array(
+              'label' => 'Page redirect',
+              'module' => 'System',
+              'eval input' => array(
+                '0' => 'path',
+                '1' => 'query',
+                '2' => 'fragment',
+              ),
+            ),
+            '#name' => 'rules_action_drupal_goto',
             '#settings' => array(
-              'auto_save' => 1,
-              '#argument map' => array(
-                'node' => 'node',
+              'path' => '[node:ogalias]',
+              'query' => '',
+              'fragment' => '',
+              'force' => 1,
+              'immediate' => 0,
+              '#eval input' => array(
+                'token_rules_input_evaluator' => array(
+                  'path' => array(
+                    '0' => 'node',
+                  ),
+                ),
               ),
             ),
             '#type' => 'action',

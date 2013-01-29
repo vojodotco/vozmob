@@ -1,5 +1,4 @@
 <?php
-// $Id: audiofield_formatter.inc,v 1.22 2011/01/31 17:55:44 tamerzg Exp $:
 /**@file
  * Theme function for 'embedded' audio.
  */

@@ -1,0 +1,14 @@
+name = Audio Recorder Field
+description = Adds a CCK field for recording and playing .wav audio files directly from the browser.
+core = 6.x
+dependencies[] = audiofield
+package = CCK
+
+
+
+; Information added by drupal.org packaging script on 2012-04-26
+version = "6.x-1.0-beta5"
+core = "6.x"
+project = "audiorecorderfield"
+datestamp = "1335466573"
+

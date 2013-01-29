@@ -29,15 +29,16 @@ function view_unpublished_perm() {
  */
 function view_unpublished_menu_alter(&$items) {
   $old_access_callback = $items['node/%node']['access callback'];
+  $old_access_arguments = $items['node/%node']['access arguments'];
   $items['node/%node']['access callback'] = '_view_unpublished_node_access';
-  $items['node/%node']['access arguments'] = array(1, $old_access_callback);
+  $items['node/%node']['access arguments'] = array(1, $old_access_callback, $old_access_arguments);
 }
 
 /**
  * Returns true if the user has 'view all unpublished content' or if
  * they have the permission corresponding to the node's content type.
  */
-function _view_unpublished_node_access($node, $old_access_callback = "node_access") {
+function _view_unpublished_node_access($node, $old_access_callback, $old_access_arguments) {
   // Only check permissions on nodes that are unpublished.
   if ($node->status == 0) {
     if (user_access('view all unpublished content')) {
@@ -48,8 +49,9 @@ function _view_unpublished_node_access($node, $old_access_callback = "node_acces
       return TRUE;
     }
   }
-  // If none of the above conditions were satisfied, then use the normal callback.
-  return $old_access_callback('view', $node);
+  // If none of the above conditions were satisfied, then use the original callback.
+  $old_access_arguments[1] = $node; // arg 1 is node object
+  return call_user_func_array($old_access_callback, $old_access_arguments);
 }
 
 /**
@@ -81,7 +83,13 @@ function view_unpublished_views_handlers() {
  * Implementation of hook_views_query_substitutions().
  */
 function view_unpublished_views_query_substitutions() {
-  return array(
+  $substitutions = array(
     '***VIEWALLUNPUBLISHED_NODES***' => intval(user_access('view all unpublished content')),
   );
+
+  foreach (node_get_types() as $type => $name) {
+    $substitutions["***VIEWUNPUBLISHED_$type***"] = intval(user_access('view unpublished ' . $type . ' content'));
+  }
+
+  return $substitutions;
 }

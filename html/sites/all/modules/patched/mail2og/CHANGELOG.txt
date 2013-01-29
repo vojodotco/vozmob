@@ -1,0 +1,16 @@
+mail2og 6.x-1.0-beta1
+==================
+Issue #636782 by Code Rader, jludwig: Got the module to work.
+Issue #612040 by deggertsen: Fixed domain missing from mail2og block.
+Issue #587688 by jludwig: Fixed mail2og interference w/Mailcomment.
+Issue #1127920 by jludwig: Removed var mail2og_og_cck_name from module.
+Added 'mail2og_fields' variable and updated mail2og_fields to grab return data directly from the variable if it exists and the reset param isn't set to TRUE.
+Added a wrapper to reset mail2og_fields whenever a new field is saved or updated.
+Updated hook_block to take the possibility of multiple email addresses into account.
+Cleaned up CCK functions and removed ones that weren't needed.
+Added mail2og_default_public to admin settings page.
+Implemented 'field' tokens for mail2og.
+Added mail2og.install to notify CCK when module is enabled, disabled, installed, and uninstalled and to delete variables when module is uninstalled.
+General coding style changes to (mostly to conform to macros I have on my text editor).
+Updated README.txt
+Added LICENSE.txt
