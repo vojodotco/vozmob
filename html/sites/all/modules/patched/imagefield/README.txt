@@ -17,6 +17,7 @@ ImageField also provides additional features when used with the following:
 
  * Token (Generate dynamic paths when saving images.)
  * ImageCache (Create thumbnails of images on output.)
+ * ImageAPI (Rotation of uploaded images.)
 
 Install
 -------
