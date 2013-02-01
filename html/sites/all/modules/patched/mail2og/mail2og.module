@@ -233,7 +233,14 @@ function mail2og_administration_form() {
     '#default_value' => variable_get('mail2og_enabled_groups', 0),
     '#description' => t('Select the groups you want to enable mail2og on. Default is all')
   );
-
+  // Require posts to be associated with a group
+  $form['mail2og_require_group'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Ignore posts not associated with a group.'),
+    '#default_value' => variable_get('mail2og_require_group', FALSE),
+    '#description' => t('Check this box if you would like to ignore posts sent to an email that does not match an enabled group.')
+  );
+  
   // Choose public settings
   $form['mail2og_default_public'] = array(
     '#type' => 'checkbox',
@@ -669,18 +676,30 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
   // If no groups are enabled, exit
   if (in_array(0, variable_get('mail2og_enabled_groups', array()))) {
-    return;
+    if (variable_get('mail2og_require_group')) {
+      return;
+    } else {
+      return $node;
+    }
   }
 
   // now we need to look for the emailbox name to see if it belongs to a group
   if (!$group = mail2og_find_email_address($email) ) {
-    return;
+    if (variable_get('mail2og_require_group')) {
+      return;
+    } else {
+      return $node;
+    }
   }
 
   // Now check to see if this group is enabled, or if all groups are allowed
   $enabled_groups = variable_get('mail2og_enabled_groups', array());
   if (!in_array($group->nid, $enabled_groups) && !isset($enabled_groups[1]) ) {
-    return;
+    if (variable_get('mail2og_require_group')) {
+      return;
+    } else {
+      return $node;
+    }
   }
 
   // Get the full user object. We need to make sure this user is a member
@@ -706,7 +725,11 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
         '!user' => l($user->name, 'user/'. $user->uid)
       ),
       'warning');
-    return;
+    if (variable_get('mail2og_require_group')) {
+      return;
+    } else {
+      return $node;
+    }
   }
 
   // Check for content type permission
@@ -720,7 +743,11 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
         '!content' => $content_type,
       ),
       'warning');
-    return;
+    if (variable_get('mail2og_require_group')) {
+      return;
+    } else {
+      return $node;
+    }
   }
 
   // Set the content type
