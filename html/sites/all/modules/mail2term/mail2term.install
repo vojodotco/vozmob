@@ -1,0 +1,10 @@
+<?php
+
+function mail2term_update_6000() {
+  $result = db_query('SELECT m.tid, m.mail FROM {mail2term} m INNER JOIN {term_data} t ON m.tid = t.tid WHERE m.mail <> t.name');
+  while ($term = db_fetch_object($result)) {
+    db_query("INSERT INTO {term_synonym} (tid, name) VALUES (%d, '%s')", $term->tid, $term->mail);
+  }
+  db_drop_table($ret, 'mail2term');
+  return $ret;
+}
