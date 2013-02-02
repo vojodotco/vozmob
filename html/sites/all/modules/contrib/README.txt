@@ -137,3 +137,11 @@ voipnumber: Allow phone numbers associated with things.
 voipviews: Read group story media to voice phone callers.
 
 voipvoice: Multilingual audio selection for voice phone calls.
+
+print: adds print options
+
+securelogin: forces https.
+
+taxonomy_image: associates image w/ term.
+
+flowplayer: media player.
