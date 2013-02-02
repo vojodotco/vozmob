@@ -26,14 +26,12 @@ function _vozmob_callin_load_script($script_name) {
   $script = new VoipScript('vozmob_callin_record_script');
 
   $script->addLabel('switch_to_spanish');
-  $script->addSetLanguage('es');
   $script->addSet('spanishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Bienven-Es-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $script->addGetInput('%spanishmsg', 1, '', 1);
   $script->addGotoIf('switch_to_english', "^%input_digits == '2'");
   $script->addGoto('start_recording');
 
   $script->addLabel('switch_to_english');
-  $script->addSetLanguage('en');
   $script->addSet('englishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Welcome-En-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $script->addSay('%englishmsg');
 
