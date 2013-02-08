@@ -114,7 +114,7 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
   $providers = sms_carriers();
   $to_address = $header->to[0]->mailbox . '@' . $header->to[0]->host;
   $sms_registration_address = sms_registration_get_address();
-  $number = $from[0];
+  $number = sms_get_idd_number($from_address);
   $password = user_password(8);
   $new_user = false;
   $message = null;
@@ -153,7 +153,7 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
         'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
         'status' => 1,
         'language' => $node->language,
-        'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+        'sms_user' => array('number' => $number, 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
         'access' => time(),
       ));
     }
@@ -189,10 +189,6 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $from = explode('@', strtolower($from_address));
   // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
   
-  // Hack to remove cc from virgin mms to match sms -Ed
-  if (preg_match('/@pixmbl.com$/', $from[0])) {
-    $from[0] = substr($from[0], 1);
-  }
   $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
   $number = $from[0];
   $providers = sms_carriers();
