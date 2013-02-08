@@ -92,11 +92,6 @@ function sms_registration_mailhandler_authenticate_info() {
 function sms_registration_authenticate_default($node, $header, $origbody, $mailbox) {
   list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
   
-  // Hack to remove cc from virgin mms to match sms -Ed
-  if (preg_match('/@pixmbl.com$/', $from_address)) {
-    $from_address = substr($from_address, 1);
-  }
-  
   // Try to authenticate using email address
   if ($from_user = mailhandler_user_load($from_address, $node->pass, $mailbox)) {
     $node->uid = $from_user->uid;
