@@ -6,7 +6,6 @@
  */
 function sms_registration_init () {
   global $conf;
-  
   // Make settings variables translatable
   $conf['i18n_variables'][] = 'sms_registration_failed_msg';
   $conf['i18n_variables'][] = 'sms_registration_name_changed_msg';
@@ -157,7 +156,7 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
         'mail' => $from_address,
         'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
         'status' => 1,
-        'language' => $node->language,
+        'language' => language_default('language'),
         'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
         'access' => time(),
       ));
@@ -343,7 +342,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
  * Make sure SMS msgs are translated to the correct language by switching based on a set
  * of heuristics
  */ 
-function sms_registration_get_user_language($u){
+function sms_registration_get_user_language($user){
   global $language;
   $user_language = null;
   // start off with the user's chosen language, if they have set one
@@ -358,9 +357,9 @@ function sms_registration_get_user_language($u){
       $user_language = $group->language;
     }
   }
-  // switch language if required to
+  // if the user language can't be set from any other method, use site default language
   if(empty($user_language)) {
-    $user_language = $language->language;
+    $user_language = language_default('language');
   }
   return $user_language;
 }
