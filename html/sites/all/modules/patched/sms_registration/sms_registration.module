@@ -334,7 +334,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     // Do not post content from the registration address.
     $node = FALSE;
   }
-
+  // matto
+  watchdog('matto', 'ul: ' . $user_language . ', message: ' . $message);
   return $node;
 }
 
@@ -366,34 +367,34 @@ function sms_registration_get_user_language($user){
 
 // the save failed - this assumes the name must have been duplicate
 function sms_registration_failed_msg($username, $language){
-  return t( variable_get('sms_registration_failed_msg','Error') , array('!name'=>$username), $language );
+  return t( i18n_variable_get('sms_registration_failed_msg', $language, 'Error') , array('!name'=>$username), $language );
 }
 
 // this is an existing user account, so we're changing their username
 function sms_registration_name_changed_msg($username, $url, $language){
-  return t( variable_get('sms_registration_name_changed_msg','Success'), array('!name' => $username, '!server_url'=>$url ), $language );
+  return t( i18n_variable_get('sms_registration_name_changed_msg', $language, 'Success'), array('!name' => $username, '!server_url'=>$url ), $language );
 }
 
 // sent in content, reply asking for email address
 function sms_registration_welcome_email_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_welcome_email_msg', 'Success') ,
+  return t( i18n_variable_get('sms_registration_welcome_email_msg', $language, 'Success') ,
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // sent in content, reply asking for username change
 function sms_registration_welcome_username_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_welcome_username_msg', 'Success'), 
+  return t( i18n_variable_get('sms_registration_welcome_username_msg', $language, 'Success'), 
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
 function sms_registration_registrar_welcome_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_registrar_welcome_msg', 'Success'), 
+  return t( i18n_variable_get('sms_registration_registrar_welcome_msg', $language, 'Success'), 
             array('!name'=>username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // tell the user the carrier isn't supported and log it
 function sms_registration_parse_error_msg($carrier_name, $language){
-  return t( variable_get('sms_registration_parse_error_msg', 'Error') , 
+  return t( i18n_variable_get('sms_registration_parse_error_msg', $language, 'Error') , 
             array('!carrier'=>$carrier_name), $language );
 }
