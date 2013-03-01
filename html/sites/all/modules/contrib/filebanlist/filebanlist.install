@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * Implementation of hook_schema().
+ */
+function filebanlist_schema() {
+  $schema['filebanlist'] = array(
+    'description' => 'File ban list.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'File identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sha256' => array(
+        'description' => 'The sha256 digest for this file.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => 'Type of denial action (currently unused).',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('fid'),
+    'unique keys' => array(
+      'sha256' => array('sha256'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function filebanlist_install() {
+  drupal_install_schema('filebanlist');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function filebanlist_uninstall() {
+  drupal_uninstall_schema('filebanlist');
+}

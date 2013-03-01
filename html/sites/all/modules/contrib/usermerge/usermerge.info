@@ -1,0 +1,10 @@
+name = User merge
+description = Creates an extensible way to merge users together. The base module provides bonus support for nodes, comments, and profile since those are in Drupal core.
+core = 6.x
+
+; Information added by drupal.org packaging script on 2012-03-30
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "usermerge"
+datestamp = "1333068974"
+

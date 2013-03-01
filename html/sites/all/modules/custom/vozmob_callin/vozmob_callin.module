@@ -8,7 +8,7 @@
  */
 function vozmob_callin_voipscript_load_script($script_name, $params=NULL) {
   if ($script_name == 'vozmob_callin_record_script') {
-    return _vozmob_callin_load_script($script_name);
+    return _vozmob_callin_load_script();
   }
 }
 
@@ -22,18 +22,17 @@ function vozmob_callin_voipscript_get_script_names() {
 /*
  * Sample scripts that highlight VoIP Drupal capabilities
  */
-function _vozmob_callin_load_script($script_name) {
+function _vozmob_callin_load_script() {
   $script = new VoipScript('vozmob_callin_record_script');
 
   $script->addLabel('switch_to_spanish');
-  $script->addSetLanguage('es');
   $script->addSet('spanishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Bienven-Es-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $script->addGetInput('%spanishmsg', 1, '', 1);
   $script->addGotoIf('switch_to_english', "^%input_digits == '2'");
   $script->addGoto('start_recording');
 
   $script->addLabel('switch_to_english');
-  $script->addSetLanguage('en');
+  $script->addSet('language', 'en');
   $script->addSet('englishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Welcome-En-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $script->addSay('%englishmsg');
 
@@ -48,7 +47,7 @@ function _vozmob_callin_load_script($script_name) {
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
   // otherwise just save
-  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)');
+  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration, %caller_number, %language)');
   $script->addGoto('end call');
 
   $script->addLabel('no recording detected');
@@ -66,14 +65,17 @@ function _vozmob_callin_load_script($script_name) {
  * Callback function associated with the script vozmob_callin_record_script.
  * It is called whenever that script records a new entry from the user.
  */
-function _vozmob_callin_record_callback($call_id, $fid, $recording_duration) {
-  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)', array('%call_id' => $call_id, '%recording_fid' => $fid, '%recording_duration' => $recording_duration));
-  $language = 'es';
-  $uid = sms_user_get_uid(substr($_REQUEST['From'], 1));
-  if (!$uid) {
-    // Find number stored without a 1-digit country code.
-    $uid = sms_user_get_uid(substr($_REQUEST['From'], 2));
+function _vozmob_callin_record_callback($call_id, $fid, $recording_duration, $caller_number, $language) {
+  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration, %caller_number, %english_msg)', array('%call_id' => $call_id, '%recording_fid' => $fid, '%recording_duration' => $recording_duration, '%caller_number' => $caller_number, '%english_msg' => $language));
+
+  // If no language came across, user did not specify english, so use site default (es).
+  if (!$language) {
+    $language = language_default('language');
   }
+  // Get user info based on the number they called in with.
+  $uid = sms_user_get_uid($caller_number);
+
+  // create a new user if phone number isn't in database
   while (!$uid) {
     $user = user_save(NULL, array(
       'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
@@ -82,12 +84,13 @@ function _vozmob_callin_record_callback($call_id, $fid, $recording_duration) {
       'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
       'status' => 1,
       'language' => $language,
-      'sms_user' => array('number' => sms_formatter($_REQUEST['From']), 'status' => SMS_USER_PENDING, 'gateway' => array()),
+      'sms_user' => array('number' => sms_formatter($caller_number), 'status' => SMS_USER_PENDING, 'gateway' => array()),
     ));
     if ($user) {
       $uid = $user->uid;
     }
   }
+
   // Construct the new node object.
   $node = new stdClass();
   $result = db_query('SELECT * FROM {files} WHERE fid = %d', $fid);

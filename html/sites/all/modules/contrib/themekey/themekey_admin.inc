@@ -43,11 +43,14 @@ function themekey_rule_chain_form() {
   $operators = array(
     '=' => '=',
     '!' => '!',
+    '*' => '*',
+    '!*' => '!*',
     '<' => '<',
     '<=' => '<=',
     '>' => '>',
     '>=' => '>=',
     '~' => '~',
+    '!~' => '!~',
   );
 
   $form = array('#tree' => TRUE);
@@ -253,6 +256,18 @@ function themekey_form_alter(&$form, $form_state, $form_id) {
             }
             else {
               themekey_rule_chain_form_set_error($form, $key_1, 'property', t('ThemeKey requested an unknown validator called %validator to validate property %property', array('%validator' => $validator, '%property' => $value_1['property']['#default_value'])));
+            }
+          }
+          elseif ('~' == $value_1['operator']['#default_value'] || '!~' == $value_1['operator']['#default_value']) {
+            $rule = array(
+              'property' => $value_1['property']['#default_value'],
+              'wildcard' => $value_1['wildcard']['#default_value'],
+              'operator' => $value_1['operator']['#default_value'],
+              'value' => $value_1['value']['#default_value'],
+            );
+            $errors = themekey_validator_regex($rule);
+            foreach ($errors as $element => $msg) {
+              themekey_rule_chain_form_set_error($form, $key_1, $element, $msg);
             }
           }
 

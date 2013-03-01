@@ -1,7 +1,0 @@
-; $Id$
-name = Bot Aggregator Plus
-package = Bot
-dependencies[] = bot
-dependencies[] = aggregator
-description = "Relay messages from Atom and RSS feeds to IRC."
-core = 6.x

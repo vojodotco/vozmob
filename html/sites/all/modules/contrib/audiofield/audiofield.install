@@ -10,4 +10,6 @@ function audiofield_install() {
 function audiofield_uninstall() {
   drupal_load('module', 'content');
   content_notify('uninstall', 'audiofield');
+  //Delete module variables
+  db_query("DELETE FROM {variable} WHERE name LIKE '%audiofield_%'");
 }
