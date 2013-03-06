@@ -34,6 +34,11 @@ function messaging_mms_messaging($op = 'info') {
  *   Message array
  */
 function messaging_mms_send_msg($destination, $message, $params = array()) {
+  //HACK: custom from address set to group
+  $customFrom = null;
+  if(property_exists($message,'notifications')) {
+    $customFrom = $message->notifications['events'][0]->params['from'];
+  }
   // Include messaging mail library.
   module_load_include('mail.inc', 'messaging');
   // Get parameters without invoking hook_mail_alter()
@@ -41,6 +46,15 @@ function messaging_mms_send_msg($destination, $message, $params = array()) {
   if (strpos($mail['to'], '@') === FALSE && isset($params['carrier'])) {
     // Add e-mail gateway to destination.
     $mail['to'] .= '@'. mms_email_gateway_rewrite_to_mms($params['carrier']);
+  }
+  //HACK: custom from address set to group
+  if($customFrom) {
+    $mail['from'] = $customFrom;
+    $mail['headers']['From'] = $customFrom;
+    $mail['headers']['Reply-To'] = $customFrom;
+    $mail['headers']['Return-Path'] = $customFrom;
+    $mail['headers']['Sender'] = $customFrom;
+    $mail['params']['from'] = $customFrom;
   }
   // mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '')
   return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], TRUE, $mail['headers'], NULL, $mail['attachments'], '');
