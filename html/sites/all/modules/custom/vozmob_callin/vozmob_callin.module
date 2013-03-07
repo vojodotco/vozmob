@@ -88,9 +88,6 @@ function _vozmob_callin_record_callback($call_id, $fid, $recording_duration, $ca
     if (!$uid) {
       $caller_number = $mod_number;
     }
-    else {
-      watchdog('vozmob_callin', 'found user with modified number: %uid', array('%uid' => $uid));
-    }
   }
   
   watchdog('vozmob_callin', 'found user %uid for %caller_number', array('%uid' => $uid, '%caller_number' => $caller_number));
