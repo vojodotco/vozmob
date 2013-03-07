@@ -74,6 +74,26 @@ function _vozmob_callin_record_callback($call_id, $fid, $recording_duration, $ca
   }
   // Get user info based on the number they called in with.
   $uid = sms_user_get_uid($caller_number);
+  // there is some wackiness with phone numbers in sms_user table.  Sometimes
+  // a phone number comes in as 11 digits, with a 1 digit country code at
+  // the beginning. If the number is 11 digits and no uid is set, do another
+  // lookup after removing the first digit.
+  if (!$uid && strlen($caller_number) == 11) {
+    watchdog('vozmob_callin', '11 digit number detected');
+    $mod_number = substr($caller_number, 1);
+    $uid = sms_user_get_uid($mod_number);
+    // if no user is still found, we need to create the new user without
+    // the country code. otherwise it will create a different account
+    // without the country code when a user sends an sms to the system.
+    if (!$uid) {
+      $caller_number = $mod_number;
+    }
+    else {
+      watchdog('vozmob_callin', 'found user with modified number: %uid', array('%uid' => $uid));
+    }
+  }
+  
+  watchdog('vozmob_callin', 'found user %uid for %caller_number', array('%uid' => $uid, '%caller_number' => $caller_number));
 
   // create a new user if phone number isn't in database
   while (!$uid) {
