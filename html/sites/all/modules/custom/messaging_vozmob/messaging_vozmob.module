@@ -5,6 +5,18 @@
  */
 
 /**
+ * Send a text message.  Will either use smsframework or voipdrupal depending
+ * on the carrier info.
+ *
+ * @param $number
+ * @param $message
+ * @param $options
+ */
+function messaging_vozmob_send_text($number, $message, $options) {
+  sms_send($number, $message, $options);
+}
+
+/**
  * Implementation of hook_messaging().
  */
 function messaging_vozmob_messaging($op = 'info') {
@@ -26,7 +38,7 @@ function messaging_vozmob_messaging($op = 'info') {
 }
 
 /**
- * Route message to most appropriate messaging method.
+ * Route messaging message to most appropriate method.
  *
  * @param $account
  *   Destination user's account
@@ -34,8 +46,14 @@ function messaging_vozmob_messaging($op = 'info') {
  *   Message array
  */
 function messaging_vozmob_send_msg($account, $message, $params = array()) {
-  dsm($message);
-  die();
+  $number = $account->sms_user[0]['number'];
+  $sms_carrier = $account->sms_user[0]['gateway']['carrier'];
+  $mms_carrier = mms_email_gateway_rewrite_to_mms($sms_carrier);
+  if (true) {
+    // Send using messaging_mms
+    $destination = messaging_mms_user_destination($account, $message);
+    return messaging_mms_send_msg($destination, $message, $params);
+  }
 }
 
 /**
