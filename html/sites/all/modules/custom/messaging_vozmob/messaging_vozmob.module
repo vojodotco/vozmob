@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Vozmob Messsaging method plug-in.  Routes to appropriate messaging method.
+ */
+
+/**
+ * Implementation of hook_messaging().
+ */
+function messaging_vozmob_messaging($op = 'info') {
+  switch($op) {
+    case 'send methods':
+      $info['vozmob'] = array(
+        'title' => 'Vozmob message router',
+        'name' => t('Vozmob'),
+        'group' => 'sms', // Class of send method
+        'type' => MESSAGING_TYPE_SEND,
+        'glue' => "\n", // Glue for message body lines
+        'footer' => "\n--",  // Separator for message footer
+        'description' => t('Route messages to the most appropriate Vozmob send method.'),
+        'send callback' => 'messaging_vozmob_send_msg',  // Sending callback
+        'destination callback' => 'messaging_vozmob_user_destination',
+      );
+      return $info;  
+  }
+}
+
+/**
+ * Route message to most appropriate messaging method.
+ *
+ * @param $account
+ *   Destination user's account
+ * @param $message
+ *   Message array
+ */
+function messaging_vozmob_send_msg($account, $message, $params = array()) {
+  dsm($message);
+  die();
+}
+
+/**
+ * Map user account to destination (currently the same as account)
+ */
+function messaging_vozmob_user_destination($account, $message) {
+  return $account;
+
+  // Check for active mobile infomation. Simply return it so that the send
+  // callback has a destination array and access everything.
+  $exists = !empty($account->sms_user[0]);
+  $is_valid_status = $account->sms_user[0]['status'] == SMS_USER_CONFIRMED || $account->sms_user[0]['status'] == SMS_USER_ACTIVE || $account->sms_user[0]['status'] == SMS_USER_PENDING;
+  $has_number = !empty($account->sms_user[0]['number']);
+  $has_carrier = !empty($account->sms_user[0]['gateway']['carrier']);
+  if ($exists && $is_valid_status && $has_number && $has_carrier) {
+    return $account->sms_user[0]['number'] . '@' . mms_email_gateway_rewrite_to_mms($account->sms_user[0]['gateway']['carrier']);
+  }
+}
+
+/**
+ * Implementation of hook_disable()
+ */
+function messaging_vozmob_disable() {
+  messaging_method_disable('vozmob');
+}
