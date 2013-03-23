@@ -1,0 +1,13 @@
+name = Mail to Organic Groups
+description = Gateway module for creating OG content by email
+package = "Notifications"
+dependencies[] = mailhandler
+dependencies[] = og
+core = 6.x
+
+; Information added by drupal.org packaging script on 2012-03-02
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "mail2og"
+datestamp = "1330725946"
+

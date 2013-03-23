@@ -213,11 +213,19 @@ function themekey_taxonomy_vid2tid_and_parents($node_vid) {
  *   or NULL if no value could be mapped
  */
 function themekey_taxonomy_tid2tid_and_parents($tids) {
+  /* It might be a bit confusing why the callback for 'taxonomy:tid_and_childs' is
+   * called themekey_taxonomy_tid2tid_and_parents() and detects the parents for a
+   * given tid. But it's correct to invert the logic here.
+   * Example:
+   * Term 17 has a child 27. The ThemeKey rule is "taxonomy:tid_and_childs = 17".
+   * So if curent tid is 27, this callback function has to return it's parent 17
+   * to cause a match in the rule engine.
+   */
   $tids = is_array($tids) ? $tids : array($tids);
+  $parents = array();
   foreach ($tids as $tid) {
     // note that taxonomy_get_parents_all() returns the term itself
     $parent_terms = taxonomy_get_parents_all($tid);
-    $parents = array();
     foreach ($parent_terms as $parent_term) {
       $parents[] = $parent_term->tid;
     }

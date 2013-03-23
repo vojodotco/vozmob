@@ -17,7 +17,9 @@ function vozmob_og_user_default_permissions() {
   // Exported permission: administer mail2og
   $permissions['administer mail2og'] = array(
     'name' => 'administer mail2og',
-    'roles' => array(),
+    'roles' => array(
+      '0' => 'sysadmin',
+    ),
   );
 
   // Exported permission: administer organic groups
@@ -39,7 +41,14 @@ function vozmob_og_user_default_permissions() {
   // Exported permission: send to group
   $permissions['send to group'] = array(
     'name' => 'send to group',
-    'roles' => array(),
+    'roles' => array(
+      '0' => 'anonymous user',
+      '1' => 'authenticated user',
+      '2' => 'blogger',
+      '3' => 'editor',
+      '4' => 'group-admin blogger',
+      '5' => 'sysadmin',
+    ),
   );
 
   // Exported permission: subscribe to content in groups

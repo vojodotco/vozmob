@@ -1,5 +1,4 @@
 <?php
-// $Id: audiofield_widget.inc,v 1.3 2010/11/23 19:45:37 tamerzg Exp $
 
 /**
  * @file
@@ -43,7 +42,7 @@ function audiofield_widget_value($element, $edit = FALSE) {
 }
 
 /**
- * FormAPI theme function. Theme the output of an image field.
+ * FormAPI theme function. Theme the output of an audio field.
  */
 function theme_audiofield_widget($element) {
   

@@ -1,0 +1,253 @@
+Index: README.txt
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/imagefield/README.txt,v
+retrieving revision 1.5
+diff -u -p -r1.5 README.txt
+--- README.txt	16 Mar 2009 23:34:17 -0000	1.5
++++ README.txt	8 Oct 2009 05:04:41 -0000
+@@ -18,6 +18,7 @@ ImageField also provides additional feat
+ 
+  * Token (Generate dynamic paths when saving images.)
+  * ImageCache (Create thumbnails of images on output.)
++ * ImageAPI (Rotation of uploaded images.)
+ 
+ Install
+ -------
+Index: imagefield-rotate.js
+===================================================================
+RCS file: imagefield-rotate.js
+diff -N imagefield-rotate.js
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ imagefield-rotate.js	8 Oct 2009 05:04:41 -0000
+@@ -0,0 +1,44 @@
++// $Id$
++
++Drupal.behaviors.imagefieldRotate = function(context) {
++
++  // Hide rotation select, set a single option for the select, add rotate buttons.
++  $('select.imagefield-rotate:not(.processed)').addClass('processed').each(function(i) {
++    $(this).after('<a class="imagefield-rotate right" href="#">' + Drupal.t('Right') + '</a>').nextAll('a.imagefield-rotate.right').click(function(e) {
++      rotateImg(this, 90);
++      setForm(this, 90);
++      return false;
++    });
++    $(this).after('<a class="imagefield-rotate left" href="#">' + Drupal.t('Left') + '</a> ').nextAll('a.imagefield-rotate.left').click(function(e) {
++      rotateImg(this, -90);
++      setForm(this, -90);
++      return false;
++    });
++    $(this).hide().empty().append('<option selected="selected" value="0" />');
++  });
++
++  // Perform the rotation.
++  function rotateImg(button, angle) {
++    var previewDiv = $(button).parent().parent().siblings('.widget-preview'); 
++    // If a rotation has already occurred we'll have a canvas instead of an img element.
++    if ($(previewDiv).find('img').size()) {
++       $(previewDiv).find('img').rotateRight(angle);
++    } else {
++      $(previewDiv).find('canvas').rotateRight(angle);
++    }
++  }
++  
++  // Alter the form value.
++  function setForm(button, angle) {
++    var rotateOption = $(button).parent().find('select.imagefield-rotate option');
++    var newVal = parseInt($(rotateOption).val()) + angle;
++    // Need to keep the value matching an original form value to validate in FAPI:
++    // 0, 90, 180, 270.
++    newVal = newVal % 360;
++    if (newVal < 0) {
++      newVal = newVal + 360;
++    }
++    $(rotateOption).val(newVal);
++  }
++  
++}
+Index: imagefield_file.inc
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/imagefield/imagefield_file.inc,v
+retrieving revision 1.18
+diff -u -p -r1.18 imagefield_file.inc
+--- imagefield_file.inc	14 Apr 2009 01:28:52 -0000	1.18
++++ imagefield_file.inc	8 Oct 2009 05:04:41 -0000
+@@ -94,3 +94,35 @@ function imagefield_create_admin_thumb($
+     drupal_set_message(t('An image thumbnail was not able to be created.'), 'error');
+   }
+ }
++
++/**
++ * Process rotation of submitted images.
++ */
++function imagefield_rotate(&$element) {
++  if ($element['rotate'] && module_exists('imageapi')) {
++    // Open and rotate the image.
++    $image = imageapi_image_open($element['filepath']);
++    imageapi_image_rotate($image, $element['rotate']);
++    
++    // Temp increase the jpeg quality, better way to do this?
++    $imageapi_jpeg_quality = variable_get('imageapi_jpeg_quality', 75);
++    variable_set('imageapi_jpeg_quality', 100);
++    
++    // Save the rotated image to a temp file.
++    $tmp = file_directory_temp() .'/'. basename($image->source);
++    imageapi_image_close($image, $tmp);
++    
++    // Reset imageapi_jpeg_quality.
++    variable_set('imageapi_jpeg_quality', $imageapi_jpeg_quality);
++    
++    // Save the rotated tmp file into the drupal file system and file table.
++    $rotated_file = field_file_save_file($tmp, array(), dirname($element['filepath']));
++    
++    // Delete the old, unrotated file.
++    $unrotated_file = field_file_load($element['fid']);
++    field_file_delete($unrotated_file);
++    
++    // Update the element with the new rotated file.
++    $element = array_merge($element, $rotated_file);
++  }
++}
+Index: imagefield_widget.inc
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/imagefield/imagefield_widget.inc,v
+retrieving revision 1.40
+diff -u -p -r1.40 imagefield_widget.inc
+--- imagefield_widget.inc	18 Sep 2009 15:30:18 -0000	1.40
++++ imagefield_widget.inc	8 Oct 2009 05:04:41 -0000
+@@ -36,6 +36,15 @@ function imagefield_widget_settings_form
+     '#weight' => 2.2,
+   );
+ 
++  $form['rotate'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Allow image rotation on edit (Requires ImageAPI module)'),
++    '#default_value' => isset($widget['rotate']) ? $widget['rotate'] : 0,
++    '#description' => t('Select this to allow users to rotate images on the node edit form.'),
++    '#weight' => 5,
++    '#disabled' => !module_exists('imageapi'),
++  );
++
+   $form['alt_settings'] = array(
+     '#type' => 'fieldset',
+     '#title' => t('ALT text settings'),
+@@ -189,7 +198,7 @@ function imagefield_widget_settings_vali
+  */
+ function imagefield_widget_settings_save($widget) {
+   $filefield_settings = module_invoke('filefield', 'widget_settings', 'save', $widget);
+-  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title', 'title_type', 'default_image', 'use_default_image'));
++  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title', 'title_type', 'default_image', 'use_default_image', 'rotate'));
+ }
+ 
+ /**
+@@ -205,6 +214,12 @@ function imagefield_widget_value($elemen
+     $item['alt'] = '';
+     $item['title'] = '';
+   }
++  
++  // Process rotation.
++  if ($item['rotate']) {
++    imagefield_rotate($item);
++  }
++  
+   return $item;
+ }
+ 
+@@ -265,6 +280,26 @@ function imagefield_widget_process($elem
+   if ($default_title) {
+     $element['data']['title']['#value'] = $field['widget']['title'];
+   }
++  
++  // Add rotation widget.
++  if ($field['widget']['rotate'] && module_exists('imageapi')) {  
++    $element['rotate'] = array(
++      '#type' => 'select',
++      '#title' => t('Rotate'),
++      '#options' => array(
++        0 => t('None'),
++        90 => t('90 degrees clockwise'),
++        180 => t('180 degrees'),
++        270 => t('90 degrees anti-clockwise'),
++      ),
++      '#default_value' => 0,
++      '#attributes' => array(
++        'class' => 'imagefield-rotate',
++      ),
++    );
++    drupal_add_js(drupal_get_path('module', 'imagefield') .'/jquery.rotate.1-1.js');
++    drupal_add_js(drupal_get_path('module', 'imagefield') .'/imagefield-rotate.js');
++  }
+ 
+   return $element;
+ }
+Index: jquery.rotate.1-1.js
+===================================================================
+RCS file: jquery.rotate.1-1.js
+diff -N jquery.rotate.1-1.js
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ jquery.rotate.1-1.js	8 Oct 2009 05:04:41 -0000
+@@ -0,0 +1,65 @@
++jQuery.fn.rotate = function(angle,whence) {
++	var p = this.get(0);
++
++	// we store the angle inside the image tag for persistence
++	if (!whence) {
++		p.angle = ((p.angle==undefined?0:p.angle) + angle) % 360;
++	} else {
++		p.angle = angle;
++	}
++
++	if (p.angle >= 0) {
++		var rotation = Math.PI * p.angle / 180;
++	} else {
++		var rotation = Math.PI * (360+p.angle) / 180;
++	}
++	var costheta = Math.cos(rotation);
++	var sintheta = Math.sin(rotation);
++
++	if (document.all && !window.opera) {
++		var canvas = document.createElement('img');
++
++		canvas.src = p.src;
++		canvas.height = p.height;
++		canvas.width = p.width;
++
++		canvas.style.filter = "progid:DXImageTransform.Microsoft.Matrix(M11="+costheta+",M12="+(-sintheta)+",M21="+sintheta+",M22="+costheta+",SizingMethod='auto expand')";
++	} else {
++		var canvas = document.createElement('canvas');
++		if (!p.oImage) {
++			canvas.oImage = new Image();
++			canvas.oImage.src = p.src;
++		} else {
++			canvas.oImage = p.oImage;
++		}
++
++		canvas.style.width = canvas.width = Math.abs(costheta*canvas.oImage.width) + Math.abs(sintheta*canvas.oImage.height);
++		canvas.style.height = canvas.height = Math.abs(costheta*canvas.oImage.height) + Math.abs(sintheta*canvas.oImage.width);
++
++		var context = canvas.getContext('2d');
++		context.save();
++		if (rotation <= Math.PI/2) {
++			context.translate(sintheta*canvas.oImage.height,0);
++		} else if (rotation <= Math.PI) {
++			context.translate(canvas.width,-costheta*canvas.oImage.height);
++		} else if (rotation <= 1.5*Math.PI) {
++			context.translate(-costheta*canvas.oImage.width,canvas.height);
++		} else {
++			context.translate(0,-sintheta*canvas.oImage.width);
++		}
++		context.rotate(rotation);
++		context.drawImage(canvas.oImage, 0, 0, canvas.oImage.width, canvas.oImage.height);
++		context.restore();
++	}
++	canvas.id = p.id;
++	canvas.angle = p.angle;
++	p.parentNode.replaceChild(canvas, p);
++}
++
++jQuery.fn.rotateRight = function(angle) {
++	this.rotate(angle==undefined?90:angle);
++}
++
++jQuery.fn.rotateLeft = function(angle) {
++	this.rotate(angle==undefined?-90:-angle);
++}

@@ -353,25 +353,34 @@ function themekey_match_condition($condition, &$parameters) {
           // Supported operators for condition check:
           // smaller ('<'), greater ('>'), equal ('='), not equal ('!'), regex match ('~')
           if ($condition['operator'] == '<' && $single_value >= $condition['value']) {
-            return FALSE;
+            return FALSE; // all values need to not match
           }
           elseif ($condition['operator'] == '>' && $single_value <= $condition['value']) {
-            return FALSE;
+            return FALSE; // all values need to not match
           }
           elseif ($condition['operator'] == '<=' && $single_value > $condition['value']) {
-            return FALSE;
+            return FALSE; // all values need to not match
           }
           elseif ($condition['operator'] == '>=' && $single_value < $condition['value']) {
-            return FALSE;
+            return FALSE; // all values need to not match
           }
           elseif ($condition['operator'] == '=' && $single_value == $condition['value']) {
             return TRUE;
           }
           elseif ($condition['operator'] == '!' && $single_value == $condition['value']) {
-            return FALSE;
+            return FALSE; // all values need to not match
+          }
+          elseif ($condition['operator'] == '*' && strpos($single_value, $condition['value']) !== FALSE) {
+            return TRUE;
+          }
+          elseif ($condition['operator'] == '!*' && strpos($single_value, $condition['value']) !== FALSE) {
+            return FALSE; // all values need to not match
           }
           elseif ($condition['operator'] == '~' && preg_match($condition['value'], $single_value)) {
             return TRUE;
+          }
+          elseif ($condition['operator'] == '!~' && preg_match($condition['value'], $single_value)) {
+            return FALSE; // all values need to not match
           }
         }
         else {
@@ -380,7 +389,7 @@ function themekey_match_condition($condition, &$parameters) {
         }
       }
 
-      if ($condition['operator'] == '=' || $condition['operator'] == '~') {
+      if ($condition['operator'] == '=' || $condition['operator'] == '~' || $condition['operator'] == '*') {
         // no value matched
         return FALSE;
       }
