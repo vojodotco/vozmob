@@ -5,6 +5,32 @@
  */
 
 /**
+ * Send sms via voip.
+ * @param $account The drupal user account.
+ * @param $msg The message string.
+ */
+function messaging_vozmob_send_voip_sms($account, $message, $options) {
+  // Switch to admin user for extra privileges
+  global $user;
+  $tempUserId = $user->uid;
+  $user = user_load(1);  
+  // Get array of numbers and associated info for the user, use the first
+  $numbers = sms_user_numbers($account, 'number');
+  $keys = array_keys($numbers);
+  $number = $keys[0];
+  // Create and execute a voipcall
+  $call = new VoipCall();
+  $call->setCurrentChannel('text');
+  $call->setCurrentNetwork('sms');
+  $call->setDestNumber($number);
+  $call->setCallerNumber($options['from'] || variable_get('voipcall_cid_number', NULL));  // this is not a useful phone number :-(
+  $call->setCallerName(sms_registration_get_address());   // does this work?
+  voip_text($message, $call);
+  // Switch back to current user
+  $user = user_load($tempUserId);
+}
+
+/**
  * Send a text message.  Will either use smsframework or voipdrupal depending
  * on the carrier info.
  *
@@ -12,7 +38,11 @@
  * @param $message
  * @param $options
  */
-function messaging_vozmob_send_text($number, $message, $options) {
+function messaging_vozmob_send_text($account, $message, $options) {
+  // Get array of numbers and associated info for the user, use the first
+  $numbers = sms_user_numbers($account, 'number');
+  $keys = array_keys($numbers);
+  $number = $keys[0];
   sms_send($number, $message, $options);
 }
 
