@@ -41,9 +41,17 @@ function messaging_vozmob_send_voip_sms($account, $message, $options) {
 function messaging_vozmob_send_text($account, $message, $options) {
   // Get array of numbers and associated info for the user, use the first
   $numbers = sms_user_numbers($account, 'number');
-  $keys = array_keys($numbers);
-  $number = $keys[0];
-  sms_send($number, $message, $options);
+  $domain = $account->sms_user[0]['gateway']['carrier'];
+  $carrier = sms_carriers($domain);
+  if ($carrier['receive']) {
+    // Send via smsframework
+    $keys = array_keys($numbers);
+    $number = $keys[0];
+    sms_send($number, $message, $options);
+  } else {
+    // Send via voipdrupal
+    messaging_vozmob_send_voip_sms($account, $message, $options);
+  }
 }
 
 /**
