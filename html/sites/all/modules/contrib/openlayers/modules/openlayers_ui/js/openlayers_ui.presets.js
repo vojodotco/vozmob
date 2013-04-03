@@ -1,3 +1,4 @@
+// $Id: openlayers_ui.presets.js,v 1.1.2.3 2010/05/28 15:37:30 tmcw Exp $
 
 /**
  * @file

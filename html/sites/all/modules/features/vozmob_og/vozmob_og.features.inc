@@ -148,8 +148,8 @@ function vozmob_og_imagecache_default_presets() {
           'module' => 'imagecache',
           'action' => 'imagecache_scale',
           'data' => array(
-            'width' => '700',
-            'height' => '200',
+            'width' => '200',
+            'height' => '',
             'upscale' => 0,
           ),
         ),
@@ -425,6 +425,6 @@ function vozmob_og_rules_defaults() {
  */
 function vozmob_og_views_api() {
   return array(
-    'api' => '3.0',
+    'api' => '3.0-alpha1',
   );
 }

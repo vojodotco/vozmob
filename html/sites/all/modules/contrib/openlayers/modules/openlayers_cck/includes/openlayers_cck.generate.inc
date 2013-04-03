@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_cck.generate.inc,v 1.1.2.2 2010/03/22 23:55:10 zzolo Exp $
 
 /**
  * @file

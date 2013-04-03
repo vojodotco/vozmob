@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_cck.feeds.inc,v 1.1.4.3 2010/03/22 23:55:10 zzolo Exp $
 
 /**
  * @file

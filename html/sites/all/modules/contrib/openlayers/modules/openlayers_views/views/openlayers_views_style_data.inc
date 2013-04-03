@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers_views_style_data.inc,v 1.1.2.30 2010/10/14 10:10:11 zzolo Exp $
 
 /**
  * @file
@@ -392,7 +393,7 @@ class openlayers_views_style_data extends views_plugin_style {
         // as choosen through interface
         $name_field = NULL;
         $description_field = NULL;
-        if (is_array($data_source) && $data_source['name_field']) {
+        if ($data_source['name_field']) {
           $name_field = $fields[$data_source['name_field']]['field_alias'];
           $feature['attributes']['name'] = $rendered_record[$name_field];
           $excluded_fields[] = $name_field;
@@ -403,7 +404,7 @@ class openlayers_views_style_data extends views_plugin_style {
         else {
           $feature['attributes']['name'] = '';
         }
-        if (is_array($data_source) && $data_source['description_field']) {
+        if ($data_source['description_field']) {
           $description_field = $fields[$data_source['description_field']]['field_alias'];
           $feature['attributes']['description'] = $rendered_record[$description_field];
           $excluded_fields[] = $description_field;

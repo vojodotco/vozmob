@@ -1,3 +1,4 @@
+// $Id: openlayers_behavior_tooltip.js,v 1.1.2.2 2010/06/27 13:55:25 zzolo Exp $
 
 /**
  * Javascript Drupal Theming function for inside of Tooltips

@@ -1,3 +1,4 @@
+// $Id: README.txt,v 1.1.2.3 2009/02/15 21:14:21 quicksketch Exp $
 
 Theming instructions
 ====================

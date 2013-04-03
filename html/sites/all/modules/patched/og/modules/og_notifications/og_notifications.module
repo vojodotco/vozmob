@@ -167,8 +167,15 @@ function og_notifications_og($op, $gid, $uid, $args) {
     case 'admin new':
     case 'user broadcast':
       $destinations = is_array($uid) ? $uid : array($uid);
+      //HACK: custom from address set to group
+      $node = node_load($gid);
+      $email = $node->field_yeta[0]['value'];
+      $params = array('module'=>'og_notifications');
+      if(strlen($email)>0){
+        $params['from'] = $email;
+      }
       foreach ($destinations as $uid) {
-        notifications_lite_send($uid, $args['subject'], $args['body'], 'default', array('module'=>'og_notifications'));
+        notifications_lite_send($uid, $args['subject'], $args['body'], 'default', $params);
       }
       break;
   }

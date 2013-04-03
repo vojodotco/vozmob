@@ -23,3 +23,7 @@ vozmob_geo:
 vozmob_support:
 
 vozmob_util:
+
+uploadterm
+
+mail2term

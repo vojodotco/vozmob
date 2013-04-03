@@ -1,0 +1,24 @@
+# config/cucumber.yml
+##YAML Template
+---
+local: |
+    BASE_URL=http://localhost.vojo.co/
+    TITLE=localhost.vojo.co
+    GATEWAY=http://example.com/
+dev: |
+    BASE_URL=http://dev.vojo.co/
+    TITLE=dev.vojo.co
+    GATEWAY=http://example.com/
+staging: |
+    BASE_URL=http://staging.vojo.co/
+    TITLE=staging.vojo.co
+    GATEWAY=http://example.com/
+production: |
+    BASE_URL=http://vojo.co/
+    TITLE=vojo.co
+    GATEWAY=http://example.com/
+default: |
+    BASE_URL=http://vojo.co/
+    TITLE=vojo.co
+    GATEWAY=http://example.com/
+    

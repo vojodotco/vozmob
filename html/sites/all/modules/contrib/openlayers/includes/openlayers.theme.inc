@@ -1,4 +1,5 @@
 <?php
+// $Id: openlayers.theme.inc,v 1.6.2.6 2010/04/28 13:00:45 zzolo Exp $
 
 /**
  * @file

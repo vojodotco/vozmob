@@ -1,0 +1,9 @@
+; $Id$
+name = Vozmob Messaging
+description = Sending Method: Vozmob
+package = Messaging
+dependencies[] = messaging
+dependencies[] = mimemail
+dependencies[] = sms_email_gateway
+dependencies[] = mms_email_gateway
+core = 6.x

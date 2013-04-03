@@ -8,8 +8,10 @@ div.field-field-image div.field-items img {
   border:  1px solid #ccc;  
   background-color: #eee;
 }
-
-.cycle-nav a { border: 1px solid #ccc; background: #fc0; text-decoration: none; margin: 0 5px; padding: 3px 5px;  }
+.cycle-nav {
+   overflow: hidden;
+}
+.cycle-nav a { border: 1px solid #ccc; background: #fc0; text-decoration: none; margin: 0 3px 3px; padding: 2px 4px; float: left; }
 .cycle-nav a.activeSlide { background: #ea0 }
 .cycle-nav a:focus { outline: none; }
 
@@ -24,11 +26,7 @@ div.view-overlay {
 
 div.view-overlay div.views-field-title {
   font-size: 1.5em;
-  margin-top: 10px;
-}
-
-div.view-overlay div.views-field-field-image-fid {
-  height: 412px;
+  margin: 10px 0;
 }
 
 div.view-overlay div.overlay-nav {
@@ -49,6 +47,8 @@ div.overlay-links ul {
     border-top-style: solid;
     border-top-width: 5px;
     padding-top: 10px;
+    width: 100%;
+    clear: both;
 }
 .media-mover-audio-image .flowplayer {
   width: 512px;
@@ -59,7 +59,14 @@ div.overlay-links ul {
   width: 512px;
   height: 384px;
 }
-
+div.overlay-links {
+   overflow: hidden;
+   clear: both;
+}
+#send-to {
+   clear: both;
+   margin-top: 20px;
+}
 div.overlay-links ul.links li {
     display: inline;
     margin-bottom: 0;
@@ -71,6 +78,7 @@ div.overlay-links ul.links li {
 .overlay_wrapper .views-field-name,
 .overlay_wrapper .views-field-created {
    padding-top: 5px;
+   display: inline;
 }
 .overlay_wrapper .views-field-title {
    color: #333;
@@ -123,9 +131,9 @@ div.view-features ul.pager {
   float: left;
 }
 
-div.view-id-feature div.view-content { width: 690px; height: 320px; }
+div.view-id-feature div.view-content { width: 640px; height: 320px; }
 div.view-id-feature div.views-row-2, div.view-id-feature div.views-row-3, div.view-id-feature div.views-row-4, div.view-id-feature div.views-row-5 { display: none; }
-#feature-cycle-nav { position: relative; top: -34px; left: 300px; }
+#feature-cycle-nav { position: relative; top: -40px; left: 300px; }
 a#feature-cycle-prev, a#feature-cycle-next { z-index: 10; display: inline-block; width: 17px; height: 16px; }
 a#feature-cycle-prev { background-image: url(../images/arrow-l-sm.png); }
 a#feature-cycle-next { background-image: url(../images/arrow-r-sm.png); }
@@ -311,6 +319,7 @@ ul.header_links li a:hover {
 }
 h2.page-title {
    margin: 0 0 20px;
+   line-height: 1;
 }
 /**styles for the footer**/
 #footer {
@@ -414,4 +423,15 @@ text-decoration:none;
 div.vertical-tabs ul.vertical-tabs-list li.vertical-tab-button {
    list-style-type: none;
    list-style-image: none;
+}
+
+/* Media type icons */
+.mediaterms,
+.mediaterms .item-list,
+.mediaterms .item-list ul.links {
+  display: inline;
+}
+.mediaterms ul.links { 
+  margin: 0 0 0 10px;
+  display: inline;
 }
