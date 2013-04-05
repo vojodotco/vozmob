@@ -19,7 +19,8 @@ mailsave:
 A number of the cleanup email gateway filters have been changed to keep up to date with changes in the emails sent by providers.
 
 messaging:
-Only insert footer glue string if footer is not empty. 
+* Only insert footer glue string if footer is not empty. 
+* message_mime_mail sets the from address on notifications to the group email to do better group broadcasts
 
 notifications:
 In notifications_preprocess_message() use module name as notification group and replace underscores with dashes.
@@ -29,6 +30,9 @@ Patches to og_notifications:
 * Specify module name when sending message.
 * Make default strings empty.
 * Modifications to og_notifications_message_alter for consistency with notifications_process_compose()
+* message_mime_mail sets the from address on notifications to the group email to do better group broadcasts
+* og_notifications_og adds in the group email address to the $params array so messaging engine can set a better 'from' address on emails
+* Removes hard-coded og_rss_groups element from rss feeds.
 
 smsframework:
 This has been modified by ekes, and we should think about contributing these back upstream  to the module maintainers.
