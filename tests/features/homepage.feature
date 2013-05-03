@@ -4,5 +4,6 @@ Feature: Homepage Feature
     I want to visit the homepage
     
     Scenario: Homepage Scenario
-        Given I have opened the homepage
-        Then the title should be correct
+        Given I visit the homepage url
+        Then I should see the homepage
+        

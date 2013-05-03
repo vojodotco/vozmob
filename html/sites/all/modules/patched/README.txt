@@ -22,6 +22,9 @@ messaging:
 * Only insert footer glue string if footer is not empty. 
 * message_mime_mail sets the from address on notifications to the group email to do better group broadcasts
 
+node_autotitle:
+* Make sure titles like " " count as empty
+
 notifications:
 In notifications_preprocess_message() use module name as notification group and replace underscores with dashes.
 

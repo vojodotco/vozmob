@@ -5,8 +5,8 @@ Feature: Register Feature
     
     Scenario: Register by sending story
         Given I am not registered
-        When I submit a Vojo story
-        Then I should receive a registration confirmation
-        When I send cucumber to the registrar
-        Then I should receive a name change confirmation
-        
+        Given a story
+        When I sms the story to a group
+        Then I should receive an sms registration confirmation
+        When I sms "cucumber_user" to the registrar
+        Then I should receive an sms name change confirmation

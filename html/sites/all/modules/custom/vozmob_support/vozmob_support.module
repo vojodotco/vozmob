@@ -69,6 +69,16 @@ function vozmob_support_mail_alter(&$message) {
   if (!empty($message['from'])) {
     $message['headers']['Return-Path'] = $message['from'];
   }
+  // Change message format sent by user contact form
+  if ($message['id'] == 'contact_user_mail') {
+    // Get the individual message parts
+    $salutation = $message['body'][0];
+    $info = $message['body'][1];
+    $settings = $message['body'][2];
+    $msg = $message['body'][4];
+    // Create the body with the new order
+    $message['body'] = array($salutation, $msg, $info, $settings);
+  }
 }
 
 /**
