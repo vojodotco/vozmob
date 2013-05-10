@@ -283,6 +283,12 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
     $save = array('sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
 
+    // if the user was created via a VoIP call, their email address might be empty
+    if (empty($user->mail) ){
+      $save['mail'] = $from_address;
+      watchdog('sms_reg','Setting VoIP user email to '.$from_address);
+    }
+
     // figure out if this is username or email (based on admin setting)
     if (variable_get('sms_registration_request_user', 'name') == 'name') {
       $save['name'] = $info;
