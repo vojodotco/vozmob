@@ -1,0 +1,36 @@
+<?php
+/**@file
+ * Implementation of hook_install().
+ */
+function voipnumberfield_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'voipnumberfield');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function voipnumberfield_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'voipnumberfield');
+  //Delete module variables
+  //@todo: check if this is still needed?
+  db_query("DELETE FROM {variable} WHERE name LIKE '%voipnumberfield_%'");
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function voipnumberfield_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'voipnumberfield');
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function voipnumberfield_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'voipnumberfield');
+}
+
