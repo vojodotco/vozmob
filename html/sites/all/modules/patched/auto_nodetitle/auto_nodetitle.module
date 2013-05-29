@@ -72,7 +72,7 @@ function auto_nodetitle_nodeapi(&$node, $op) {
  * Returns whether the auto nodetitle has to be set.
  */
 function auto_nodetitle_is_needed($node) {
-  $title = trim($form_state['values']['title']);  // can't use empty() on a function return
+  $title = trim($node->title);
   return empty($node->auto_nodetitle_applied) && ($setting = auto_nodetitle_get_setting($node->type)) && !($setting == AUTO_NODETITLE_OPTIONAL && !empty($title));
 }
 
