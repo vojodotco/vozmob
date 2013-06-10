@@ -1,0 +1,15 @@
+; $Id$
+name = VoIP Number Field
+description = Provides VoIP Number cck field.
+dependencies[] = voipnumber
+dependencies[] = voipcall
+dependencies[] = content
+package = VoIP Drupal
+core = 6.x
+
+; Information added by drupal.org packaging script on 2013-01-18
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "voipnumberfield"
+datestamp = "1358524101"
+

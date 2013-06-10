@@ -6,7 +6,6 @@
  */
 function sms_registration_init () {
   global $conf;
-  
   // Make settings variables translatable
   $conf['i18n_variables'][] = 'sms_registration_failed_msg';
   $conf['i18n_variables'][] = 'sms_registration_name_changed_msg';
@@ -43,15 +42,33 @@ function sms_registration_menu() {
  * Public API to fetch the registrar's email address
  */
 function sms_registration_get_address(){
-    return variable_get('sms_registration_address', '');
+  return variable_get('sms_registration_address', '');
 }
 
 /**
- * Implementation of hook_mail_alter().
+ * Implementation of hook_mail_alter()
  */
 function sms_registration_mail_alter(&$message) {
   if (isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
     $message['headers']['Return-Path'] = sms_registration_get_address();
+  }
+  // if this is an email-to-sms then customize it to include the password (cause the url is useless)
+  if ($message['id']=='user_password_reset') {
+    $u = $message['params']['account'];
+    if(array_key_exists(0,$u->sms_user)){
+      $carrier = $u->sms_user[0]['gateway']['carrier'];
+      $providers = sms_carriers();
+      if($providers[$carrier]['receive']==1){ // the carrier support sending to the phone via email
+        watchdog('sms_reg', 'Password reset for sms user '.$u->name);
+        // change the password
+        $new_password = user_password(8);
+        $user = user_save($u, array('pass'=>$new_password));
+        // alter the message to be sms friendly
+        $message['title'] = variable_get('site_name', 'the site').' password reset';
+        $message['body'] = sms_registration_registrar_welcome_msg($u->name, $new_password, 
+          variable_get('site_name', 'the site'), sms_registration_get_user_language($u) );
+      }
+    }
   }
 }
 
@@ -146,14 +163,44 @@ function sms_registration_authenticate_default($node, $header, $origbody, $mailb
     $new_user = true;
     
     while (!$user) {
+      
+      // For the 0.6.0 release, we need to do some special language detection to make sure that
+      // SMS registration will work correctly on both Vojo (groups) and VozMob (non-groups).  This
+      // code may need to be revisited when rolling Vojo groups into VozMob.
+      
+      // Basically, if a user is registering the first time by posting to a group, they should
+      // inherit language settings from the group.  If they are posting to the catchall email,
+      // then they should inherit the site's default language.
+      
+      // Detect if the email the user is posting to is associated w/ a group.  This is a hack,
+      // as there is no other reliable way I can find to get a group context at this stage of
+      // registration and content creation.  We need to do this now so that the system will
+      // send the right language SMS message back to the user.
+      
+      // Get the GID based on the email address, if there is a GID use the group node's language.
+      $gid = NULL;
+      $rs = db_query("SELECT nid FROM content_type_group WHERE field_yeta_value = '%s'", $header->toaddress);
+      while ($row = db_fetch_array($rs)) {
+        watchdog('matto', "row nid: {$row['nid']}");
+        $gid = $row['nid'];
+      }
+      if ($gid > 0) {
+        $group_node = node_load($gid);
+        $user_language = $group_node->language;
+      }
+      // otherwise, use the default language setting of the site.
+      else {
+        $user_language = language_default('language');
+      }
+      
       $user = user_save(NULL, array(
         'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
         'pass' => $password,
         'mail' => $from_address,
         'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
         'status' => 1,
-        'language' => $node->language,
-        'sms_user' => array('number' => $number, 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+        'language' => $user_language,
+        'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
         'access' => time(),
       ));
     }
@@ -332,7 +379,6 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     // Do not post content from the registration address.
     $node = FALSE;
   }
-
   return $node;
 }
 
@@ -340,7 +386,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
  * Make sure SMS msgs are translated to the correct language by switching based on a set
  * of heuristics
  */ 
-function sms_registration_get_user_language($u){
+function sms_registration_get_user_language($user){
   global $language;
   $user_language = null;
   // start off with the user's chosen language, if they have set one
@@ -355,43 +401,46 @@ function sms_registration_get_user_language($u){
       $user_language = $group->language;
     }
   }
-  // switch language if required to
+  // if the user language can't be set from any other method, use site default language
   if(empty($user_language)) {
-    $user_language = $language->language;
+    $user_language = language_default('language');
   }
   return $user_language;
 }
 
 // the save failed - this assumes the name must have been duplicate
 function sms_registration_failed_msg($username, $language){
-  return t( variable_get('sms_registration_failed_msg','Error') , array('!name'=>$username), $language );
+  return t( i18n_variable_get('sms_registration_failed_msg', $language, 'Error') , array('!name'=>$username), $language );
 }
 
 // this is an existing user account, so we're changing their username
 function sms_registration_name_changed_msg($username, $url, $language){
-  return t( variable_get('sms_registration_name_changed_msg','Success'), array('!name' => $username, '!server_url'=>$url ), $language );
+  return t( i18n_variable_get('sms_registration_name_changed_msg', $language, 'Success'), array('!name' => $username, '!server_url'=>$url ), $language );
 }
 
 // sent in content, reply asking for email address
 function sms_registration_welcome_email_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_welcome_email_msg', 'Success') ,
+  return t( i18n_variable_get('sms_registration_welcome_email_msg', $language, 'Success') ,
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // sent in content, reply asking for username change
 function sms_registration_welcome_username_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_welcome_username_msg', 'Success'), 
+  return t( i18n_variable_get('sms_registration_welcome_username_msg', $language, 
+            'Welcome to !server_url ! Your username is !name, password is !pass. To change your username, reply to this msg w/the name you want!'), 
              array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // user's first sms was right to the registrar address (this doesn't happen often, but is supported nonetheless)
 function sms_registration_registrar_welcome_msg($username, $password, $url, $language){
-  return t( variable_get('sms_registration_registrar_welcome_msg', 'Success'), 
-            array('!name'=>username, '!pass'=>$password, '!server_url'=>$url), $language );
+  return t( i18n_variable_get('sms_registration_registrar_welcome_msg', $language, 
+            'Welcome to !server_url ! Your username is !name, password is !pass. You can log in to the website with this info.'), 
+            array('!name'=>$username, '!pass'=>$password, '!server_url'=>$url), $language );
 }
 
 // tell the user the carrier isn't supported and log it
 function sms_registration_parse_error_msg($carrier_name, $language){
-  return t( variable_get('sms_registration_parse_error_msg', 'Error') , 
+  return t( i18n_variable_get('sms_registration_parse_error_msg', $language, 
+            'Sorry !carrier is not supported.  Try logging in online.'), 
             array('!carrier'=>$carrier_name), $language );
 }

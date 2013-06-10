@@ -195,9 +195,9 @@ function _vozmob_support_media_mover_cleanup(&$node) {
   $clean_up = FALSE;
 
   // If the node is being saved to the database for the first time, do nothing and quit
- if ($node->nid == NULL) {
-   return;
- }
+  if ($node->nid == NULL) {
+    return;
+  }
  
   // get the media_mover array - normally it's in the node object, but if not fetch via API
   $mm_node_data = array();
@@ -277,4 +277,14 @@ function _vozmob_support_media_mover_cleanup(&$node) {
     //db_query('DELETE FROM cache_media_mover WHERE cid = %d', 'media_mover_files_node_' . $node->nid . '_8');
     watchdog('vozmob_support', 'Cleaned up media_mover entries for ' . url('node/' . $node->nid, array('absolute' => TRUE)));
   }
+}
+
+/**
+ * Implementation of hook_mailhandler()
+ * Make $node use user's desired language.
+ */
+function vozmob_support_mailhandler(&$node, $result, $i, $header, $mailbox) {
+  $user = user_load($node->uid);
+  $node->language = $user->language;
+  return $node;
 }
