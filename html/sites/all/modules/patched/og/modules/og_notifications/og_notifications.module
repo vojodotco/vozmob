@@ -175,6 +175,7 @@ function og_notifications_og($op, $gid, $uid, $args) {
         $params['from'] = $email;
       }
       foreach ($destinations as $uid) {
+        if($uid==vojo_og_anon_get_user_id()) continue;  // don't send notifications to anon user
         notifications_lite_send($uid, $args['subject'], $args['body'], 'default', $params);
       }
       break;
