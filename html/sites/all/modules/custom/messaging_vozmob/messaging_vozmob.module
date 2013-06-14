@@ -20,8 +20,8 @@ function messaging_vozmob_send_voip_sms($account, $message, $options) {
   $number = $keys[0];
   // Create and execute a voipcall
   $call = new VoipCall();
-  $call->setCurrentChannel('text');
-  $call->setCurrentNetwork('sms');
+  $call->setCallChannel('text');
+  $call->setCallNetwork('sms');
   $call->setDestNumber($number);
   $call->setCallerNumber($options['from'] || variable_get('voipcall_cid_number', NULL));  // this is not a useful phone number :-(
   $call->setCallerName(sms_registration_get_address());   // does this work?
