@@ -11,7 +11,7 @@ function vozmob_og_fieldgroup_default_groups() {
     'group_type' => 'standard',
     'type_name' => 'group',
     'group_name' => 'group_voipnode_settings',
-    'label' => 'Custom Phone Audio',
+    'label' => 'VoIP Extension Settings',
     'settings' => array(
       'form' => array(
         'style' => 'fieldset_collapsible',
@@ -28,18 +28,6 @@ function vozmob_og_fieldgroup_default_groups() {
           'exclude' => 0,
         ),
         '4' => array(
-          'format' => 'fieldset',
-          'exclude' => 0,
-        ),
-        '2' => array(
-          'format' => 'fieldset',
-          'exclude' => 0,
-        ),
-        '3' => array(
-          'format' => 'fieldset',
-          'exclude' => 0,
-        ),
-        '5' => array(
           'format' => 'fieldset',
           'exclude' => 0,
         ),
@@ -60,7 +48,7 @@ function vozmob_og_fieldgroup_default_groups() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Custom Phone Audio');
+  t('VoIP Extension Settings');
 
   return $groups;
 }
