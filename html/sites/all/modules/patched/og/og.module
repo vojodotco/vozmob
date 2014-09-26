@@ -1943,8 +1943,7 @@ function og_get_sql_args() {
 
 function og_user($op, $edit, &$account, $category = NULL) {
   global $user;
-  watchdog('mariorz', "og_user called with op:" . $op);
-  
+
   switch ($op) {
     case 'register':
       $options = array();
@@ -2229,7 +2228,7 @@ function og_block_new() {
 
 function og_block_details() {
   global $user;
-  
+
   // Only display group details if we have a group context.
   if (($node = og_get_group_context()) && node_access('view', $node)) {
     list($txt, $subscription) = og_subscriber_count_link($node);

@@ -205,7 +205,7 @@ function _post_key() {
 
 /**
  * Converts an hexadecimal string to binairy
-
+ */
 function hex2bin($h) {
   if (!is_string($h)) {
     return NULL;
@@ -216,7 +216,7 @@ function hex2bin($h) {
   }
   return $r;
 }
- */
+
 /**
  * Implementation of our own API hook_swfupload().
  */
