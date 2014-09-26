@@ -66,7 +66,7 @@ function og_broadcast_form_submit($form, &$form_state) {
     'subject' => $form_state['values']['subject'],
     'body' => _og_mail_text('og_admin_email_body', $variables)
   );
-
+  watchdog('mariorz', "about to broadcast, og.pages.inc");
   // Send notifications to each member; Sending an array of recipients implies
   // that this is a bulk message.
   module_invoke_all('og', 'user broadcast', $node->nid, $recipients, $message);
