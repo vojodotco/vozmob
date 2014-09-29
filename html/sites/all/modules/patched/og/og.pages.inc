@@ -22,19 +22,11 @@
    
    $form['subject'] = array(
     '#type' => 'textfield', 
-    '#title' => t('Subject'), 
+    '#title' => t('SMS Content'), 
     '#size' => 70,
-    '#maxlength' => 250,
-    '#description' => t('Enter a subject for your message.'), 
+    '#maxlength' => 160,
+    '#description' => t('Enter the content for your message.'), 
     '#required' => TRUE,
-  );
-  $form['body'] = array(
-    '#type' => 'textarea', 
-    '#title' => t('Body'), 
-    '#rows' => 5,
-    '#cols' => 90,
-    '#description' => t('Enter a body for your message.'), 
-    '#required' => TRUE
   );
   $form['send'] = array('#type' => 'submit', '#value' => t('Send message'));
   $form['gid'] = array('#type' => 'value', '#value' => $node->nid);
@@ -55,7 +47,6 @@ function og_broadcast_form_submit($form, &$form_state) {
   $variables = array(
     '@group' => $node->title,
     '@subject' => $form_state['values']['subject'],
-    '@body' => $form_state['values']['body'],
     '@site' => variable_get('site_name', 'drupal'),
     '!url_group' => url("node/$node->nid", array('absolute' => TRUE)),
     '!url_unsubscribe' => url("og/unsubscribe/$node->nid/$user->uid", array('absolute' => TRUE))
@@ -63,8 +54,8 @@ function og_broadcast_form_submit($form, &$form_state) {
 
   $message = array(
     'from' => $user,
-    'subject' => $form_state['values']['subject'],
-    'body' => _og_mail_text('og_admin_email_body', $variables)
+    'subject' => $form_state['values']['subject']
+
   );
 
   // Send notifications to each member; Sending an array of recipients implies
@@ -143,8 +134,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
   );
 
   $message = array(
-    'subject' => _og_mail_text('og_new_admin_subject', $variables),
-    'body' => _og_mail_text('og_new_admin_body', $variables)
+    'subject' => _og_mail_text('og_new_admin_subject', $variables)
   );
 
   module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);
@@ -249,7 +239,7 @@ function og_invite_form_submit($form, &$form_state) {
   $emails = $form_state['valid_emails'];
   $node = node_load($form_state['values']['gid']);
 
-  $variables = array(
+  $variables = array(s.
     '@group' => $node->title,
     '@description' => $node->og_description,
     '@site' => variable_get('site_name', 'drupal'),
