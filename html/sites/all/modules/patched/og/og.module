@@ -519,6 +519,29 @@ function og_perm() {
   return array('administer organic groups');
 }
 
+
+function og_cron() {
+  $queue = DrupalQueue::get('sms_broadcast');
+  $queue->createItem(1);
+}
+
+function og_cron_queue_info(){
+    $queues['sms_broadcast'] = array(
+    'worker callback' => 'og_broadcast_sms',
+    'time' => 120,
+  );
+  return $queues;
+}
+
+function og_broadcast_sms($data) {
+  global $user;
+  $tosend = variable_get("og_broadcast_sms_".$user->uid);
+  variable_set("og_broadcast_sms_".$user->uid, '');
+  foreach($tosend['numbers'] as $number) {
+    _vojo_send_sms($number, $tosend['msg']);
+  }
+}
+
 /**
  * Implementation of hook_og().
  */
@@ -531,6 +554,19 @@ function og_og($op, $gid, $uid, $args) {
     elseif ($op == 'user update' && $args['is_active']) {
       rules_invoke_event('og_user_approved', $uid, $gid);
     }
+  }
+  if($op == 'user broadcast' && og_is_group_admin(node_load($gid))) {
+    global $user;
+    $tosend = array();
+    $tosend['msg'] = $args['subject'];
+    $tosend['numbers'] = array();
+    foreach($uid as $duid) {
+      $user_info = user_load($duid);
+      if(sizeof($user_info->sms_user) > 0) {
+	array_push($tosend['numbers'], $user_info->sms_user[0]['number']);
+      }
+    }
+    variable_set("og_broadcast_sms_".$user->uid, $tosend);
   }
   if (module_exists('trigger')) {
     $aids = _trigger_get_hook_aids('og', $op);
