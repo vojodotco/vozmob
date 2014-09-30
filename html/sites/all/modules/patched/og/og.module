@@ -538,6 +538,9 @@ function og_broadcast_sms($data) {
   variable_set('og_broadcast_sms_keys', '');
   foreach($sendkeys as $tosendkey) {
     $tosend = variable_get($tosendkey);
+    if (!$tosend) {
+       return;
+    }
     variable_set($tosendkey, '');
     foreach($tosend['numbers'] as $number) {
       _vojo_send_sms($number, $tosend['msg']);
