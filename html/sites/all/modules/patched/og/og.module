@@ -528,17 +528,20 @@ function og_cron() {
 function og_cron_queue_info(){
     $queues['sms_broadcast'] = array(
     'worker callback' => 'og_broadcast_sms',
-    'time' => 120,
+    'time' => 600,
   );
   return $queues;
 }
 
 function og_broadcast_sms($data) {
-  global $user;
-  $tosend = variable_get("og_broadcast_sms_".$user->uid);
-  variable_set("og_broadcast_sms_".$user->uid, '');
-  foreach($tosend['numbers'] as $number) {
-    _vojo_send_sms($number, $tosend['msg']);
+  $sendkeys = variable_get('og_broadcast_sms_keys');
+  variable_set('og_broadcast_sms_keys', '');
+  foreach($sendkeys as $tosendkey) {
+    $tosend = variable_get($tosendkey);
+    variable_set($tosendkey, '');
+    foreach($tosend['numbers'] as $number) {
+      _vojo_send_sms($number, $tosend['msg']);
+    }
   }
 }
 
@@ -566,7 +569,15 @@ function og_og($op, $gid, $uid, $args) {
 	array_push($tosend['numbers'], $user_info->sms_user[0]['number']);
       }
     }
-    variable_set("og_broadcast_sms_".$user->uid, $tosend);
+    $tosendkey = "og_broadcast_sms_".$user->uid."_".$gid;
+    variable_set($tosendkey, $tosend);
+    $sendkeys = variable_get("og_broadcast_sms_keys", array());
+    if (!is_array(sendkeys)) {
+      $sendkeys = array();
+    }
+    array_push($sendkeys, $tosendkey);
+    variable_set("og_broadcast_sms_keys", $sendkeys);
+    return;
   }
   if (module_exists('trigger')) {
     $aids = _trigger_get_hook_aids('og', $op);
