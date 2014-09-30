@@ -572,10 +572,10 @@ function og_og($op, $gid, $uid, $args) {
 	array_push($tosend['numbers'], $user_info->sms_user[0]['number']);
       }
     }
-    $tosendkey = "og_broadcast_sms_".$user->uid."_".$gid;
+    $tosendkey = "og_broadcast_sms_".$user->uid."_".$gid."_".time();
     variable_set($tosendkey, $tosend);
     $sendkeys = variable_get("og_broadcast_sms_keys", array());
-    if (!is_array(sendkeys)) {
+    if (!is_array($sendkeys)) {
       $sendkeys = array();
     }
     array_push($sendkeys, $tosendkey);
