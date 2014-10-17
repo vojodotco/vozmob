@@ -522,7 +522,7 @@ function og_perm() {
 
 function og_cron() {
   $queue = DrupalQueue::get('sms_broadcast');
-  $queue->createItem(1);
+  $queue->createItem('sms_brcst');
 }
 
 function og_cron_queue_info(){
@@ -535,6 +535,10 @@ function og_cron_queue_info(){
 
 function og_broadcast_sms($data) {
   $sendkeys = variable_get('og_broadcast_sms_keys');
+  if(!is_array($sendkeys)) {
+    watchdog('og', 'exit, found no array');
+    return;
+  }
   variable_set('og_broadcast_sms_keys', '');
   foreach($sendkeys as $tosendkey) {
     $tosend = variable_get($tosendkey);
@@ -543,7 +547,12 @@ function og_broadcast_sms($data) {
     }
     variable_set($tosendkey, '');
     foreach($tosend['numbers'] as $number) {
-      _vojo_send_sms($number, $tosend['msg']);
+      if($number!='1') {
+	//shameful hack to prevent weird extraneous sms
+	//from being sent to destination number '+1'
+	//while I figure out why that happens
+	_vojo_send_sms($number, $tosend['msg']);
+      }
     }
   }
 }

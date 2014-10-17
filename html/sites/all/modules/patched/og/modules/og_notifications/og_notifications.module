@@ -166,6 +166,12 @@ function og_notifications_og($op, $gid, $uid, $args) {
     case 'admin create':
     case 'admin new':
     case 'user broadcast':
+      /**
+      Commented out as user "user broadcast" operations
+      is being used for broadcaast sms funcionality in vojo groups
+      this code was sending an extraneous message with content
+      from the templates at admin/messaging/template
+      
       $destinations = is_array($uid) ? $uid : array($uid);
       //HACK: custom from address set to group
       $node = node_load($gid);
@@ -178,6 +184,7 @@ function og_notifications_og($op, $gid, $uid, $args) {
         if($uid==vojo_og_anon_get_user_id()) continue;  // don't send notifications to anon user
         notifications_lite_send($uid, $args['subject'], $args['body'], 'default', $params);
       }
+      **/
       break;
   }
 }
