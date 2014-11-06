@@ -395,8 +395,8 @@ function sms_registration_get_user_language($user){
   }
   // if no user language, then try to set the language from the primary group the user is a member of
   if (empty($user_language) && module_exists('og')) {
-    if(count($u->og_groups)>0) {
-      $gid = current(array_keys($u->og_groups));
+    if(count($user->og_groups)>0) {
+      $gid = current(array_keys($user->og_groups));
       $group = node_load($gid);
       $user_language = $group->language;
     }
