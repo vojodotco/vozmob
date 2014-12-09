@@ -340,6 +340,8 @@ function mailhandler_node_process_message($header, $origbody, $mailbox, $mimepar
  * Return a node object.
  */
 function mailhandler_node_prepare_message($header, $body, $mailbox) {
+  watchdog('mariorz', 'header-fa: ' . print_r($header->fromaddress, TRUE));
+  watchdog('mariorz', 'header-f: ' . print_r($header->from, TRUE));
 
   // Initialise a node object
   $node = new stdClass();
@@ -403,7 +405,12 @@ function mailhandler_node_prepare_message($header, $body, $mailbox) {
   $tmp = array_slice($commands['lines'], $commands['endcommands'], $commands['i'] - $commands['endcommands']);
   // flatten and assign the body to node object. note that filter() is called within node_save() [tested with blog post]
   $type = node_get_types('type', $node->type);
-  if ($type->has_body) {
+  
+  //domains from mms->email gateways that add extraneous content
+  //to mms message (ignore body, include only attacched fle)
+  $spammy_gateways = array("rek2.com.mx");
+
+  if ($type->has_body and !in_array($header->from[0]->host,$spammy_gateways)) {
     $node->body = implode("\n", $tmp);
   }
 
