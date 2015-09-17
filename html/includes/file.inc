@@ -44,6 +44,12 @@ function file_create_url($path) {
   }
   switch (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC)) {
     case FILE_DOWNLOADS_PUBLIC:
+      // temporary hack to handle files in s3 folders
+      // for the great vozmob migration of 2015
+      $s3path = 'sites/default/s3files';
+      if (substr_compare($path,$s3path,0,21) == 0) {
+	return $GLOBALS['base_url'] .'/'. str_replace('\\', '/', $path);
+      }
       return $GLOBALS['base_url'] .'/'. file_directory_path() .'/'. str_replace('\\', '/', $path);
     case FILE_DOWNLOADS_PRIVATE:
       return url('system/files/'. $path, array('absolute' => TRUE));

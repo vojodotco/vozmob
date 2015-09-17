@@ -1,0 +1,68 @@
+<?php
+
+function og_domain_schema() {
+  $schema = array();
+
+  $schema['og_domain_mapping'] = array(
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'did' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'overrides' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('nid'),
+    'unique keys' => array(
+      'nid_uniq' => array('nid'),
+      'domain_uniq' => array('did'),
+    ),
+  );
+
+  $schema['og_domain_domain'] = array(
+    'fields' => array(
+      'did' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'domain' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('did'),
+    'unique keys' => array(
+      'domain_uniq' => array('domain'),
+    ),
+  );
+
+  return $schema;
+}
+
+function og_domain_install() {
+  drupal_install_schema('og_domain');
+  include_once 'og_domain.module';
+  variable_set('og_domain_default_value', _og_domain_get_base_url_domain());
+}
+
+function og_domain_uninstall() {
+  drupal_uninstall_schema('og_domain');
+  //variable_del('og_domain_default_value');
+  db_query('DELETE FROM {variable} WHERE name LIKE \'og_domain_%\'');
+}

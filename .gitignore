@@ -8,4 +8,5 @@ html/sites/vojo.co
 wavplayer.swf
 webrat.log
 cucumber.yml
-
+html/sites/default/s3files
+html/sites/all/modules/migrate_vozmob/migrate_config.php

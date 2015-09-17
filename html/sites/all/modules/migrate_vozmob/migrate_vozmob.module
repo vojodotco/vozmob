@@ -1,0 +1,139 @@
+<?php
+
+/**
+ * Implements hook_migrate_api().
+ */
+function migrate_vozmob_migrate_api() {
+  $api = array(
+    'api' => 2,
+    'groups' => array(
+      'vozmob' => array(
+        'title' => t('Vozmob Migrations'),
+      ),
+    ),
+    'migrations' => array(
+      'VozmobUser' => array(
+        'class_name' => 'VozmobUserMigration',
+        'group_name' => 'vozmob',
+      ),
+      'VozmobSMSUser' => array(
+        'class_name' => 'VozmobSMSUsermigration',
+        'group_name' => 'vozmob',
+      ),
+
+      'VozmobTerm' => array(
+        'class_name' => 'VozmobTermMigration',
+        'group_name' => 'vozmob',
+      ),
+       'VozmobNode' => array(
+        'class_name' => 'VozmobNodeMigration',
+        'group_name' => 'vozmob',
+      ),
+       'VozmobNode' => array(
+        'class_name' => 'VozmobNodeMigration',
+        'group_name' => 'vozmob',
+      ),
+      'VozmobNodeRevision' => array(
+        'class_name' => 'VozmobNodeRevisionMigration',
+        'group_name' => 'vozmob',
+      ),
+       'VozmobTermSynonym' => array(
+        'class_name' => 'VozmobTermSynonymMigration',
+        'group_name' => 'vozmob',
+      ),
+      'VozmobComments' => array(
+        'class_name' => 'VozmobCommentsMigration',
+        'group_name' => 'vozmob',
+      ),
+
+      'VozmobOG' => array(
+        'class_name' => 'VozmobOGMigration',
+        'group_name' => 'vozmob',
+      ),
+      'VozmobOGUID' => array(
+        'class_name' => 'VozmobOGUidmigration',
+        'group_name' => 'vozmob',
+      ),
+      'VozmobOGAncestry' => array(
+        'class_name' => 'VozmobOGAncestryMigration',
+        'group_name' => 'vozmob',
+      ),
+      /* 'VozmobOGAccessPost' => array(
+        'class_name' => 'VozmobOGAccessPostMigration',
+        'group_name' => 'vozmob',
+	),*/
+
+       'VozmobFile' => array(
+        'class_name' => 'VozmobFilemigration',
+        'group_name' => 'vozmob',
+      ),
+      
+      'VozmobCFI' => array(
+        'class_name' => 'VozmobCFIMigration',
+        'group_name' => 'vozmob',
+      ),
+
+      'VozmobUpload' => array(
+        'class_name' => 'VozmobUploadMigration',
+        'group_name' => 'vozmob',
+      ),
+
+      'VozmobMMFiles' => array(
+        'class_name' => 'VozmobMMFilesMigration',
+        'group_name' => 'vozmob',
+      ),
+
+       'VozmobTermNode' => array(
+        'class_name' => 'VozmobTermNodeMigration',
+        'group_name' => 'vozmob',
+      ),
+                  
+    ),
+  );
+  return $api;
+}
+
+
+/**
+ * @file
+ */
+
+/*
+ * You must implement hook_migrate_api(), setting the API level to 2, if you are
+ * implementing any migration classes. As of Migrate 2.5, you should also
+ * register your migration and handler classes explicitly here - the former
+ * method of letting them get automatically registered on a cache clear will
+ * break in certain environments (see http://drupal.org/node/1778952).
+
+function migrate_example_migrate_api() {
+  $api = array(
+    'api' => 2,
+    'migrations' => array(
+      'BeerTerm' => array('class_name' => 'BeerTermMigration'),
+      'BeerUser' => array('class_name' => 'BeerUserMigration'),
+      'BeerNode' => array('class_name' => 'BeerNodeMigration'),
+      'BeerComment' => array('class_name' => 'BeerCommentMigration'),
+      'WinePrep' => array('class_name' => 'WinePrepMigration'),
+      'WineVariety' => array('class_name' => 'WineVarietyMigration'),
+      'WineRegion' => array('class_name' => 'WineRegionMigration'),
+      'WineBestWith' => array('class_name' => 'WineBestWithMigration'),
+      'WineRole' => array('class_name' => 'WineRoleMigration'),
+      'WineUser' => array('class_name' => 'WineUserMigration'),
+      'WineProducer' => array('class_name' => 'WineProducerMigration'),
+      'WineProducerXML' => array('class_name' => 'WineProducerXMLMigration'),
+      'WineProducerMultiXML' => array('class_name' => 'WineProducerMultiXMLMigration'),
+      'WineProducerXMLPull' => array('class_name' => 'WineProducerXMLPullMigration'),
+      'WineWine' => array('class_name' => 'WineWineMigration'),
+      'WineComment' => array('class_name' => 'WineCommentMigration'),
+      'WineTable' => array('class_name' => 'WineTableMigration'),
+      'WineFinish' => array('class_name' => 'WineFinishMigration'),
+      'WineUpdates' => array('class_name' => 'WineUpdatesMigration'),
+      'WineCommentUpdates' => array('class_name' => 'WineCommentUpdatesMigration'),
+      'WineVarietyUpdates' => array('class_name' => 'WineVarietyUpdatesMigration'),
+      'WineUserUpdates' => array('class_name' => 'WineUserUpdatesMigration'),
+    ),
+  );
+  return $api;
+}
+ */
+

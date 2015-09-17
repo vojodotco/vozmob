@@ -1,0 +1,13 @@
+name = DBTNG
+description = Drupal 7 database 
+
+; Compatability and dependencies
+core = 6.x
+php = 5.2
+
+; Information added by Drupal.org packaging script on 2014-10-16
+version = "6.x-1.0-rc5"
+core = "6.x"
+project = "dbtng"
+datestamp = "1413420529"
+
