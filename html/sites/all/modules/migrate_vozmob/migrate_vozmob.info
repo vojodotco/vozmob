@@ -1,0 +1,24 @@
+name = "Migrate Vozmob"
+description = "Migrate Vozmob site to Vojo.co"
+package = "Development"
+core = 6.x
+php = 5.2
+dependencies[] = taxonomy
+dependencies[] = imagefield
+dependencies[] = comment
+dependencies[] = migrate
+dependencies[] = content
+dependencies[] = date
+dependencies[] = migrate_extras
+files[] = migrate_vozmob.module
+files[] = vozmob.inc
+
+; For testing table_copy plugin. Since is infrequently used, we comment it out.
+; files[] = example.table_copy.inc
+
+; Information added by drupal.org packaging script on 2012-11-07
+version = "6.x-2.5"
+core = "6.x"
+project = "migrate"
+datestamp = "1352299011"
+

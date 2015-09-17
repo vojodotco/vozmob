@@ -1,0 +1,643 @@
+<?php
+
+include_once 'og_domain.crud.inc';
+
+define('OG_DOMAIN_PERM_USE_DOMAINS', 'use domains');
+
+/**
+ * Makes a lookup for a specified domain.
+ *
+ * @param string $domain
+ * @return mixed nid if the domain found, FALSE else
+ */
+function _og_domain_db_lookup_nid($domain) {
+  return db_result(db_query('SELECT nid FROM {og_domain_mapping} NATURAL JOIN {og_domain_domain} WHERE domain = \'%s\'', $domain));
+}
+
+/**
+ * Makes a lookup for a specified nid.
+ *
+ * @param int $nid
+ * @return mixed domain if the nid found, FALSE else
+ */
+function _og_domain_db_lookup_domain($nid) {
+  static $cache = array();
+  if(!isset($cache[$nid])) {
+    $domain = FALSE;
+    $node = node_load($nid);
+    if($node != FALSE) {
+      $sql = 'SELECT domain FROM {og_domain_mapping} NATURAL JOIN {og_domain_domain} WHERE nid = %d';
+      if(og_is_group_type($node->type)) {
+        $domain = db_result(db_query($sql, $nid));
+      }else if(og_is_group_post_type($node->type)) {
+        if(!in_array(_og_domain_db_lookup_nid(_og_domain_get_base_url_domain()), $node->og_groups)) {
+          $nids = $node->og_groups;
+          $node_id = array_shift($nids);
+          $domain = db_result(db_query($sql, $node_id));
+        }
+      }
+    }
+    if($domain === FALSE) $domain = _og_domain_get_base_url_domain();
+    $cache[$nid] = $domain;
+  }
+  return $cache[$nid];
+}
+
+/**
+ * Makes a lookup for multiple nids.
+ *
+ * @param array<int> $nids
+ * @return array
+ */
+function _og_domain_db_lookup_multiple_domains($nids) {
+  $domains = array();
+  $nids = array_filter($nids, 'is_numeric');
+  if(count($nids) > 0) {
+    $res = db_query('SELECT domain FROM {og_domain_mapping} NATURAL JOIN {og_domain_domain} WHERE nid IN ('.join(',',$nids).')');
+    while($row = db_fetch_array($res))
+      $domains []= $row['domain'];
+  }
+  return $domains;
+}
+
+/**
+ * Returns the current domain.
+ *
+ * @global string $base_url
+ * @return string
+ */
+function _og_domain_get_base_url_domain() {
+  global $base_url;
+  $matches = NULL;
+  return (preg_match_all('/http[s]?:\/\/([^\/]*)/i', $base_url, $matches) && isset($matches[1])) ? $matches[1][0] : NULL;
+}
+
+/**
+ * Rewrites and URL.
+ *
+ * @param string $base_url
+ * @param string $new_domain
+ * @return string
+ */
+function _og_domain_rewrite_url($base_url, $new_domain) {
+  return preg_replace('/^(http[s]?:\/\/)([^\/]*)/i', '$1'.$new_domain, $base_url);
+}
+
+/**
+ * Replaces the domain in the base_url.
+ *
+ * @see _og_domain_rewrite_full_url()
+ *
+ * @global string $base_url
+ * @param string $new_domain
+ * @return string
+ */
+function _og_domain_rewrite_base_url($new_domain) {
+  global $base_url;
+  return _og_domain_rewrite_url($base_url, $new_domain);
+}
+
+/**
+ * Replaces the domain in the complete url.
+ *
+ * @param string $new_domain
+ * @return string
+ */
+function _og_domain_rewrite_complete_url($new_domain) {
+  return _og_domain_rewrite_base_url($new_domain) . '/' . ($GLOBALS['conf']['clean_url'] ? '' : '?q=') . drupal_get_path_alias($_GET['q']);
+}
+
+/**
+ * Guesses the correct domain for a group.
+ *
+ * @staticvar array<string> $cache
+ * @staticvar string $current_domain
+ * @param stdClass $node
+ * @param boolean $reset
+ * @return string
+ */
+function _og_domain_guess_domain($node, $reset = FALSE) {
+  static $cache = array();
+  static $current_domain = NULL;
+  if($reset) {
+    $cache = array();
+    $current_domain = NULL;
+  }
+  if($current_domain === NULL) $current_domain = _og_domain_get_base_url_domain();
+  if(!isset($cache[$node->nid])) {
+    // assume that this node is in a group
+    if(isset($node->og_groups)) {
+      $domain_candidates = _og_domain_db_lookup_multiple_domains($node->og_groups);
+      if(count($domain_candidates) == 0) return $current_domain;
+      if(in_array($current_domain, $domain_candidates)) {
+        $cache[$node->nid] = $current_domain;
+        return $current_domain;
+      } else {
+        shuffle($domain_candidates);
+        return array_shift($domain_candidates);
+      }
+    }
+    
+    // assume that this node is an organic group
+    $domain = _og_domain_db_lookup_domain($node->nid);
+    if($domain !== FALSE) {
+      $cache[$node->nid] = $domain;
+      return $domain;
+    }
+
+    $hook_domains = _og_domain_invoke_all('domain', $node);
+    $hook_domains = array_unique($hook_domains);
+    $hook_domains = array_filter($hook_domains, 'is_string');
+    if(count($hook_domains) > 0) {
+      $domain = array_pop($hook_domains);
+      $cache[$node->nid] = $domain;
+      return $domain;
+    }
+  }
+  return variable_get('og_node_default_domain', $current_domain);
+}
+
+/**
+ * Overrides values from $GLOBALS['conf']
+ *
+ * @param string $domain
+ * @return null
+ */
+function _og_domain_handle_conf_overrides($domain) {
+  $overrides = db_result(db_query('SELECT overrides FROM {og_domain_mapping} NATURAL JOIN {og_domain_domain} WHERE domain = \'%s\'', $domain));
+  if($overrides === FALSE) return;
+  $overrides = unserialize($overrides);
+  if(!is_array($overrides)) return;
+  foreach($overrides as $k=>$v)
+    $GLOBALS['conf'][$k] = $v;
+}
+
+/**
+ * Implementation of hook_init().
+ *
+ * @return null
+ */
+function og_domain_init() {
+  // dynamic plugin loader
+  // TODO search in every enabled module
+  foreach(file_scan_directory(drupal_get_path('module', 'og_domain'), 'plugin\.[^\.]*\.inc') as $f) {
+    include_once $f->basename;
+    og_domain_plugin_manager('add', substr($f->name, 7)); // remove the 'plugin.' part
+  }
+  
+  $nid = _og_domain_db_lookup_nid($_SERVER['SERVER_NAME']);
+  $current_domain = _og_domain_get_base_url_domain();
+
+  if(!_og_domain_is_enabled($current_domain)) {
+    drupal_goto(variable_get('_og_domain_disabled_page', _og_domain_get_default_disabled_page()));
+  }
+
+  if($nid !== FALSE) {
+    $node = node_load($nid);
+    // if it is the front page, the we would rather like to see the og page
+    if(drupal_is_front_page()) {
+      drupal_goto('node/'.$nid);
+      return;
+    }
+    // forcing og context based on a domain
+    if(variable_get('og_domain_force_context', FALSE)) {
+      og_set_group_context($node);
+    }
+    // forcing og_theme
+    if(variable_get('og_domain_force_theme', FALSE)) {
+      og_set_theme($node);
+    }
+  }
+  
+  $node = node_load(arg(1));
+  if($node !== FALSE) {
+    $node_domain = _og_domain_guess_domain($node);
+    if($node_domain != $current_domain) {
+      drupal_goto(_og_domain_rewrite_complete_url($node_domain));
+      return;
+    }
+  }
+
+  _og_domain_handle_conf_overrides($current_domain);
+}
+
+/**
+ * Reimplementation of user_access()
+ *
+ * @staticvar array $cache
+ * @param string $permission not used
+ * @param string $account
+ * @param boolean $reset
+ * @return boolean
+ */
+function _og_domain_user_access($permission = NULL, $account = NULL, $reset = FALSE) {
+  static $cache = NULL;
+  if($cache === NULL) {
+    $cache = array();
+    foreach(node_get_types() as $n) {
+      if(og_is_group_type($n->type)) {
+        $cache []= $n->type;
+      }
+    }
+  }
+  if(user_access(OG_DOMAIN_PERM_USE_DOMAINS))
+    foreach($cache as $t) {
+      if(user_access("edit any $t content", $account, $reset) || user_access("edit own $t content", $account, $reset))
+        return TRUE;
+    }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_menu().
+ *
+ * @return array
+ */
+function og_domain_menu() {
+  $items = array();
+
+  $items['og_domain'] = array(
+    'page callback' => 'og_domain_mappings_admin_page',
+    'title' => 'Domain mappings',
+    'access callback' => '_og_domain_user_access',
+    'description' => t('Configure your domain mappings'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_CALLBACK | MENU_NORMAL_ITEM,
+  );
+
+  $items['og_domain/mappings'] = array(
+    'title' => 'Mappings',
+    'access callback' => '_og_domain_user_access',
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -2,
+  );
+
+  $items['og_domain/mappings/unmap/%'] = array(
+    'page callback' => 'og_domain_mappings_unmap_admin_page',
+    'page arguments' => array(3),
+    'title' => 'Delete mapping',
+    'access callback' => '_og_domain_user_access',
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['og_domain/manager'] = array(
+    'page callback' => 'og_domain_manager_admin_page',
+    'title' => 'Domain manager',
+    'access callback' => '_og_domain_user_access',
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -1,
+  );
+  
+  $items['og_domain/manager_add'] = array(
+    'page callback' => 'og_domain_manager_add_page',
+    'title' => 'Add domain',
+    'access callback' => '_og_domain_user_access',
+    'file' => 'og_domain.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  $items['og_domain/manager/delete/%'] = array(
+    'page callback' => 'og_domain_manager_delete_page',
+    'page arguments' => array(3),
+    'title' => 'Delete domain',
+    'access callback' => '_og_domain_user_access',
+    'file' => 'og_domain.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/og/domain'] = array(
+    'page callback' => 'og_domain_admin_page',
+    'title' => 'Domain mapping configuration',
+    'access arguments' => array('administer site configuration'),
+    'description' => t('Configure organic groups domain mappings'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_CALLBACK | MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/og/domain/general'] = array(
+    'title' => 'General',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -3,
+  );
+
+  $items['admin/og/domain/mappings'] = array(
+    'page callback' => 'og_domain_mappings_admin_page',
+    'page arguments' => array(TRUE),
+    'title' => 'Mappings',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -2,
+  );
+
+  $items['admin/og/domain/manager'] = array(
+    'page callback' => 'og_domain_manager_admin_page',
+    'page arguments' => array(TRUE),
+    'title' => 'Domain manager',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['admin/og/domain/manager_add'] = array(
+    'page callback' => 'og_domain_manager_add_page',
+    'page arguments' => array(TRUE),
+    'title' => 'Add domain',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  $items['admin/og/domain/manager/delete/%'] = array(
+    'page callback' => 'og_domain_manager_delete_page',
+    'page arguments' => array(5, TRUE),
+    'title' => 'Delete domain',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/og/domain/mappings/unmap/%'] = array(
+    'page callback' => 'og_domain_mappings_unmap_admin_page',
+    'page arguments' => array(5, TRUE),
+    'title' => 'Delete mapping',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'og_domain.admin.inc',
+    'file path' => drupal_get_path('module', 'og_domain'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $form_id
+ * @return null
+ */
+function og_domain_form_alter(&$form, $form_state, $form_id) {
+  if(!user_access(OG_DOMAIN_PERM_USE_DOMAINS)) return;
+  global $user;
+  $formidarr = explode('_', $form_id);
+  $formnamearr = array();
+  array_unshift($formnamearr, array_pop($formidarr));
+  array_unshift($formnamearr, array_pop($formidarr));
+  $type = implode('_', $formidarr);
+  $form_name = implode('_', $formnamearr);
+  if(!($form_name == 'node_form' && og_is_group_type($type))) return;
+  drupal_add_js(drupal_get_path('module', 'og_domain').'/og_domain.js', 'module', 'header', FALSE, FALSE);
+  $nid = $form['nid']['#value'];
+  $default_domain = '';
+  if($nid !== NULL) {
+    $domain = _og_domain_db_lookup_domain($nid);
+    if($domain !== FALSE) {
+      $default_domain = $domain;
+    }
+  }
+  $form['og_domain'] = array(
+    '#type' => 'select',
+    '#title' => t('Domain'),
+    '#default_value' => _og_domain_get_did_by_domain($default_domain),
+    '#description' => t('Dedicated domain name for this group.'),
+    '#options' => _og_domain_get_available_domains($user->uid, $nid),
+  );
+  $hook_form_items = _og_domain_invoke_all('override_form_add', $nid);
+  if(count($hook_form_items) > 0) {
+    $form['og_domain_overrides'] = array(
+      '#title' => t('Domain variable overrides'),
+      '#type' => 'fieldset',
+    );
+    $form['og_domain_overrides'] = array_merge_recursive($form['og_domain_overrides'], $hook_form_items);
+  }
+  $form['#validate'] []= 'og_domain_form_validate';
+  $form['#submit'] []= 'og_domain_form_submit';
+}
+
+/**
+ * Implementation of hook_form_validate().
+ *
+ * @param array $form
+ * @param array $form_state
+ * @return null
+ */
+function og_domain_form_validate($form, &$form_state) {
+  $did = $form_state['values']['og_domain'];
+  if(!$did > 0) return;
+  // checking if the domain name is already mapped
+  $mapped_nid = _og_domain_db_lookup_nid($did);
+  if($mapped_nid !== FALSE && $mapped_nid != $form_state['values']['nid']) {
+    $mapped_node = node_load($mapped_nid);
+    form_set_error('og_domain', t('This domain is mapped by !node', array('!node' => l($mapped_node->title, 'node/'.$mapped_node->nid))));
+  }
+  _og_domain_invoke_all('override_form_validate', $form_state);
+}
+
+/**
+ * Implementation of hook_form_submit().
+ *
+ * @todo add support for overrides (needs discussion)
+ * @param array $form
+ * @param array $form_state
+ */
+function og_domain_form_submit($form, &$form_state) {
+  $did = $form_state['values']['og_domain'];
+  $nid = $form_state['values']['nid'];
+  if(!$did > 0) {
+    if(is_numeric($nid) && $nid > 0) {
+      _og_domain_unmap_by_nid($nid);
+      $default_domain = variable_get('og_domain_default_value', _og_domain_get_base_url_domain());
+      if($default_domain != _og_domain_get_base_url_domain()) {
+        drupal_goto(_og_domain_rewrite_complete_url($default_domain));
+      }
+    }
+  } else {
+    if(is_numeric($nid) && $nid > 0) {
+      _og_domain_do_mapping($nid, $did);
+    }
+  }
+  _og_domain_invoke_all('override_form_submit', $form_state);
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * @todo add full integration
+ * @param stdClass $node
+ * @param string $op
+ * @param mixed $a3
+ * @param mixed $a4
+ */
+function og_domain_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch($op) {
+    case 'delete':
+      _og_domain_unmap_by_nid($node->nid);
+      drupal_goto(_og_domain_rewrite_base_url(variable_get('og_domain_default_value', _og_domain_get_base_url_domain())));
+      break;
+    case 'insert':
+      if(isset($node->og_domain) && $node->og_domain > 0) {
+        _og_domain_do_mapping($node->nid, $node->og_domain);
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ *
+ * @return array
+ */
+function og_domain_perm() {
+  return array('raw overrides', OG_DOMAIN_PERM_USE_DOMAINS);
+}
+
+/**
+ * Plugin manager function.
+ *
+ * @todo add possibility to enable/disable plugins
+ * @staticvar array $plugins
+ * @param string $op can be add or get
+ * @param string $arg
+ * @return mixed
+ */
+function og_domain_plugin_manager($op, $arg = NULL){
+  static $plugins = array();
+  switch($op) {
+    case 'add':
+      if(!in_array($arg, $plugins) && $arg !== NULL){
+        $plugins []= $arg;
+        return TRUE;
+      }
+      return FALSE;
+      break;
+    case 'get':
+      return $plugins;
+      break;
+  }
+  return NULL;
+}
+
+/**
+ * Something like module_invoke_all() but for plugins.
+ *
+ * @param string $hook
+ * @return array
+ */
+function _og_domain_invoke_all($hook) {
+  $items = array();
+  $args = func_get_args();
+  array_shift($args);
+  foreach(og_domain_plugin_manager('get') as $p) {
+    if(function_exists($p.'_'.$hook))
+    $items = call_user_func_array($p.'_'.$hook, $args);
+  }
+  return $items;
+}
+
+/**
+ * Returns the group of a node based on the domain.
+ *
+ * @staticvar array $cache
+ * @param stdClass $node
+ * @return int
+ */
+function _og_domain_get_domain_group_nid($node) {
+  static $cache = array();
+  if(!isset($cache[$node->nid])) {
+    $domain = _og_domain_guess_domain($node);
+    $cache[$node->nid] = _og_domain_db_lookup_nid($domain);
+  }
+  return $cache[$node->nid];
+}
+
+/**
+ * Returns the current group nid.
+ *
+ * @staticvar int $cache
+ * @return int
+ */
+function _og_domain_get_current_domain_group_nid() {
+  static $cache = NULL;
+  if($cache === NULL) {
+    $cache = _og_domain_db_lookup_nid(_og_domain_get_base_url_domain());
+  }
+  return $cache;
+}
+
+/**
+ * Returns a default disabled page.
+ *
+ * @global string $base_url
+ * @staticvar string $cache
+ * @return string
+ */
+function _og_domain_get_default_disabled_page() {
+  global $base_url;
+  static $cache = NULL;
+  if($cache === NULL) {
+    $cache = _og_domain_rewrite_url($base_url, variable_get('og_domain_default_value', _og_domain_get_base_url_domain()));
+  }
+  return $cache;
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function og_domain_cron() {
+  // I know that this is a bit ugly hack :(
+  foreach(_og_domain_get_all() as $d) {
+    if(node_load($d['nid']) == FALSE) {
+      _og_domain_unmap_by_domain($d['domain']);
+    }
+  }
+}
+
+/**
+ * Suspices the current group.
+ *
+ * @staticvar int $cache
+ * @return int
+ */
+function og_domain_gid() {
+  static $cache = NULL;
+  if($cache === NULL) {
+    $domain = _og_domain_get_base_url_domain();
+    if($domain != variable_get('og_domain_default_value', _og_domain_get_base_url_domain())) {
+      $cache = (int)_og_domain_db_lookup_nid($domain);
+    } else {
+      if(arg(0) == 'node') {
+        $node = node_load(arg(1));
+        if($node === FALSE) {
+          $cache = 0;
+        } else {
+          if(og_is_group_type($node->type)) {
+            $cache = $node->nid;
+          } else if(og_is_group_post_type($node->type) || og_is_wiki_type($node->type)) {
+            $cache = db_result(db_query('SELECT nid FROM {og_ancestry} WHERE group_nid = %d', $node->nid));
+          } else {
+            $cache = 0;
+          }
+        }
+      }
+    }
+  }
+  return $cache;
+}

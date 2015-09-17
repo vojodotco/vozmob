@@ -360,7 +360,11 @@ function og_is_group_member($gid, $include_admins = TRUE, $uid = NULL) {
     $gid = $gid->nid;
   }
 
-  $groups = array_keys($user->og_groups);
+  try {
+    $groups = array_keys($user->og_groups);
+  } catch (Exception $e) {
+    $groups = array();
+  }
   if ($include_admins) {
     return user_access('administer nodes', $user) || in_array($gid, $groups) ? TRUE : FALSE;
   }
