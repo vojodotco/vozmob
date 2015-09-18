@@ -1,0 +1,28 @@
+name = Migrate Extras
+description = "Adds migrate module integration with contrib modules and other miscellaneous tweaks."
+core = 6.x
+package=Development
+
+dependencies[] = migrate
+files[] = cck_phone.inc
+files[] = content_taxonomy.inc
+files[] = date.inc
+files[] = emfield.inc
+files[] = flag.inc
+files[] = formatted_number.inc
+files[] = nodewords.inc
+files[] = og.inc
+files[] = page_title.inc
+files[] = pathauto.inc
+files[] = rules.inc
+files[] = user_relationships.inc
+files[] = uuid.inc
+files[] = tests/date.test
+files[] = tests/pathauto.test
+
+; Information added by drupal.org packaging script on 2012-11-07
+version = "6.x-2.5"
+core = "6.x"
+project = "migrate_extras"
+datestamp = "1352299014"
+

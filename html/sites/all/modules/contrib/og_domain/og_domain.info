@@ -1,0 +1,11 @@
+name = Domain based organic groups
+description = Redirects a specified organic group to a mapped domain.
+dependencies[] = og
+core = 6.x
+package = "Organic groups"
+; Information added by drupal.org packaging script on 2013-10-01
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "og_domain"
+datestamp = "1380595395"
+

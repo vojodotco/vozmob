@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php print $language->language ?>" lang="<?php print $language->language ?>">
 <head>
-	<title><?php print $head_title ?></title>
+   <title><?php print menu_get_active_title(); ?></title>
 	<meta http-equiv="content-language" content="<?php print $language->language ?>" />
 	<?php print $meta; ?>
   <?php print $head; ?>
@@ -37,8 +37,8 @@
   
    <div id="menu">
     
-    <?php if (isset($primary_links)) : ?>
-      <?php print theme('links', $primary_links, array('id' => 'nav', 'class' => 'header_links')) ?>
+    <?php if (isset($menu_vozmobnet)) : ?>
+      <?php print theme('links', $menu_vozmobnet, array('id' => 'nav', 'class' => 'header_links')) ?>
     <?php endif; ?>
     <?php if (isset($secondary_links)) : ?>
       <?php print theme('links', $secondary_links, array('id' => 'subnav', 'class' => 'header_links')) ?>
@@ -53,19 +53,47 @@
   <?php endif ?>
   
   <div class="<?php print $center_classes; ?>">
-	<?php if ($breadcrumb != '') { print $breadcrumb; } ?>
+	<?php if ($breadcrumb != '' && $_GET['q']!=variable_get('vozmob_group_path')) { print $breadcrumb; } ?>
 
     <div id="main-content">
 
     <?php if ($tabs != '') { print '<div class="tabs">'. $tabs .'</div>'; } ?>
 
-    <?php if ($messages != '') { print '<div id="messages">'. $messages .'</div>';} ?>
-      
-    <?php if ($title != '') { print '<h2 class="page-title">'. $title .'</h2>'; } ?>      
+   <?php if ($messages != '') { print '<div id="messages">'. $messages .'</div>';} ?>
 
+    <? if ($_GET['q']==variable_get('vozmob_group_path')): 
+   global $language ;
+   $lang_name = $language->language;
+if($lang_name == 'es'):
+  ?>
+    <h2 class="page-title">Historias Destacadas</h2>
+  <?php else: ?>
+      <h2 class="page-title">Featured Stories</h2>
+ <?php endif ?>
+     <?php else: ?>
+  <?php if ($title != '') { print '<h2 class="page-title">'. $title .'</h2>'; } ?> 
+ <?php endif ?>
+  
     <?php print $help; // Drupal already wraps this one in a class  ?>
+   <? if ($_GET['q']==variable_get('vozmob_group_path')): ?> 
+
+
+    <?php print views_embed_view('feature'); ?>
+   
+    <div id="block-views-features-block_1" class="block block-views region-odd odd region-count-1 count-13 with-block-editing">
+         <?php if($lang_name == 'es'): ?>
+  <h3>Historias Recientamente Destacadas</h3>
+<?php else: ?>
+     <h3>Recently Featured Stories</h3>
+      <?php endif ?>
+<div class="content">
+    
+   <?php print views_embed_view('features'); ?>
+</div></div>
+    <?php endif ?>
 
 	 <?php print $content; ?>
+  
 	 </div>
      <?php print $feed_icons; ?>
 

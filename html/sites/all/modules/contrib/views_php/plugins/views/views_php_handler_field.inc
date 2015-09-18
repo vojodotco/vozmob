@@ -241,7 +241,7 @@ class views_php_handler_field extends views_handler_field {
 
       $function = $this->php_output_lambda_function;
       ob_start();
-      $function($this->view, $this, $this->php_static_variable, $normalized_row, $values, isset($values->{$this->field_alias}) ? $values->{$this->field_alias} : NULL);
+      call_user_func($function,$this->view, $this, $this->php_static_variable, $normalized_row, $values, isset($values->{$this->field_alias}) ? $values->{$this->field_alias} : NULL);
       $value = ob_get_clean();
     }
     else {
