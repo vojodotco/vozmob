@@ -16,6 +16,11 @@ function migrate_vozmob_migrate_api() {
         'class_name' => 'VozmobUserMigration',
         'group_name' => 'vozmob',
       ),
+      'VozmobSMSUser' => array(
+        'class_name' => 'VozmobSMSUsermigration',
+        'group_name' => 'vozmob',
+      ),
+
       'VozmobTerm' => array(
         'class_name' => 'VozmobTermMigration',
         'group_name' => 'vozmob',
