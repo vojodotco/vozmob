@@ -9,21 +9,14 @@ abstract class VozmobMigration extends DynamicMigration {
     //parent::__construct();
     //parent::__construct(MigrateGroup::getInstance('vozomb', array('default')));
     parent::__construct(MigrateGroup::getInstance('vozomb'));
-
-     Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
+    $db_config = include('migrate_config.php');
+    Database::addConnectionInfo('vozmob_migration', 'default', $db_config);
     
     // With migrate_ui enabled, migration pages will indicate people involved in
     // the particular migration, with their role and contact info. We default the
     // list in the shared class; it can be overridden for specific migrations.
     $this->team = array(
-      new MigrateTeamMember('Mario Romero', 'mariorz@vojo.co', t('Implementor')),
+      new MigrateTeamMember('Mario Romero', 'mario@romero.fm', t('Implementor')),
     );
 
     // Individual mappings in a migration can be linked to a ticket or issue
@@ -51,16 +44,7 @@ class VozmobUserMigration extends VozmobMigration {
         MigrateDestinationUser::getKeySchema()
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
-     $source_fields = array(
+    $source_fields = array(
       'uid' => t('User ID'),
       'roles' => t('The set of roles assigned to a user.'),
       'role_names' => t('The set of role names assigned to a user.'),
@@ -87,18 +71,8 @@ class VozmobUserMigration extends VozmobMigration {
   // massage the user roles before saving
   public function prepareRow($current_row) {
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
-
-
-      $current_row->picture = str_replace('sites/default/files/', 'sites/default/s3files/',$current_row->picture);
+    $current_row->picture = str_replace('sites/default/files/', 'sites/default/s3files/',$current_row->picture);
      
 
     global $saved_count;
@@ -157,16 +131,8 @@ class VozmobSMSUserMigration extends VozmobMigration {
         MigrateDestinationTable::getKeySchema('sms_user')
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
-     $query = Database::getConnection('default', 'vozmob_migration')
+    $query = Database::getConnection('default', 'vozmob_migration')
       ->select('sms_user', 's')
        ->fields('s', array('uid', 'delta', 'number', 'status', 'code', 'gateway'));
        
@@ -204,15 +170,6 @@ class VozmobTermMigration extends VozmobMigration {
         MigrateDestinationTerm::getKeySchema()
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
 
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('term_data', 'term')
@@ -233,15 +190,7 @@ class VozmobTermMigration extends VozmobMigration {
 
   /*public function prepareRow($current_row) {
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
+    
     $source_id = $current_row->tid;
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('term_hierarchy', 'r')
@@ -278,20 +227,11 @@ class VozmobTermSynonymMigration extends VozmobMigration {
         MigrateDestinationTable::getKeySchema('term_synonym')
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
-     $query = Database::getConnection('default', 'vozmob_migration')
+    $query = Database::getConnection('default', 'vozmob_migration')
       ->select('term_synonym', 's')
        ->fields('s', array('tsid', 'tid', 'name'));
        
-     $this->source = new MigrateSourceSQL($query);
+    $this->source = new MigrateSourceSQL($query);
 
     $this->destination = new MigrateDestinationTable('term_synonym');
    
@@ -346,14 +286,6 @@ class VozmobNodeMigration extends VozmobMigration {
 				   //MigrateDestinationTable::getKeySchema('node')
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
     
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('node', 'node');
@@ -416,14 +348,6 @@ class VozmobNodeMigration extends VozmobMigration {
         MigrateDestinationNode::getKeySchema()
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
     
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('node', 'node');
@@ -488,16 +412,6 @@ class VozmobNodeRevisionMigration extends VozmobMigration {
         MigrateDestinationTable::getKeySchema('node_revisions')
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
-
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('node_revisions', 'nr');
     $query->fields('nr', array('vid','nid','title','body', 'teaser', 'format', 'log', 'uid', 'timestamp'));
@@ -544,15 +458,6 @@ class VozmobTermNodeMigration extends VozmobMigration {
         MigrateDestinationTable::getKeySchema('term_node')
     );
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
 
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('term_node', 'tn');
@@ -588,39 +493,30 @@ class VozmobTermNodeMigration extends VozmobMigration {
   // massage the user roles before saving
   public function prepareRow($current_row) {
 
-    Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
-       
-      $query = Database::getConnection('default', 'vozmob_migration')
+    $query = Database::getConnection('default', 'vozmob_migration')
 	->select('node', 'n');
-      $query->fields('n', array('vid'));
-      $query->condition('n.nid', $current_row->nid, '=');
-       $results= $query->execute()->fetchAll();
-       if($current_row->vid != $results[0]->vid) {
-	 return FALSE;
-       }
+    $query->fields('n', array('vid'));
+    $query->condition('n.nid', $current_row->nid, '=');
+    $results= $query->execute()->fetchAll();
+    if($current_row->vid != $results[0]->vid) {
+      return FALSE;
+    }
 
-       $query = db_select('migrate_map_vozmobnode', 'mn')
+    $query = db_select('migrate_map_vozmobnode', 'mn')
       ->fields('mn', array('destid1'))
       ->condition('mn.sourceid1', $current_row->nid, '=')
       ->range(0,1);
-      $results = $query->execute()->fetchAll();
-      $mapped_nid = $results[0]->destid1;
+    $results = $query->execute()->fetchAll();
+    $mapped_nid = $results[0]->destid1;
 
 
-      $query = db_select('node', 'n')
+    $query = db_select('node', 'n')
       ->fields('n', array('vid'))
       ->condition('n.nid', $mapped_nid, '=')
       ->range(0,1);
-      $results = $query->execute()->fetchAll();
-      $current_row->vid_to_map = $results[0]->vid;
+    $results = $query->execute()->fetchAll();
+    $current_row->vid_to_map = $results[0]->vid;
     
     return TRUE;
 
@@ -647,15 +543,6 @@ class VozmobCommentsMigration extends VozmobMigration {
         ),
       MigrateDestinationTable::getKeySchema('comments')
       );
-        Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('comments', 'c');
     $query->fields('c', array('cid','pid','nid','uid', 'subject', 'comment', 'hostname', 'timestamp', 'status','format','thread','name','mail','homepage'));
@@ -694,15 +581,6 @@ class VozmobOGMigration extends VozmobMigration {
         ),
       MigrateDestinationOGMembership::getKeySchema()
       );
-
-      Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('og', 'og');
@@ -752,14 +630,6 @@ class VozmobOGMigration extends VozmobMigration {
       MigrateDestinationTable::getKeySchema('og')
       );
 
-      Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
     $query = Database::getConnection('default', 'vozmob_migration')
       ->select('og', 'og');
@@ -903,14 +773,6 @@ class VozmobOGAccessPostMigration extends VozmobMigration {
       MigrateDestinationTable::getKeySchema('og_access_post')
       );
 
-     Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
 
 
     $query = Database::getConnection('default', 'vozmob_migration')
