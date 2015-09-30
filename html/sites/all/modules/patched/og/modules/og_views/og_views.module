@@ -194,6 +194,9 @@ function og_views_form_alter(&$form, $form_state, $form_id) {
  * Embed the configured group homepage.
  */
 function og_views_view_group($node, $teaser, $page) {
+  if (variable_get('vozmob_group_path') == 'node/'.$node->nid) {
+    return;
+  }
   if ($name = variable_get('og_home_page_view', 'og_ghp_ron')) {
     // There is a view defiened to act as the group's home page.
     $view = views_get_view($name);
