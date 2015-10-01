@@ -879,15 +879,6 @@ class VozmobCFIMigration extends VozmobMigration {
       MigrateDestinationTable::getKeySchema($table_name)
       );
 
-   Database::addConnectionInfo('vozmob_migration', 'default', array(
-      'driver' => 'mysql',
-      'database' => 'vozmob',
-      'username' => 'vozmob_dev',
-      'password' => 'vm4vojo2dev',
-      'host' => 'localhost',
-      'prefix' => '',
-    ));
-
 
     
     $query = Database::getConnection('default', 'vozmob_migration')
