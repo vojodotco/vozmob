@@ -53,7 +53,7 @@
   <?php endif ?>
   
   <div class="<?php print $center_classes; ?>">
-	<?php if ($breadcrumb != '' && $_GET['q']!=variable_get('vozmob_group_path')) { print $breadcrumb; } ?>
+   <?php if ($breadcrumb != '' && $_GET['q']!=variable_get('vozmob_group_path', false)) { print $breadcrumb; } ?>
 
     <div id="main-content">
 
@@ -61,7 +61,7 @@
 
    <?php if ($messages != '') { print '<div id="messages">'. $messages .'</div>';} ?>
 
-    <? if ($_GET['q']==variable_get('vozmob_group_path')): 
+   <? if ($_GET['q']==variable_get('vozmob_group_path', false)): 
    global $language ;
    $lang_name = $language->language;
 if($lang_name == 'es'):
@@ -75,7 +75,7 @@ if($lang_name == 'es'):
  <?php endif ?>
   
     <?php print $help; // Drupal already wraps this one in a class  ?>
-   <? if ($_GET['q']==variable_get('vozmob_group_path')): ?> 
+  <? if ($_GET['q']==variable_get('vozmob_group_path', false)): ?> 
 
 
     <?php print views_embed_view('feature'); ?>
