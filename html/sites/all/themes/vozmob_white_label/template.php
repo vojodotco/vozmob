@@ -24,7 +24,7 @@ function vozmob_white_label_preprocess_page(&$vars) {
  *   A sequential array of variables passed to the theme function.
  */
 function vozmob_white_label_preprocess_node(&$vars) {
-  
+
   jquery_plugin_add('cycle', 'theme', 'header');
   jquery_plugin_add('expose');
   jquery_plugin_add('overlay');
@@ -49,12 +49,13 @@ function vozmob_white_label_preprocess_node(&$vars) {
     }
   }
 
+
   // Hackish way of adding audio overlay launcher into the node view.
   // This should get cleaned up (e.g. using CCK to render media mover audio).
   if (!$vars['overlay_launcher'] && empty($node->field_image[0]['view']) && !empty($node->media_mover)) {
     foreach ($node->media_mover as $cid) {
       foreach ($cid as $mmfid) {
-        if (substr($mmfid['complete_file'], -4, 4) == '.mp3') {
+        if (substr($mmfid['complete_file'], -4, 4) == '.mp3' || substr($mmfid['complete_file'], -4, 4) == '.ogg') {
           $vars['overlay_launcher'] = TRUE;
           $vars['overlay_launcher_image'] = drupal_get_path('theme', 'vozmob_white_label') . '/images/' . ($vars['teaser'] ? 'audio_icon_whitebg.gif' : 'audio_icon_large.gif');
           break 2;

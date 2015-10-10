@@ -194,7 +194,7 @@ function og_views_form_alter(&$form, $form_state, $form_id) {
  * Embed the configured group homepage.
  */
 function og_views_view_group($node, $teaser, $page) {
-  if (variable_get('vozmob_group_path') == 'node/'.$node->nid) {
+  if (variable_get('vozmob_group_path', false) == 'node/'.$node->nid) {
     return;
   }
   if ($name = variable_get('og_home_page_view', 'og_ghp_ron')) {
