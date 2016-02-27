@@ -43,11 +43,15 @@
     <div class="media-mover">
       <?php foreach ($node->media_mover as $cid): ?>
         <?php foreach ($cid as $mmfid): ?>
-          <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.mp3'): ?>
+	  <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.mp3' || strtolower(substr($mmfid['complete_file'], -4, 4)) == '.ogg'): ?>
             <?php if (empty($playlist) && empty($node->field_image[0])): ?>
               <?php $playlist[$mmfid['fid']] = base_path() . drupal_get_path('theme', 'bluemob') . '/images/audio_icon_large.gif'; ?>
             <?php endif; ?>
-            <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+	    <?php $file_stage = 'complete_file'; ?>
+            <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.ogg'): ?>
+            <?php $file_stage = 'harvest_file'; ?>
+            <?php endif; ?>
+            <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid[$file_stage])); ?>
           <?php endif; ?>
           <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv' || substr($mmfid['complete_file'], -4, 4) == '.m4v'): ?>
             <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
