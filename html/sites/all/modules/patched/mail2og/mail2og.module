@@ -656,6 +656,10 @@ function mail2og_token_values($type, $object = NULL) {
  * group. This uses the to address (to@domain.com)
  */
 function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
+ 
+  if ($header->to[0]->host=='vozmob.net') {
+     $header->to[0]->host='vojo.co';
+  }
 
   // Set $email var with the address this node was sent to
   $email = $header->to[0]->mailbox . '@' . $header->to[0]->host;
