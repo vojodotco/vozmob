@@ -1412,6 +1412,7 @@ function file_get_mimetype($filename, $mapping = NULL) {
       'mpeg|mpg|mpe' => 'video/mpeg',
       'mp4|f4v|f4p' => 'video/mp4',
       'flv' => 'video/x-flv',
+      'm4v' => 'video/x-m4v',
       'ogv' => 'video/ogg',
       'qt|mov' => 'video/quicktime',
       'mxu' => 'video/vnd.mpegurl',
